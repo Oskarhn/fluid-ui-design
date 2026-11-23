@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fluid UI Design"
+  short_description: "Studio-grade web, UI/UX, motion, and 3D design skill with OKLCH color science, optical typography, Apple spring physics, and real-browser anti-slop verification."
+  default_prompt: "Use fluid-ui-design to design, build, or refactor this interface with OKLCH color tokens, optical typography, concentric geometry, fluid spring motion, and zero AI-slop defaults."
