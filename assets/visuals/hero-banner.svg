@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#090B10"/>
+      <stop offset="100%" stop-color="#0E121A"/>
+    </linearGradient>
+    <linearGradient id="oklch-bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2855D9"/>
+      <stop offset="35%" stop-color="#19B5B0"/>
+      <stop offset="70%" stop-color="#1EE89A"/>
+      <stop offset="100%" stop-color="#F0B429"/>
+    </linearGradient>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#ffffff" stroke-opacity="0.035" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect width="1200" height="420" rx="20" fill="url(#bg-grad)"/>
+  <rect width="1200" height="420" rx="20" fill="url(#grid)"/>
+  <rect x="1" y="1" width="1198" height="418" rx="19" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="1"/>
+
+  <!-- Top Editorial Header Bar -->
+  <text x="48" y="52" fill="#8A94AD" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" font-weight="500" letter-spacing="1.5">FLUID UI DESIGN // INTERFACE, MOTION &amp; 3D ENGINEERING</text>
+  <circle cx="1138" cy="48" r="5" fill="#1EE89A"/>
+  <text x="1122" y="52" text-anchor="end" fill="#8A94AD" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">700+ BLUEPRINTS &amp; RECIPES</text>
+  <line x1="48" y1="72" x2="1152" y2="72" stroke="#ffffff" stroke-opacity="0.08"/>
+
+  <!-- Left Column: Title & Core Thesis -->
+  <text x="48" y="140" fill="#F2EFE9" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="48" font-weight="600" letter-spacing="-1.6">Fluid UI Design</text>
+  <text x="48" y="182" fill="#9AABC4" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" font-weight="400">Anti-slop web and interface engineering: OKLCH color</text>
+  <text x="48" y="208" fill="#9AABC4" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" font-weight="400">science, optical typography, spring physics, and 3D shaders.</text>
+
+  <!-- 60-30-10 Proportion Meter -->
+  <g transform="translate(48, 244)">
+    <text x="0" y="0" fill="#8A94AD" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11">60% GROUND  /  30% STRUCTURE  /  10% ACCENT (OKLCH)</text>
+    <rect x="0" y="12" width="236" height="28" rx="6" fill="#171B26" stroke="#ffffff" stroke-opacity="0.12"/>
+    <text x="12" y="30" fill="#9AABC4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11">60% Basalt</text>
+    <rect x="242" y="12" width="118" height="28" rx="6" fill="#EDEAE2"/>
+    <text x="254" y="30" fill="#0C0E12" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" font-weight="600">30% Bone</text>
+    <rect x="366" y="12" width="46" height="28" rx="6" fill="#E63B2E"/>
+    <text x="375" y="30" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" font-weight="600">10%</text>
+  </g>
+
+  <!-- Key Metrics Strip -->
+  <g transform="translate(48, 336)">
+    <rect x="0" y="0" width="128" height="48" rx="8" fill="#131722" stroke="#ffffff" stroke-opacity="0.09"/>
+    <text x="14" y="21" fill="#F2EFE9" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600">247 Sites</text>
+    <text x="14" y="38" fill="#8A94AD" font-family="system-ui, -apple-system, sans-serif" font-size="11">Empirical library</text>
+
+    <rect x="138" y="0" width="128" height="48" rx="8" fill="#131722" stroke="#ffffff" stroke-opacity="0.09"/>
+    <text x="152" y="21" fill="#F2EFE9" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600">67 Systems</text>
+    <text x="152" y="38" fill="#8A94AD" font-family="system-ui, -apple-system, sans-serif" font-size="11">Interface styles</text>
+
+    <rect x="276" y="0" width="136" height="48" rx="8" fill="#131722" stroke="#ffffff" stroke-opacity="0.09"/>
+    <text x="290" y="21" fill="#1EE89A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600">74 Recipes</text>
+    <text x="290" y="38" fill="#8A94AD" font-family="system-ui, -apple-system, sans-serif" font-size="11">Motion, 3D &amp; shaders</text>
+  </g>
+
+  <!-- Right Spec Cards -->
+  <!-- Card 1: Concentric Geometry -->
+  <g transform="translate(520, 100)">
+    <rect width="304" height="284" rx="24" fill="#131722" stroke="#ffffff" stroke-opacity="0.11"/>
+    <rect x="12" y="12" width="280" height="148" rx="12" fill="#1B2130" stroke="#6BC5F8" stroke-opacity="0.35" stroke-dasharray="4 3"/>
+    <text x="28" y="42" fill="#6BC5F8" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">r_inner = r_outer - padding</text>
+    <text x="28" y="64" fill="#8A94AD" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11">24px - 12px = 12px concentric</text>
+    <path d="M 220 132 A 28 28 0 0 0 248 104" fill="none" stroke="#F2EFE9" stroke-width="2"/>
+    <path d="M 220 144 A 40 40 0 0 0 260 104" fill="none" stroke="#6BC5F8" stroke-width="2"/>
+    <circle cx="220" cy="104" r="3" fill="#E63B2E"/>
+
+    <text x="24" y="194" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600">Surface &amp; Type Precision</text>
+    <text x="24" y="218" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="13">• Alpha borders &amp; OKLCH surface steps</text>
+    <text x="24" y="240" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="13">• text-box-trim &amp; tabular-nums</text>
+    <text x="24" y="262" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="13">• Stroke weight matched to font weight</text>
+  </g>
+
+  <!-- Card 2: Fluid Physics & Shaders -->
+  <g transform="translate(848, 100)">
+    <rect width="304" height="284" rx="24" fill="#131722" stroke="#ffffff" stroke-opacity="0.11"/>
+    <rect x="12" y="12" width="280" height="148" rx="12" fill="#1B2130" stroke="#ffffff" stroke-opacity="0.08"/>
+    <text x="28" y="42" fill="#1EE89A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">Spring ζ = 1.0  |  Press 0.97</text>
+    <line x1="28" y1="74" x2="268" y2="74" stroke="#ffffff" stroke-opacity="0.15" stroke-dasharray="3 3"/>
+    <path d="M 28 136 C 68 136, 76 74, 138 74 L 268 74" fill="none" stroke="#1EE89A" stroke-width="2.5"/>
+    <path d="M 28 136 C 64 136, 72 56, 112 68 C 142 78, 164 74, 268 74" fill="none" stroke="#6BC5F8" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="164" y="96" fill="#8A94AD" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10">ζ=1.0 UI / ζ=0.8 Flick</text>
+    <rect x="28" y="124" width="240" height="6" rx="3" fill="url(#oklch-bar)"/>
+
+    <text x="24" y="194" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600">Fluid Motion &amp; WebGL</text>
+    <text x="24" y="218" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="13">• Velocity handoff &amp; rubber-banding</text>
+    <text x="24" y="240" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="13">• R3F Portals, 3D Book &amp; Shaders</text>
+    <text x="24" y="262" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="13">• Native mobile CSS &amp; Safe Triangles</text>
+  </g>
+</svg>
