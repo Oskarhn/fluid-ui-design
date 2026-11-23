@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="100%" height="100%">
+  <rect width="1200" height="340" rx="20" fill="#090B10"/>
+  <rect x="1" y="1" width="1198" height="338" rx="19" fill="none" stroke="#ffffff" stroke-opacity="0.1"/>
+
+  <!-- Panel 1: Concentric Radii -->
+  <g transform="translate(28, 28)">
+    <rect width="272" height="284" rx="16" fill="#121620" stroke="#ffffff" stroke-opacity="0.09"/>
+    <text x="20" y="34" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600">1. Concentric Corner Math</text>
+    <text x="20" y="54" fill="#8A94AD" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">r_in = r_out - padding</text>
+
+    <!-- Bad example -->
+    <rect x="20" y="76" width="108" height="108" rx="22" fill="#1A1F2C" stroke="#E63B2E" stroke-opacity="0.6"/>
+    <rect x="32" y="88" width="84" height="84" rx="22" fill="#252C3D"/>
+    <text x="74" y="135" text-anchor="middle" fill="#E63B2E" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">22 / 22 ✗</text>
+
+    <!-- Good example -->
+    <rect x="144" y="76" width="108" height="108" rx="22" fill="#1A1F2C" stroke="#1EE89A" stroke-opacity="0.6"/>
+    <rect x="156" y="88" width="84" height="84" rx="10" fill="#252C3D"/>
+    <text x="198" y="135" text-anchor="middle" fill="#1EE89A" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">22 / 10 ✓</text>
+
+    <text x="20" y="218" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">Matching nested radii look pinched at</text>
+    <text x="20" y="236" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">the diagonal. Subtract padding (12px)</text>
+    <text x="20" y="254" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">so both arcs share one center point.</text>
+  </g>
+
+  <!-- Panel 2: Dark Mode Surface Elevation -->
+  <g transform="translate(318, 28)">
+    <rect width="272" height="284" rx="16" fill="#121620" stroke="#ffffff" stroke-opacity="0.09"/>
+    <text x="20" y="34" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600">2. Dark-Mode OKLCH Depth</text>
+    <text x="20" y="54" fill="#8A94AD" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">Lighter surfaces &gt; drop shadows</text>
+
+    <rect x="20" y="76" width="232" height="108" rx="12" fill="#0D1017" stroke="#ffffff" stroke-opacity="0.07"/>
+    <text x="32" y="96" fill="#8A94AD" font-family="ui-monospace, SFMono-Regular, monospace" font-size="10">L = 0.14 (Canvas)</text>
+
+    <rect x="38" y="106" width="196" height="68" rx="9" fill="#171C28" stroke="#ffffff" stroke-opacity="0.1"/>
+    <text x="50" y="124" fill="#9AABC4" font-family="ui-monospace, SFMono-Regular, monospace" font-size="10">L = 0.18 (Card)</text>
+
+    <rect x="56" y="134" width="160" height="32" rx="6" fill="#232A3B" stroke="#ffffff" stroke-opacity="0.18"/>
+    <text x="68" y="154" fill="#F2EFE9" font-family="ui-monospace, SFMono-Regular, monospace" font-size="10">L = 0.22 (Floating Well)</text>
+
+    <text x="20" y="218" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">Drop shadows vanish on dark grounds.</text>
+    <text x="20" y="236" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">Step surface lightness in OKLCH and</text>
+    <text x="20" y="254" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">add a 1px alpha specular top border.</text>
+  </g>
+
+  <!-- Panel 3: Motion Timing & Origin -->
+  <g transform="translate(608, 28)">
+    <rect width="272" height="284" rx="16" fill="#121620" stroke="#ffffff" stroke-opacity="0.09"/>
+    <text x="20" y="34" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600">3. Trigger-Anchored Motion</text>
+    <text x="20" y="54" fill="#8A94AD" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">scale(0.95 → 1) · Exit 20% faster</text>
+
+    <rect x="24" y="80" width="76" height="28" rx="6" fill="#1D4ED8"/>
+    <text x="62" y="98" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">Trigger</text>
+    <circle cx="62" cy="108" r="3" fill="#6BC5F8"/>
+
+    <!-- Expanding popover frames from trigger origin -->
+    <rect x="44" y="114" width="110" height="44" rx="6" fill="none" stroke="#6BC5F8" stroke-opacity="0.35" stroke-dasharray="3 3"/>
+    <rect x="34" y="114" width="212" height="68" rx="10" fill="#1D2331" stroke="#6BC5F8" stroke-opacity="0.7"/>
+    <text x="48" y="140" fill="#F2EFE9" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">In: 200ms ease-out</text>
+    <text x="48" y="160" fill="#1EE89A" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">Out: 160ms (-20%)</text>
+
+    <text x="20" y="218" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">Never scale from 0 or fade from screen</text>
+    <text x="20" y="236" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">center. Anchor transform-origin to the</text>
+    <text x="20" y="254" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">trigger and dismiss 20% faster.</text>
+  </g>
+
+  <!-- Panel 4: Amazon Safe Triangle -->
+  <g transform="translate(898, 28)">
+    <rect width="274" height="284" rx="16" fill="#121620" stroke="#ffffff" stroke-opacity="0.09"/>
+    <text x="20" y="34" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600">4. Amazon Safe Triangle</text>
+    <text x="20" y="54" fill="#8A94AD" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">Diagonal submenu cursor cone</text>
+
+    <!-- Parent menu -->
+    <rect x="20" y="76" width="88" height="108" rx="8" fill="#181D2A" stroke="#ffffff" stroke-opacity="0.1"/>
+    <rect x="26" y="84" width="76" height="24" rx="4" fill="#1D4ED8"/>
+    <text x="34" y="100" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="10">Products ▸</text>
+    <text x="34" y="126" fill="#8A94AD" font-family="system-ui, -apple-system, sans-serif" font-size="10">Pricing</text>
+    <text x="34" y="150" fill="#8A94AD" font-family="system-ui, -apple-system, sans-serif" font-size="10">Docs</text>
+
+    <!-- Submenu -->
+    <rect x="136" y="76" width="118" height="108" rx="8" fill="#1D2331" stroke="#ffffff" stroke-opacity="0.15"/>
+    <text x="150" y="102" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="10">3D Engine</text>
+    <text x="150" y="128" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="10">Shader Studio</text>
+    <text x="150" y="154" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="10">Design Tokens</text>
+
+    <!-- Safe Triangle Cone -->
+    <polygon points="82,96 136,76 136,184" fill="#1EE89A" fill-opacity="0.18" stroke="#1EE89A" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <circle cx="82" cy="96" r="3.5" fill="#1EE89A"/>
+
+    <text x="20" y="218" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">While the cursor travels inside the</text>
+    <text x="20" y="236" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">green triangle toward the submenu,</text>
+    <text x="20" y="254" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">sibling hover events are suppressed.</text>
+  </g>
+</svg>
