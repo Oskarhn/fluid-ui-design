@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="100%" height="100%">
+  <defs>
+    <linearGradient id="srgb-mud" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1D4ED8"/>
+      <stop offset="50%" stop-color="#7E7E7E"/>
+      <stop offset="100%" stop-color="#FACC15"/>
+    </linearGradient>
+    <linearGradient id="oklch-clean" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1D4ED8"/>
+      <stop offset="50%" stop-color="#14B8A6"/>
+      <stop offset="100%" stop-color="#FACC15"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="320" rx="20" fill="#090B10"/>
+  <rect x="1" y="1" width="1198" height="318" rx="19" fill="none" stroke="#ffffff" stroke-opacity="0.1"/>
+
+  <!-- Card 1: OKLCH Gradient Midpoint -->
+  <g transform="translate(28, 28)">
+    <rect width="368" height="264" rx="16" fill="#121620" stroke="#ffffff" stroke-opacity="0.09"/>
+    <text x="24" y="36" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="600">OKLCH vs. sRGB Gradient Midpoint</text>
+
+    <text x="24" y="72" fill="#E63B2E" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">✗ Standard sRGB (Muddy gray dead-zone in middle)</text>
+    <rect x="24" y="82" width="320" height="34" rx="8" fill="url(#srgb-mud)"/>
+
+    <text x="24" y="144" fill="#1EE89A" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">✓ linear-gradient(in oklch, ...) (Chroma preserved)</text>
+    <rect x="24" y="154" width="320" height="34" rx="8" fill="url(#oklch-clean)"/>
+
+    <text x="24" y="218" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">Interpolating in OKLCH preserves perceptual lightness</text>
+    <text x="24" y="236" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">and hue vibrancy across the entire transition.</text>
+  </g>
+
+  <!-- Card 2: Optical text-box-trim -->
+  <g transform="translate(416, 28)">
+    <rect width="368" height="264" rx="16" fill="#121620" stroke="#ffffff" stroke-opacity="0.09"/>
+    <text x="24" y="36" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="600">Optical Vertical Centering (text-box-trim)</text>
+
+    <!-- Untrimmed -->
+    <rect x="24" y="68" width="320" height="48" rx="10" fill="#1B2130" stroke="#E63B2E" stroke-opacity="0.4"/>
+    <line x1="24" y1="92" x2="344" y2="92" stroke="#E63B2E" stroke-opacity="0.4" stroke-dasharray="3 3"/>
+    <text x="184" y="95" text-anchor="middle" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="17" font-weight="600">Deploy Pipeline  (Off-center ✗)</text>
+
+    <!-- Trimmed -->
+    <rect x="24" y="136" width="320" height="48" rx="10" fill="#1B2130" stroke="#1EE89A" stroke-opacity="0.5"/>
+    <line x1="24" y1="160" x2="344" y2="160" stroke="#1EE89A" stroke-opacity="0.4" stroke-dasharray="3 3"/>
+    <text x="184" y="166" text-anchor="middle" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="17" font-weight="600">Deploy Pipeline  (Cap-centered ✓)</text>
+
+    <text x="24" y="218" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">Fonts reserve bottom room for descenders (g, y, p).</text>
+    <text x="24" y="236" fill="#9AABC4" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">text-box-trim: trim-both; text-box-edge: cap alphabetic;</text>
+  </g>
+
+  <!-- Card 3: Icon Stroke Weight Matching -->
+  <g transform="translate(804, 28)">
+    <rect width="368" height="264" rx="16" fill="#121620" stroke="#ffffff" stroke-opacity="0.09"/>
+    <text x="24" y="36" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="600">Match Icon Stroke to Font Weight</text>
+
+    <!-- Mismatched thin icon -->
+    <rect x="24" y="68" width="320" height="48" rx="10" fill="#1B2130"/>
+    <circle cx="54" cy="92" r="10" fill="none" stroke="#E63B2E" stroke-width="1"/>
+    <path d="M 50 92 L 53 95 L 59 89" fill="none" stroke="#E63B2E" stroke-width="1"/>
+    <text x="76" y="98" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700">1px stroke inside bold card ✗</text>
+
+    <!-- Matched stroke icon -->
+    <rect x="24" y="136" width="320" height="48" rx="10" fill="#1B2130"/>
+    <circle cx="54" cy="160" r="10" fill="none" stroke="#1EE89A" stroke-width="2.1"/>
+    <path d="M 50 160 L 53 163 L 59 157" fill="none" stroke="#1EE89A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="76" y="166" fill="#F2EFE9" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700">2px stroke matches bold card ✓</text>
+
+    <text x="24" y="218" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">Thin 1px icons look fragile next to 600–700 weight type.</text>
+    <text x="24" y="236" fill="#9AABC4" font-family="system-ui, -apple-system, sans-serif" font-size="12">Scale SVG stroke-width (1.5px → 2.0px) with font weight.</text>
+  </g>
+</svg>
