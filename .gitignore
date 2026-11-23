@@ -1,0 +1,7 @@
+.DS_Store
+Thumbs.db
+.taste-skill/
+shots/
+node_modules/
+__pycache__/
+*.pyc
