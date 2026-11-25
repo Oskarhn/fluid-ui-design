@@ -18,10 +18,10 @@ Read this before adding any animation. The static page must already be finished 
 
 ## 1. The budget
 
-A page that does not move reads as a mock-up; the inspector counts what moves while the page loads and
-scrolls, and fails it under eight elements. The motion layer has five parts:
+A finished page can stay still. The inspector reports how much the page moves. Select the techniques
+that make a task or a change easier to understand.
 
-- **Two or three scroll scenes:** the big, scroll-driven moments award sites are remembered for (a
+- **Scroll scenes when the subject calls for them:** scroll-driven moments that show a sequence (a
   camera flying through a field of pictures, a picture that grows from a window to the whole screen,
   type that crosses a held stage, cards that deal out and stack). The direction sheet deals them from
   `library/scenes.json` when the library has scenes for the brief; `references/scenes.md` says how to
@@ -31,14 +31,11 @@ scrolls, and fails it under eight elements. The motion layer has five parts:
   out of a mask, the image that opens like a shutter, the wordmark that scales with the scroll. The
   direction sheet from `draw.mjs` names one. Build that one well; it is the only move allowed to be
   loud.
-- **Section entrances, choreographed per section:** the parts of each section arrive in reading order
-  (heading, text, picture, details), staggered 60–90ms, rising 16–32px with opacity, once. Vary the
-  manner with the content instead of stamping one preset everywhere: a list arrives row by row, a
-  picture opens from a mask or settles from a slight scale, a figure counts up once, a statement rises
-  line by line.
+- **Readable sections:** let each heading, paragraph and control appear in its settled state as it
+  enters the viewport. Reserve a reveal for a change the visitor needs to follow.
 - **Feedback under the hand:** buttons that give on press, links that answer the pointer, cards and
   pictures that respond on hover, a menu that opens from where it was clicked.
-- **One moving picture:** a found clip as a muted loop with a poster frame, a slow drift or scale on
+- **Optional moving media:** a relevant clip with a poster frame, a slow drift or scale on
   a large photograph, or a scroll-linked move on the hero picture.
 
 What is still banned: the same fade-and-slide-up with the same timing on every block, which is the most
@@ -967,8 +964,8 @@ hard cuts; monospace HUD labels become small text in the text face.
    parallax under 8% of the element; scale between 0.94 and 1.15; built with scroll timelines inside
    `@supports`, static without them. Other held stages: sticky, about one screen per step, three
    screens at most, a line of text on every held screen.
-9. **One of each.** One signature move (a dealt scene can be it); one moving picture; one marquee at
-   most. A quiet section between two scenes, so each one lands.
+9. **Use motion sparingly.** Choose a signature move, moving image or marquee only when it supports
+   the composition or explains a change. Leave an interval between adjacent scenes.
 10. **Text stays readable.** Fills start at 45% ink; dims no lower than 40%; blur at most 8px and gone
     once settled; nothing moves across text being read.
 11. **Colour by chapter** as hard cuts at section edges; the fixed header's ink follows in 300ms.

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Motion patterns for interfaces</title>
+<style>
+:root { --ground:#eaece3; --ink:#202b21; --soft:#435145; --panel:#f5f5ee; --signal:#383966; --ease:cubic-bezier(.22,1,.36,1); color:var(--ink); background:var(--ground); font-family:Arial,sans-serif; }
+* { box-sizing:border-box; }
+body { margin:0; }
+main { width:min(1120px,100%); margin-inline:auto; padding:clamp(17px,5vw,64px); }
+header { max-width:44rem; margin-bottom:44px; }
+h1 { font-size:clamp(46px,9vw,110px); letter-spacing:-.08em; line-height:.9; margin:0 0 16px; }
+h2 { font-size:clamp(28px,4vw,50px); letter-spacing:-.065em; line-height:1; margin:0 0 10px; }
+p { line-height:1.5; color:var(--soft); margin:0 0 16px; }
+section { padding:28px 0; border-top:1px solid #aeb8a6; }
+button { min-height:44px; border:0; padding:11px 14px; background:var(--ink); color:#fff; font:inherit; cursor:pointer; }
+button:disabled { opacity:.65; cursor:default; }
+button:focus-visible, [tabindex]:focus-visible { outline:2px solid var(--signal); outline-offset:4px; }
+button.secondary { color:var(--ink); background:#dbe0d3; }
+[hidden] { display:none !important; }
+.card { width:min(15rem,100%); text-align:left; padding:14px; background:var(--panel); color:var(--ink); }
+.card strong { display:block; margin-top:10px; font-size:18px; }
+.swatch { display:block; aspect-ratio:2.2; background:repeating-linear-gradient(98deg,#2f3b56 0 8px,#4b5974 8px 12px,#33405a 12px 20px); }
+dialog { width:min(36rem,calc(100% - 32px)); max-height:85dvh; padding:26px; border:0; color:var(--ink); background:var(--panel); transform-origin:top left; }
+dialog::backdrop { background:#19231f88; }
+dialog .swatch { margin-bottom:17px; }
+dialog button { margin-top:7px; }
+.chapter-layout { display:grid; grid-template-columns:1fr 1.2fr; gap:12px; margin-top:18px; }
+.chapter-controls { display:flex; flex-wrap:wrap; gap:6px; }
+.chapter-controls button[aria-pressed="true"] { background:var(--ink); color:#fff; }
+.chapter-scroll { height:205px; position:relative; overflow-y:auto; overscroll-behavior:contain; scroll-snap-type:y proximity; background:var(--panel); }
+.chapter-scroll article { min-height:205px; padding:22px; scroll-snap-align:start; }
+.chapter-scroll h3 { font-size:24px; margin:0 0 8px; }
+.chapter-stage { min-height:205px; display:grid; place-items:center; background:#2d382c; overflow:hidden; }
+.chip { position:relative; width:min(57%,180px); aspect-ratio:1.1; border-radius:15px; background:#aab695; transform:perspective(540px) rotateX(46deg) rotateZ(-20deg); box-shadow:10px 15px 0 #586649; transition:transform 470ms var(--ease),background-color 260ms ease; }
+.chapter-stage[data-scene="1"] .chip { transform:perspective(540px) rotateX(70deg) rotateZ(12deg) scale(1.06); background:#d4bf87; }
+.chapter-stage[data-scene="2"] .chip { transform:perspective(540px) rotateX(31deg) rotateZ(37deg) scale(.85); background:#9eafd2; }
+.progress-box { width:min(31rem,100%); display:grid; gap:11px; }
+.progress-box > div { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+progress { width:100%; block-size:1rem; accent-color:var(--signal); }
+#progress-state { color:var(--soft); }
+@media(max-width:575px){.chapter-layout{grid-template-columns:1fr}.chapter-stage{min-height:170px}.chapter-scroll{min-width:0}}
+@media(prefers-reduced-motion:reduce){.chip{transition:none}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>Motion in context</h1><p>Three original examples that put movement to work. Open an object, scan its layers, or follow a task from start to finish.</p></header>
+
+<section aria-labelledby="drawer-title">
+  <h2 id="drawer-title">From sample to detail</h2>
+  <p>The material keeps its visual identity as the panel opens.</p>
+  <button id="open-card" type="button" class="card" aria-haspopup="dialog"><span class="swatch" aria-hidden="true"></span><strong>Inspect cobalt weave</strong></button>
+  <dialog id="details" aria-labelledby="details-title">
+    <div class="swatch" aria-hidden="true"></div>
+    <h2 id="details-title">Cobalt weave</h2>
+    <p>A dark upholstery swatch. Turn the finished side toward the room and keep the seam clear of the seat edge.</p>
+    <button id="close-card" type="button" autofocus>Close details</button>
+  </dialog>
+</section>
+
+<section aria-labelledby="chapters-title">
+  <h2 id="chapters-title">Layers of one material</h2>
+  <p>Scroll the notes or choose a layer. The same object turns to show the current view.</p>
+  <div class="chapter-controls" role="group" aria-label="Material views">
+    <button class="secondary" type="button" data-chapter="0" aria-pressed="true">Surface</button>
+    <button class="secondary" type="button" data-chapter="1" aria-pressed="false">Core</button>
+    <button class="secondary" type="button" data-chapter="2" aria-pressed="false">Backing</button>
+  </div>
+  <div class="chapter-layout">
+    <div class="chapter-scroll" aria-label="Material layers" tabindex="0">
+      <article><h3>Surface</h3><p>The face handles light contact and shows the finish.</p></article>
+      <article><h3>Core</h3><p>The thick middle section supports the surface.</p></article>
+      <article><h3>Backing</h3><p>The backing provides a flat side for attachment.</p></article>
+    </div>
+    <div class="chapter-stage" data-scene="0" aria-hidden="true"><div class="chip"></div></div>
+  </div>
+</section>
+
+<section aria-labelledby="progress-title">
+  <h2 id="progress-title">Prepare a preview</h2>
+  <p>Simulated progress with a cancel action and a restart.</p>
+  <div class="progress-box">
+    <div><button id="start-progress" type="button">Start preview</button><button class="secondary" type="button" id="cancel-progress" hidden>Cancel</button><span id="progress-state" role="status">Ready</span></div>
+    <progress id="progress" value="0" max="100" aria-label="Preview preparation"></progress>
+  </div>
+</section>
+</main>
+<script>
+'use strict';
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+const card = document.querySelector('#open-card');
+const dialog = document.querySelector('#details');
+const closeCard = document.querySelector('#close-card');
+let dialogMotion;
+let closing = false;
+function cardFrame() {
+  const anchor = card.getBoundingClientRect();
+  const target = dialog.getBoundingClientRect();
+  return { transform: 'translate(' + (anchor.left-target.left) + 'px,' + (anchor.top-target.top) +
+    'px) scale(' + (anchor.width/target.width) + ',' + (anchor.height/target.height) + ')', opacity: .3 };
+}
+const dialogRest = { transform:'none', opacity:1 };
+card.addEventListener('click', () => {
+  dialog.showModal();
+  if (!reduce.matches) dialogMotion = dialog.animate([cardFrame(),dialogRest],{duration:330,easing:'cubic-bezier(.22,1,.36,1)'});
+});
+async function closeDetails() {
+  if (!dialog.open || closing) return;
+  closing = true;
+  const live = getComputedStyle(dialog);
+  const from = {transform:live.transform,opacity:live.opacity};
+  dialogMotion?.cancel();
+  if (!reduce.matches) {
+    dialogMotion = dialog.animate([from,cardFrame()], {duration:200,easing:'ease-in',fill:'forwards'});
+    await dialogMotion.finished.catch(() => {});
+    dialogMotion.cancel();
+  }
+  if (dialog.open) dialog.close();
+  closing = false;
+}
+closeCard.addEventListener('click',closeDetails);
+dialog.addEventListener('cancel',event=>{event.preventDefault();closeDetails();});
+dialog.addEventListener('close',()=>card.focus());
+
+const scroller = document.querySelector('.chapter-scroll');
+const sections = [...scroller.querySelectorAll('article')];
+const choices = [...document.querySelectorAll('[data-chapter]')];
+const stage = document.querySelector('.chapter-stage');
+const chapters = new IntersectionObserver(entries=>{
+  const visible = entries.find(entry=>entry.isIntersecting && entry.intersectionRatio >= .6);
+  if (!visible) return;
+  const index = sections.indexOf(visible.target);
+  stage.dataset.scene = index;
+  choices.forEach((choice,i)=>choice.setAttribute('aria-pressed',String(i===index)));
+},{root:scroller,threshold:[.6]});
+sections.forEach(section=>chapters.observe(section));
+choices.forEach((choice,i)=>choice.addEventListener('click',()=>scroller.scrollTo({
+  top:sections[i].offsetTop, behavior:reduce.matches?'instant':'smooth'
+})));
+
+const progress = document.querySelector('#progress');
+const status = document.querySelector('#progress-state');
+const start = document.querySelector('#start-progress');
+const cancel = document.querySelector('#cancel-progress');
+let frameId;
+let started;
+function finish(message,reset) {
+  cancelAnimationFrame(frameId);
+  frameId=undefined;
+  start.disabled=false;
+  if (document.activeElement===cancel || document.activeElement===document.body) start.focus();
+  cancel.hidden=true;
+  status.textContent=message;
+  if(reset) progress.value=0;
+}
+function advance(now) {
+  const elapsed=now-started;
+  progress.value=Math.min(100,elapsed/26);
+  if(progress.value===100) finish('Preview ready',false);
+  else frameId=requestAnimationFrame(advance);
+}
+start.addEventListener('click',()=>{
+  progress.value=0;
+  started=performance.now();
+  cancel.hidden=false;
+  start.disabled=true;
+  cancel.focus();
+  status.textContent='Preparing preview';
+  frameId=requestAnimationFrame(advance);
+});
+cancel.addEventListener('click',()=>finish('Cancelled',true));
+</script>
+</body>
+</html>

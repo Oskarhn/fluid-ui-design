@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field observations</title>
+<style>
+:root{font:100%/1.5 system-ui,sans-serif;color:#172d2b;background:#e6eeeb;--border:#82998f}*{box-sizing:border-box}body{margin:0}
+main{width:min(100%,70rem);margin-inline:auto;padding:clamp(16px,5vw,62px)}h1,h2,p{margin:0}h1{font-size:clamp(2.7rem,7vw,6.4rem);line-height:.9;letter-spacing:-.075em;max-width:12ch}header p{max-width:48ch;margin:14px 0 23px}
+.chooser{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.chooser button{min-height:44px;padding:8px 14px;font:650 1rem/1.3 system-ui;border:1px solid #234a44;background:#e6eeeb;color:#172d2b;cursor:pointer}
+.chooser button[aria-pressed=true]{background:#214842;color:#fff;text-decoration:underline;text-underline-offset:.18em}.chooser button:focus-visible{outline:2px solid #1d584b;outline-offset:3px}
+.study{--near-x:55%;--far-x:10%;--near-mask:0%;--far-mask:100%;position:relative;min-height:clamp(360px,42vw,570px);background:#cbded4;isolation:isolate}
+.study[data-side=left]{background:#d2dde2}
+.copy{position:relative;width:48%;min-height:inherit;display:flex;flex-direction:column;justify-content:center;padding:clamp(17px,5vw,52px);margin-inline-end:auto}
+[data-side=left] .copy{margin-inline-start:auto;margin-inline-end:0}
+.copy h2{font-size:clamp(1.65rem,3.8vw,3.7rem);line-height:1.02;letter-spacing:-.053em}.copy p{margin-top:.85rem;max-width:30ch}
+.media{position:absolute;inset:0;overflow:hidden;pointer-events:none}.leaf{position:absolute;top:7%;width:39%;height:86%;overflow:hidden;border-radius:21px;background:#264546}
+.leaf img{width:100%;height:100%;object-fit:cover;object-position:55% center;display:block}
+.near{left:var(--near-x);clip-path:inset(0 0 0 var(--near-mask) round 21px)}.far{left:var(--far-x);clip-path:inset(0 0 0 var(--far-mask) round 21px)}
+@media(max-width:690px){
+ .study{min-height:auto;padding:15px}
+ .media{position:relative;width:100%;aspect-ratio:4/3;background:#264546;border-radius:18px}
+ .leaf{inset:0;width:100%;height:100%}
+ .near{clip-path:inset(0 var(--near-mask) 0 0 round 18px)}
+ .copy,[data-side=left] .copy{padding:17px 2px 3px;min-height:0;width:100%;margin:0}
+}
+</style>
+</head>
+<body>
+<main>
+<header><h1>Field observations</h1><p>Compare two illustrated survey locations. Watch where the image goes when you switch locations.</p></header>
+<div class="chooser" role="group" aria-label="Survey location">
+ <button type="button" data-site="0" aria-pressed="true">Harbor lookout</button>
+ <button type="button" data-site="1" aria-pressed="false">Estuary bend</button>
+</div>
+<section class="study" data-side="right" aria-labelledby="site-name">
+ <div class="media" aria-hidden="true">
+  <div class="leaf far"><img src="../media/preview-loops/water.jpg" alt="" width="960" height="540"></div>
+  <div class="leaf near"><img src="../media/preview-loops/window.jpg" alt="" width="960" height="540"></div>
+ </div>
+ <div class="copy"><h2 id="site-name">Harbor lookout</h2><p id="site-detail">A fixed window frames the hills. Use the opening as a reference when comparing the horizon across visits.</p></div>
+</section>
+</main>
+<script>
+'use strict';
+const panel=document.querySelector('.study');
+const title=document.querySelector('#site-name');
+const detail=document.querySelector('#site-detail');
+const choices=[...document.querySelectorAll('[data-site]')];
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const sites=[
+ ['Harbor lookout','A fixed window frames the hills. Use the opening as a reference when comparing the horizon across visits.','right'],
+ ['Estuary bend','A stable shoreline separates the sky from its reflection. Compare that boundary from the same viewpoint.','left']
+];
+let position=0,target=0,shown=0,frame=0;
+const ease=t=>t*t*(3-2*t);
+function render(p){
+ position=p;
+ const amount=ease(p);
+ panel.style.setProperty('--near-x',(55-4*amount)+'%');
+ panel.style.setProperty('--far-x',(10-5*amount)+'%');
+ panel.style.setProperty('--near-mask',(amount*100)+'%');
+ panel.style.setProperty('--far-mask',((1-amount)*100)+'%');
+ const current=p>=.5?1:0;
+ if(current!==shown){
+   shown=current;
+   const [name,description,side]=sites[current];
+   title.textContent=name;detail.textContent=description;panel.dataset.side=side;
+ }
+}
+function choose(next){
+ cancelAnimationFrame(frame);
+ target=next;
+ for(const button of choices)button.setAttribute('aria-pressed',String(Number(button.dataset.site)===next));
+ const from=position;
+ const duration=460*Math.abs(next-from);
+ if(reduced.matches||duration===0){render(next);return;}
+ let started;
+ const tick=now=>{
+   started??=now;
+   const time=Math.min(1,(now-started)/duration);
+   render(from+(next-from)*time);
+   if(time<1)frame=requestAnimationFrame(tick);
+ };
+ frame=requestAnimationFrame(tick);
+}
+for(const button of choices)button.addEventListener('click',()=>choose(Number(button.dataset.site)));
+reduced.addEventListener('change',()=>{if(reduced.matches)choose(target);});
+render(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#e9e8dc">
+<title>TARE T‑01 — Tide logger</title>
+<style>
+:root {
+  color-scheme: light;
+  --paper: #eeede4;
+  --ink: #20251e;
+  --muted: #52594e;
+  --rule: #bdbfb2;
+  --deep: #1a271f;
+  --foam: #e2ecd7;
+  --signal: #ffcd7f;
+  --gutter: clamp(20px, 5vw, 80px);
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  font-family: Arial, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; }
+a { color: inherit; }
+button { font: inherit; }
+button[hidden] { display: none; }
+button, a { touch-action: manipulation; }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 5px; }
+.skip { position: absolute; z-index: 4; inset: 12px auto auto 12px; transform: translateY(-180%); background: var(--paper); padding: 12px; }
+.skip:focus { transform: none; }
+.wrap { width: min(100%, 1540px); margin-inline: auto; padding-inline: var(--gutter); }
+.site-header { display: flex; justify-content: space-between; gap: 16px; align-items: center; min-height: 78px; border-bottom: 1px solid var(--rule); } /* taste-skill-ignore: rule separates navigation or measurement groups. */
+.wordmark { font-size: 29px; font-weight: 800; letter-spacing: -.08em; text-decoration: none; }
+.site-header nav { display: flex; gap: clamp(15px, 3vw, 40px); color: var(--muted); font-size: 14px; }
+.site-header nav a { display: inline-flex; min-height: 44px; align-items: center; text-decoration: none; }
+.site-header nav a:hover { text-decoration: underline; }
+.hero { display: grid; grid-template-columns: minmax(0, .79fr) minmax(0, 1.21fr); gap: clamp(24px, 5vw, 76px); align-items: center; padding-block: clamp(32px, 6vh, 72px) 30px; }
+.hero h1, h2, p { margin: 0; }
+.hero h1 { font-size: clamp(62px, 8.15vw, 122px); line-height: .85; letter-spacing: -.09em; font-weight: 700; }
+.hero h1 span { display: block; font-family: Georgia, serif; font-size: .72em; line-height: 1.15; font-weight: 400; font-style: italic; letter-spacing: -.075em; }
+.promise { max-width: 29ch; margin-block: 22px 25px; font-size: clamp(18px, 1.65vw, 24px); line-height: 1.4; color: var(--muted); }
+.action { display: inline-flex; align-items: center; justify-content: space-between; gap: 28px; min-height: 46px; padding: 0 15px; background: var(--ink); color: var(--paper); text-decoration: none; font-size: 14px; }
+.action span { font-size: 19px; }
+.action:hover { background: #374136; }
+.product { margin: 0; min-width: 0; }
+.stage { position: relative; display: grid; place-items: center; min-height: clamp(390px, 62vh, 645px); isolation: isolate; overflow: hidden; color: var(--foam); background: radial-gradient(ellipse at 62% 38%, #35483a, #1a2921 65%, #141f19); } /* taste-skill-ignore: lighting and finish in the original CSS product illustration. */
+.stage::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .10; background: repeating-linear-gradient(125deg, transparent 0 7px, #91a78d 8px, transparent 9px 17px); } /* taste-skill-ignore: lighting and finish in the original CSS product illustration. */
+.ambient { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+.stage-caption { position: absolute; inset: 20px 23px auto; display: flex; align-items: start; justify-content: space-between; gap: 12px; font-size: 12px; line-height: 1.4; }
+.motion-button, .assembly-button { min-height: 44px; border: 1px solid currentColor; color: inherit; background: transparent; cursor: pointer; padding: 0 11px; }
+.motion-button[aria-pressed="true"] { background: var(--foam); color: var(--deep); border-color: var(--foam); }
+.stage-controls { position: absolute; inset: auto 23px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.stage-controls p { font-size: 13px; line-height: 1.4; max-width: 27ch; }
+.assembly-button:hover, .assembly-button[aria-pressed="true"] { background: var(--foam); color: var(--deep); border-color: var(--foam); }
+.ruler { position: absolute; inset: 24% 12%; border: 1px solid #a4ad8f35; border-radius: 50%; transform: rotate(-25deg); z-index: -1; }
+.ruler::after { content: ""; position: absolute; inset: 11%; border: 1px solid #a4ad8f32; border-radius: 50%; }
+.instrument { --width: min(65%, 422px); position: relative; width: var(--width); aspect-ratio: 5.2; transform: rotate(-27deg) skewX(-6deg); transition: transform 540ms var(--ease); filter: drop-shadow(0 22px 16px #0b150caa); } /* taste-skill-ignore: lighting and finish in the original CSS product illustration. */
+.shell { position: absolute; inset: 0 11%; overflow: hidden; border-radius: 9% 9% 10% 10% / 24% 24% 24% 24%; background: linear-gradient(180deg, #474f3d 0%, #94997c 11%, #c5caaa 22%, #92997e 39%, #707a63 55%, #465542 78%, #263527 98%); box-shadow: inset 0 1px 1px #f3ead988, inset 0 -4px 5px #142219aa; transition: clip-path 500ms var(--ease); clip-path: inset(0); } /* taste-skill-ignore: lighting and finish in the original CSS product illustration. */
+.shell::after { content: ""; position: absolute; inset: 0; opacity: .25; background: repeating-linear-gradient(0deg, #27352430 0 1px, transparent 1px 3px); pointer-events: none; } /* taste-skill-ignore: lighting and finish in the original CSS product illustration. */
+.engraving { position: absolute; top: 23%; left: 12%; color: #293027; font: bold clamp(9px, 1.2vw, 16px)/1 Arial, sans-serif; letter-spacing: .14em; }
+.led { position: absolute; top: 39%; right: 16%; width: 9%; height: 15%; border-radius: 12px; background: #72431e; box-shadow: inset 0 1px 3px #21170d; } /* taste-skill-ignore: lighting and finish in the original CSS product illustration. */
+.led::after { content: ""; position: absolute; inset: 24% 15%; border-radius: inherit; background: var(--signal); box-shadow: 0 0 10px #ffb96191; } /* taste-skill-ignore: lighting and finish in the original CSS product illustration. */
+.cap { position: absolute; z-index: 1; top: 2%; bottom: 2%; width: 15%; border-radius: 20% / 17%; box-shadow: inset 0 1px 1px #e4f1d05a, inset 0 -3px 6px #0f1711; background: repeating-linear-gradient(90deg, #1f2c2210 0 4px, #0c170d5c 5px 7px), linear-gradient(180deg, #4a5444, #68715e 19%, #394437 42%, #1b281d 77%, #132016); transition: transform 540ms var(--ease); } /* taste-skill-ignore: lighting and finish in the original CSS product illustration. */
+.cap-left { left: 0; }
+.cap-right { right: 0; }
+.connector { position: absolute; width: 14%; inset: 18% 8% 18% auto; border-radius: 4px; background: linear-gradient(180deg, #a8a793, #5e6250 52%, #2b392d); box-shadow: inset 2px 0 0 #222c24; } /* taste-skill-ignore: lighting and finish in the original CSS product illustration. */
+.connector::after { content: ""; position: absolute; width: 37%; height: 26%; top: 37%; right: 9%; border-radius: 4px; background: #18231a; border: 1px solid #d1d1b6; }
+.stage.is-open .instrument { transform: rotate(-19deg) skewX(-6deg) scale(.95); }
+.stage.is-open .cap-right { transform: translateX(115%); }
+.stage.is-open .shell { clip-path: inset(0 8% 0 0); }
+.product figcaption { padding-top: 12px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.specs { padding-block: clamp(48px, 7vw, 104px); scroll-margin-top: 10px; }
+.specs h2, .readout h2, .field h2 { font-size: clamp(39px, 5.3vw, 82px); letter-spacing: -.075em; line-height: .98; font-weight: 600; }
+.spec-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 20px; margin: 30px 0 0; }
+.spec-list div { display: flex; flex-direction: column-reverse; align-items: start; gap: 8px; padding-block: 17px; border-top: 1px solid var(--rule); } /* taste-skill-ignore: rule separates navigation or measurement groups. */
+.spec-list dt { font-size: 14px; color: var(--muted); }
+.spec-list dd { margin: 0; font-weight: 650; font-size: clamp(24px, 3.1vw, 43px); letter-spacing: -.07em; }
+.readout { color: var(--foam); background: var(--deep); padding-block: clamp(42px, 8vw, 106px); }
+.readout-grid { display: grid; grid-template-columns: minmax(0,.65fr) minmax(0,1.35fr); gap: clamp(24px, 6vw, 84px); }
+.readout-intro { margin-top: 14px; max-width: 30ch; color: #c5d1bd; font-size: 17px; line-height: 1.5; }
+.metric-controls { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 21px; }
+.metric-controls[hidden] { display: none; }
+.metric-controls button { appearance: none; padding: 0 12px; min-height: 44px; background: transparent; color: inherit; border: 1px solid #93a38d; cursor: pointer; }
+.metric-controls button[aria-pressed="true"] { background: var(--foam); color: var(--deep); border-color: var(--foam); }
+.metric-controls button:hover { border-color: white; }
+.metric-current { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 20px; border-top: 1px solid #899882; padding-block: 15px; } /* taste-skill-ignore: rule separates navigation or measurement groups. */
+.metric-current p { font-size: 14px; color: #c5d1bd; }
+.metric-current output { font-size: clamp(33px, 4vw, 55px); line-height: 1; letter-spacing: -.075em; font-variant-numeric: tabular-nums; }
+.trace { display: block; width: 100%; height: clamp(140px, 23vw, 260px); }
+.trace[hidden] { display: none; }
+.static-reading { padding-block: 10px; color: #c5d1bd; }
+.trace-axis { display: flex; justify-content: space-between; padding-top: 8px; color: #c5d1bd; font-size: 13px; font-variant-numeric: tabular-nums; }
+.field { display: grid; grid-template-columns: minmax(0, .72fr) minmax(0, 1.28fr); gap: 30px 80px; padding-block: clamp(48px, 8vw, 110px); }
+.field p { font-size: clamp(18px, 1.6vw, 23px); line-height: 1.5; max-width: 46ch; color: var(--ink); }
+.site-footer { display: flex; justify-content: space-between; gap: 18px; align-items: center; min-height: 70px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 13px; } /* taste-skill-ignore: rule separates navigation or measurement groups. */
+@media (max-width: 860px) {
+  .hero { gap: 22px; }
+  .stage { min-height: 410px; }
+  .stage-caption, .stage-controls { inset-inline: 15px; }
+}
+@media (max-width: 690px) {
+  .site-header { min-height: 60px; }
+  .site-header nav { gap: 16px; }
+  .hero, .readout-grid, .field { grid-template-columns: minmax(0, 1fr); }
+  .hero { padding-block: 27px 0; }
+  .hero h1 { font-size: clamp(65px, 15vw, 99px); }
+  .hero h1 span { display: inline; font-size: .62em; white-space: nowrap; }
+  .promise { margin-block: 15px 18px; }
+  .stage { min-height: clamp(325px, 85vw, 430px); }
+  .stage-caption { inset-block-start: 13px; }
+  .stage-controls { inset-block-end: 13px; }
+  .spec-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 350px) {
+  .hero h1 span { display: block; }
+  .stage-controls p { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+  <header class="site-header">
+    <a class="wordmark" href="#top" aria-label="TARE home">TARE</a>
+    <nav aria-label="On this page"><a href="#specs">Specifications</a><a href="#readout">Readout</a></nav>
+  </header>
+</div>
+<main id="main">
+  <div class="wrap">
+    <section class="hero" aria-labelledby="product-name">
+      <div>
+        <h1 id="product-name">T‑01 <span>Tide Logger</span></h1>
+        <p class="promise">Record a full season of tides with a logger built for coastal fieldwork.</p>
+        <a class="action" href="#specs">See specifications <span aria-hidden="true">↓</span></a>
+      </div>
+      <figure class="product">
+        <div class="stage" id="assembly" data-ui>
+          <canvas class="ambient" aria-hidden="true"></canvas>
+          <div class="stage-caption"><span>Housing detail</span><button type="button" class="motion-button" aria-pressed="false" hidden>Background motion</button></div>
+          <div class="ruler" aria-hidden="true"></div>
+          <div class="instrument" aria-hidden="true">
+            <div class="connector"></div>
+            <div class="shell"><span class="engraving">TARE / T‑01</span><span class="led"></span></div>
+            <div class="cap cap-left"></div><div class="cap cap-right"></div>
+          </div>
+          <div class="stage-controls">
+            <p id="housing-state" role="status">Oxidized aluminum housing</p>
+            <button id="assembly-action" type="button" class="assembly-button" aria-controls="housing-state" aria-pressed="false" hidden>Reveal USB‑C</button>
+          </div>
+        </div>
+        <figcaption>Sealed end caps and a recessed amber status light.</figcaption>
+      </figure>
+    </section>
+
+    <section class="specs" id="specs" aria-labelledby="spec-title">
+      <h2 id="spec-title">Specifications</h2>
+      <dl class="spec-list">
+        <div><dt>Sampling interval</dt><dd>10 min</dd></div>
+        <div><dt>Battery life</dt><dd>12 months</dd></div>
+        <div><dt>Rated depth</dt><dd>30 m</dd></div>
+        <div><dt>Data export</dt><dd>USB‑C</dd></div>
+      </dl>
+    </section>
+  </div>
+
+  <section class="readout" id="readout" aria-labelledby="readout-title">
+    <div class="wrap readout-grid">
+      <div>
+        <h2 id="readout-title">Readout</h2>
+        <p class="readout-intro">Explore 12 hours of simulated readings from a coastal station.</p>
+      </div>
+      <div data-ui>
+        <div class="metric-controls" role="group" aria-label="Select a metric" hidden>
+          <button type="button" data-metric="water" aria-pressed="true">Water level</button>
+          <button type="button" data-metric="temperature" aria-pressed="false">Temperature</button>
+          <button type="button" data-metric="battery" aria-pressed="false">Battery</button>
+        </div>
+        <div class="metric-current">
+          <p id="metric-context">Water level at 18:00</p>
+          <output aria-label="Water level at 18:00" id="metric-value">2.42 m</output>
+        </div>
+        <noscript><p class="static-reading">Water level reached a low of 0.62 m before rising to 2.42 m at 18:00.</p></noscript>
+        <canvas class="trace" hidden role="img" aria-label="Water level reached a low of 0.62 meters, then rose to 2.42 meters."></canvas>
+        <div class="trace-axis" aria-hidden="true"><span>06:00</span><span>12:00</span><span>18:00</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap field" aria-labelledby="field-title">
+    <h2 id="field-title">A season on the coast</h2>
+    <p>Mount the logger at a known depth and use the status light to confirm sampling before you leave. When you retrieve it, remove the service cap and export the data over USB‑C.</p>
+  </section>
+</main>
+<div class="wrap"><footer class="site-footer"><span>TARE T‑01 · Fictional instrument</span><a href="#top">Back to top ↑</a></footer></div>
+<script>
+'use strict';
+
+const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+const stage = document.querySelector('.stage');
+const reveal = document.querySelector('#assembly-action');
+const housing = document.querySelector('#housing-state');
+
+reveal.hidden = false;
+reveal.addEventListener('click', () => {
+  const open = reveal.getAttribute('aria-pressed') === 'false';
+  stage.classList.toggle('is-open', open);
+  reveal.setAttribute('aria-pressed', String(open));
+  housing.textContent = open ? 'USB‑C service port exposed' : 'Oxidized aluminum housing';
+});
+
+function sizeCanvas(canvas, ctx) {
+  const width = Math.max(1, canvas.clientWidth);
+  const height = Math.max(1, canvas.clientHeight);
+  const ratio = Math.min(devicePixelRatio || 1, 2);
+  const pixelWidth = Math.round(width * ratio);
+  const pixelHeight = Math.round(height * ratio);
+  if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+    canvas.width = pixelWidth;
+    canvas.height = pixelHeight;
+  }
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  return { width, height };
+}
+
+const ambient = document.querySelector('.ambient');
+const ambientContext = ambient.getContext('2d');
+const ambientButton = document.querySelector('.motion-button');
+
+if (ambientContext) {
+  let active = false;
+  let visible = true;
+  let frameId = 0;
+  let time = 0;
+  let previousFrame = 0;
+  let dimensions;
+
+  function drawAmbient() {
+    const { width, height } = dimensions;
+    ambientContext.clearRect(0, 0, width, height);
+    ambientContext.lineWidth = 1;
+    for (let line = 0; line < 23; line++) {
+      ambientContext.strokeStyle = line % 4 === 0 ? '#b5c1a544' : '#9aab8e24';
+      ambientContext.beginPath();
+      for (let x = 0; x <= width + 10; x += 10) {
+        const progress = x / width;
+        const y = height * (.15 + line * .035 + progress * .26) +
+          Math.sin(progress * 5.6 + line * .21 + time) * (height * .09) +
+          Math.sin(progress * 13 - time * .7) * (height * .014);
+        if (x === 0) ambientContext.moveTo(x, y);
+        else ambientContext.lineTo(x, y);
+      }
+      ambientContext.stroke();
+    }
+  }
+
+  function drawFrame(now) {
+    if (previousFrame) time += Math.min(now - previousFrame, 50) * .0009;
+    previousFrame = now;
+    drawAmbient();
+    frameId = requestAnimationFrame(drawFrame);
+  }
+
+  function syncAnimation() {
+    cancelAnimationFrame(frameId);
+    previousFrame = 0;
+    frameId = active && visible && !document.hidden && !motionPreference.matches
+      ? requestAnimationFrame(drawFrame) : 0;
+  }
+
+  const resizeAmbient = () => {
+    dimensions = sizeCanvas(ambient, ambientContext);
+    drawAmbient();
+  };
+  new ResizeObserver(resizeAmbient).observe(ambient);
+  resizeAmbient();
+  new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting;
+    syncAnimation();
+  }).observe(stage);
+
+  function setAmbient(next) {
+    active = next;
+    ambientButton.setAttribute('aria-pressed', String(active));
+    syncAnimation();
+  }
+
+  ambientButton.hidden = motionPreference.matches;
+  ambientButton.addEventListener('click', () => setAmbient(!active));
+  motionPreference.addEventListener('change', () => {
+    if (motionPreference.matches && document.activeElement === ambientButton) reveal.focus();
+    ambientButton.hidden = motionPreference.matches;
+    if (motionPreference.matches) setAmbient(false);
+  });
+  document.addEventListener('visibilitychange', syncAnimation);
+}
+
+const readings = {
+  water: {
+    label: 'Water level', unit: 'm', decimals: 2, range: [0, 3],
+    values: [2.3, 2.19, 1.85, 1.44, 1.06, .77, .62, .76, 1.08, 1.47, 1.88, 2.2, 2.42],
+    description: 'Water level reached a low of 0.62 meters, then rose to 2.42 meters.'
+  },
+  temperature: {
+    label: 'Temperature', unit: '°C', decimals: 1, range: [8, 14],
+    values: [9.4, 9.3, 9.4, 9.6, 10, 10.5, 11.2, 11.6, 12.1, 12.1, 12.2, 12.3, 12.1],
+    description: 'Water temperature rose from 9.4 degrees Celsius to 12.1 degrees Celsius.'
+  },
+  battery: {
+    label: 'Battery', unit: '%', decimals: 0, range: [0, 100],
+    values: [78, 78, 78, 78, 78, 78, 78, 77, 77, 77, 77, 77, 77],
+    description: 'Battery charge moved from 78 percent to 77 percent.'
+  }
+};
+const trace = document.querySelector('.trace');
+const traceContext = trace.getContext('2d');
+const metricContext = document.querySelector('#metric-context');
+const metricValue = document.querySelector('#metric-value');
+const choices = document.querySelector('.metric-controls');
+let selected = 'water';
+let traceAnimation;
+
+function drawTrace(reading) {
+  if (!traceContext) return;
+  const { width, height } = sizeCanvas(trace, traceContext);
+  const [low, high] = reading.range;
+  const margin = { left: 38, right: 8, top: 11, bottom: 12 };
+  const chartWidth = width - margin.left - margin.right;
+  const chartHeight = height - margin.top - margin.bottom;
+  const toY = value => margin.top + (high - value) / (high - low) * chartHeight;
+  traceContext.clearRect(0, 0, width, height);
+  traceContext.font = '11px Arial';
+  traceContext.textBaseline = 'middle';
+  traceContext.fillStyle = '#c5d1bd';
+  for (let tick = 0; tick <= 4; tick++) {
+    const value = low + tick * (high - low) / 4;
+    const y = toY(value);
+    traceContext.fillText(String(value), 0, y);
+    traceContext.strokeStyle = '#80907762';
+    traceContext.beginPath();
+    traceContext.moveTo(margin.left, y);
+    traceContext.lineTo(width - margin.right, y);
+    traceContext.stroke();
+  }
+  traceContext.strokeStyle = '#ffcd7f';
+  traceContext.lineWidth = 2;
+  traceContext.lineJoin = 'round';
+  traceContext.beginPath();
+  reading.values.forEach((value, index) => {
+    const x = margin.left + index / (reading.values.length - 1) * chartWidth;
+    if (index === 0) traceContext.moveTo(x, toY(value));
+    else traceContext.lineTo(x, toY(value));
+  });
+  traceContext.stroke();
+  traceContext.lineWidth = 1;
+  traceContext.fillStyle = '#ffcd7f';
+  traceContext.beginPath();
+  traceContext.arc(width - margin.right, toY(reading.values.at(-1)), 4, 0, Math.PI * 2);
+  traceContext.fill();
+}
+
+function selectMetric(key) {
+  if (selected === key) return;
+  selected = key;
+  const reading = readings[key];
+  const context = reading.label + ' at 18:00';
+  metricContext.textContent = context;
+  metricValue.setAttribute('aria-label', context);
+  metricValue.value = reading.values.at(-1).toFixed(reading.decimals) + ' ' + reading.unit;
+  trace.setAttribute('aria-label', reading.description);
+  choices.querySelectorAll('button').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.metric === key));
+  });
+  drawTrace(reading);
+  traceAnimation?.cancel();
+  if (!motionPreference.matches && traceContext) {
+    traceAnimation = trace.animate([{ opacity: .45 }, { opacity: 1 }], {
+      duration: 210, easing: 'cubic-bezier(.22, 1, .36, 1)'
+    });
+  }
+}
+choices.hidden = false;
+choices.querySelectorAll('button').forEach(button => {
+  button.addEventListener('click', () => selectMetric(button.dataset.metric));
+});
+if (traceContext) {
+  trace.hidden = false;
+  drawTrace(readings[selected]);
+  new ResizeObserver(() => drawTrace(readings[selected])).observe(trace);
+}
+motionPreference.addEventListener('change', () => {
+  if (motionPreference.matches) traceAnimation?.cancel();
+});
+</script>
+</body>
+</html>
