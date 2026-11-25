@@ -547,7 +547,7 @@ function render(s) {
     p(`### ${i + 1}. ${sec.role} — ${sec.name} (${sec.shape})`); p(sec.blueprint); if (sec.mobile) p(`On a phone: ${sec.mobile}`); adjust(sec);
   });
   p();
-  if (s.motion) { p(`## 8. Motion — ${s.motion.name}`); p(s.motion.description); p('This is the signature move, the one loud moment. Around it the page still needs the rest of the motion layer (SKILL.md step 9): an entrance for the parts of every section, feedback on every control, and one moving picture. The inspector fails a page that barely moves. Recipes: references/motion.md.'); p(); }
+  if (s.motion) { p(`## 8. Motion — ${s.motion.name}`); p(s.motion.description); p('Use this idea when it explains the subject or supports a meaningful interaction. Keep sections readable as they enter the viewport and give controls clear feedback. See references/design-defaults.md and references/motion.md.'); p(); }
   if (s.scenes?.length) {
     p('## 9. Scroll scenes');
     p(`The page's big moments: ${s.scenes.length} scroll scenes, tested and ready to fill. They are part of the composition, so build them in step 6 with the section they carry, not as a motion afterthought. Each runs on the shared stage (assets/scenes/stage.js and stage.css, with GSAP and Lenis from the pinned CDN lines in stage.js) and ships its own finished composition for reduced motion and for phones that rest. How to put one on a page, fill it and check it: references/scenes.md. Check them with \`node <skill>/scripts/scenes.mjs <page>\` and look at every sheet.`);
@@ -574,9 +574,9 @@ function render(s) {
   }
   p('## Always');
   p('Headlines two lines or fewer at every width. No eyebrow labels, no monospace, no 01/02/03, no thin rules, no gradients, no shadows at rest,');
-  p('no cream-and-terracotta, no violet. The frame: one h1 on the first screen that says what this is, equal outer margins, no');
+  p('skip default cream grounds and decorative glows. The frame: one h1 on the first screen that says what this is, equal outer margins, no');
   p('section huddled on one side with the other half empty, no blank stretch over half a screen, a heading on every section.');
-  p('`inspect.mjs` measures all of it.');
+  p('Run `inspect.mjs` for measured findings and apply references/design-defaults.md to the rendered composition and copy.');
   if (s.allow?.length) p(`This direction is allowed: ${s.allow.join(', ')} (the inspector reads this from the saved sheet).`);
   p();
   p(`Saved to ${sheetPath.split('\\').join('/')} · reprint with \`node draw.mjs --show\``);
