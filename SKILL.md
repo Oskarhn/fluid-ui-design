@@ -10,7 +10,7 @@ description: >-
   web app, native mobile interface, or interactive 3D experience.
 license: MIT
 metadata:
-  version: "2.10.0"
+  version: "2.11.0"
 ---
 
 # Fluid UI Design
@@ -38,6 +38,7 @@ Use [surface decisions and finish checks](references/surface-and-finish.md) to r
 For new sites and web changes that affect performance, use the [Lighthouse workflow](references/web-performance.md). Measure the runnable baseline, fix the largest bottlenecks, and repeat under matching mobile conditions.
 
 1. Pick the page's job, audience, primary action and strongest product-specific proof. Read one applicable [DESIGN.md study](references/design-library/INDEX.md) for composition and optionally one for its interaction. Use the subject and assets to pick the direction when the user leaves it open.
+   For pricing, checkout, onboarding, recurring goals, or discovery, open [behavioral design by product task](references/behavioral-design.md) when a pattern could help with a specific decision or action.
 2. Before coding, specify the first screen at desktop and mobile, the main image, footage, or visualization and its fallback, type and color tokens, section order, and the behavior and rest state of any signature motion. For tighter briefs the [one-page design plan](references/design-reference-workflow.md) is sufficient in place of dealing multiple speculative directions in step 2 below.
 3. Build the first viewport and main action around that proof, then finish the requested content and mobile states. Check web output in Chrome (step 5 below) and SwiftUI output in the Apple test environment for the project. Fix visible defects within this run. Use the [original motion studies](blueprints/design-motion-studies.html) for runnable examples of the effect, input and fallback.
    For gestures, moving controls, transitions or 3D details, pick a state model from [motion composition](references/motion-composition.md) and reuse a [licensed Bencho block](blueprints/bencho/README.md) where it matches the task. Adapt the trigger, feedback and fallback to the project.

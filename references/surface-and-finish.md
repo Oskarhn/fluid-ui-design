@@ -21,6 +21,8 @@ Use the surface's job, including when a single product offers several different 
 
 Apply [design defaults](design-defaults.md) and the brief when choosing visual treatment and motion. Document meaningful style exceptions with the reason.
 
+If you use a [behavioral pattern](behavioral-design.md), check the decision or action it supports. For example, verify that a buyer can compare total prices or that a person can edit a goal and stop reminders.
+
 ## Verify the state that will ship
 
 1. Choose one primary visitor action and one likely failure or edge case. Pick cases that the surface can actually reach. For a form this can be long input and a failed submit; for a gallery it can be a missing image and keyboard selection.
