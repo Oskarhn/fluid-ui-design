@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Procedural backgrounds</title>
+<style>
+:root { color-scheme: dark; font-family: Arial, sans-serif; color: #e9ebe1; background: #171b1a; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { width: min(1120px, 100%); margin-inline: auto; padding: clamp(24px, 5vw, 64px); }
+h1 { font-size: clamp(40px, 7vw, 96px); letter-spacing: -.075em; line-height: .95; margin: 0 0 24px; }
+p { color: #b9c0b7; max-width: 45ch; margin: 12px 0 25px; line-height: 1.5; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+button { min-height: 44px; padding: 0 14px; color: inherit; background: #2c3330; border: 0; font: inherit; cursor: pointer; }
+button[aria-pressed="true"] { background: #e9ebe1; color: #171b1a; }
+button[hidden], .controls[hidden] { display: none; }
+button:focus-visible, a:focus-visible { outline: 2px solid #f0ba70; outline-offset: 4px; }
+.stage { background: #102720; }
+canvas { display: block; width: 100%; aspect-ratio: 16 / 9; }
+figcaption { margin-top: 12px; color: #b9c0b7; }
+figure { margin: 0; }
+a { color: inherit; text-underline-offset: .18em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Procedural backgrounds</h1>
+  <p>Three original loops with a quiet left edge for foreground content. Select a background and play it to see the motion.</p>
+  <div class="controls" role="group" aria-label="Backgrounds" hidden>
+    <button type="button" data-scene="tidal-contours" aria-pressed="true">Tidal contours</button>
+    <button type="button" data-scene="amber-reflection" aria-pressed="false">Amber reflection</button>
+    <button type="button" data-scene="oblique-lattice" aria-pressed="false">Oblique lattice</button>
+    <button type="button" id="playback" aria-pressed="false">Play loop</button>
+  </div>
+  <figure>
+    <div class="stage"><canvas width="960" height="540" aria-hidden="true"></canvas></div>
+    <figcaption id="description" role="status">Tidal contours · green line work follows a shallow wave.</figcaption>
+  </figure>
+  <p><a href="../media/loops/README.md">Download the video loops and posters</a></p>
+</main>
+<script>
+'use strict';
+const tau = Math.PI * 2;
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const panel = document.querySelector('.controls');
+const playback = document.querySelector('#playback');
+const description = document.querySelector('#description');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+
+function paintGround(light, dark, x, y) {
+  const fill = ctx.createRadialGradient(x, y, 2, x, y, 780);
+  fill.addColorStop(0, light);
+  fill.addColorStop(1, dark);
+  ctx.fillStyle = fill;
+  ctx.fillRect(0, 0, 960, 540);
+}
+
+function contours(phase) {
+  paintGround('#385845', '#10221e', 690, 300);
+  for (let line = 0; line < 40; line++) {
+    ctx.lineWidth = line % 5 === 0 ? 1.1 : .67;
+    ctx.strokeStyle = line % 5 === 0 ? '#d2e1c87a' : '#a2c4a542';
+    ctx.beginPath();
+    for (let x = 0; x <= 960; x += 8) {
+      const u = x / 960;
+      const swell = (.1 + u * .9) * (39 * Math.sin(u * 7.2 + line * .12 + phase) + 4 * Math.sin(u * 18 - phase));
+      const y = 52 + 12 * line + u * (132 - line * 4) + swell;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+}
+
+function reflection(phase) {
+  paintGround('#3d2219', '#160f13', 675, 300);
+  for (let ribbon = 0; ribbon < 19; ribbon++) {
+    const rise = 14 * Math.sin(phase + ribbon * .30);
+    const y = 118 + ribbon * 18 + rise;
+    const glow = ctx.createLinearGradient(300, y + 120, 955, y - 80);
+    glow.addColorStop(0, '#2b152000');
+    glow.addColorStop(.47, '#ad4e3550');
+    glow.addColorStop(.81, ribbon % 4 === 0 ? '#ffd791bd' : '#d27d506c');
+    glow.addColorStop(1, '#ef785153');
+    ctx.strokeStyle = glow;
+    ctx.lineWidth = ribbon % 4 === 0 ? 8 : 3.6;
+    ctx.beginPath();
+    ctx.moveTo(135, y + 190);
+    ctx.bezierCurveTo(475, y + 35, 610, y + 55, 1020, y - 200);
+    ctx.stroke();
+  }
+}
+
+function lattice(phase) {
+  paintGround('#383e62', '#151928', 740, 265);
+  const reach = 38 * Math.sin(phase);
+  for (let index = -3; index < 26; index++) {
+    const origin = index * 45;
+    const cross = 45 + reach + 8 * Math.sin(index * .45 + phase);
+    ctx.lineWidth = index % 4 === 0 ? 1.2 : .75;
+    ctx.strokeStyle = index % 4 === 0 ? '#aba6d895' : '#7d87b75e';
+    ctx.beginPath();
+    ctx.moveTo(origin + 80, 540);
+    ctx.lineTo(origin + cross + 132, 227);
+    ctx.lineTo(origin + 310, -25);
+    ctx.stroke();
+  }
+  ctx.lineWidth = .8;
+  ctx.strokeStyle = '#c1badd47';
+  for (let index = 0; index < 14; index++) {
+    const y = 117 + index * 31 + 8 * Math.cos(phase + index * .36);
+    ctx.beginPath();
+    ctx.moveTo(320, y + 98);
+    ctx.lineTo(970, y - 108);
+    ctx.stroke();
+  }
+}
+
+const scenes = {
+  'tidal-contours': { paint: contours, label: 'Tidal contours · green line work follows a shallow wave.' },
+  'amber-reflection': { paint: reflection, label: 'Amber reflection · thin bands of light cross a warm surface.' },
+  'oblique-lattice': { paint: lattice, label: 'Oblique lattice · a grid bends around a moving axis.' }
+};
+
+function renderBackground(name, phase) {
+  scenes[name].paint(phase);
+  const scrim = ctx.createLinearGradient(0, 0, 650, 0);
+  scrim.addColorStop(0, 'rgba(12, 15, 16, .81)');
+  scrim.addColorStop(.52, 'rgba(12, 15, 16, .41)');
+  scrim.addColorStop(1, 'rgba(12, 15, 16, 0)');
+  ctx.fillStyle = scrim;
+  ctx.fillRect(0, 0, 960, 540);
+}
+
+if (ctx) {
+  let scene = 'tidal-contours';
+  let running = false;
+  let inView = true;
+  let phase = 0;
+  let lastFrame = 0;
+  let frameId = 0;
+  panel.hidden = false;
+
+  function tick(time) {
+    if (lastFrame) phase = (phase + tau * (time - lastFrame) / 6000) % tau;
+    renderBackground(scene, phase);
+    lastFrame = time;
+    frameId = requestAnimationFrame(tick);
+  }
+
+  function syncPlayback() {
+    cancelAnimationFrame(frameId);
+    lastFrame = 0;
+    if (running && inView && !document.hidden && !reduce.matches) frameId = requestAnimationFrame(tick);
+  }
+
+  function setPlayback(next) {
+    running = next;
+    playback.setAttribute('aria-pressed', String(next));
+    syncPlayback();
+  }
+
+  panel.querySelectorAll('[data-scene]').forEach(button => {
+    button.addEventListener('click', () => {
+      scene = button.dataset.scene;
+      phase = 0;
+      description.textContent = scenes[scene].label;
+      panel.querySelectorAll('[data-scene]').forEach(option => {
+        option.setAttribute('aria-pressed', String(option === button));
+      });
+      renderBackground(scene, phase);
+    });
+  });
+
+  playback.hidden = reduce.matches;
+  playback.addEventListener('click', () => setPlayback(!running));
+  reduce.addEventListener('change', () => {
+    if (reduce.matches && document.activeElement === playback) {
+      panel.querySelector('[data-scene][aria-pressed="true"]').focus();
+    }
+    playback.hidden = reduce.matches;
+    if (reduce.matches) setPlayback(false);
+  });
+
+  new IntersectionObserver(([entry]) => {
+    inView = entry.isIntersecting;
+    syncPlayback();
+  }).observe(canvas);
+  document.addEventListener('visibilitychange', syncPlayback);
+  renderBackground(scene, phase);
+}
+</script>
+</body>
+</html>
