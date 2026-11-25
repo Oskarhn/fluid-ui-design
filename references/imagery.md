@@ -307,7 +307,7 @@ The credits, as `--credits` prints them, in the footer:
 ```
 
 - Always `width` and `height` (or `aspect-ratio` in CSS) so nothing jumps while loading.
-- `loading="lazy"` on everything except the hero image, which gets `fetchpriority="high"`.
+- Keep the likely LCP image and other first-screen essentials eager. Give the LCP image `fetchpriority="high"` when the waterfall shows it needs a boost. Use `loading="lazy"` for genuinely offscreen images that can wait. [Check the page with Lighthouse](web-performance.md).
 - `alt` describes the picture in plain words. Decorative repeats get `alt=""`. The script's suggested
   alt is the archive's title; rewrite it to say what the picture shows.
 - A coloured `background-color` on the image container (the ground or surface tone) so the layout is
