@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" data-style="instrument">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Signal Lab — Mobile control styles</title>
+<link rel="stylesheet" href="control-styles.css">
+<script src="control-styles.js" defer></script>
+</head>
+<body>
+<a href="#control" class="skip">Skip to output controls</a>
+<main class="page">
+  <header class="intro">
+    <h1>Signal Lab</h1>
+    <p class="lead">Set the output. Try the same control in four visual styles.</p>
+    <canvas class="ink-mark" width="192" height="120" aria-hidden="true"></canvas>
+  </header>
+  <div class="styles" role="group" aria-label="Visual style">
+    <button type="button" data-style-choice="grid" aria-pressed="false">Brutalist</button>
+    <button type="button" data-style-choice="ink" aria-pressed="false">Hand-drawn</button>
+    <button type="button" data-style-choice="instrument" aria-pressed="true">Skeuomorphic</button>
+    <button type="button" data-style-choice="soft" aria-pressed="false">Neumorphic</button>
+  </div>
+  <section class="deck" id="control" aria-labelledby="output-title">
+    <div class="tool">
+      <div class="dial-title">
+        <h2 id="output-title">Output</h2>
+        <output id="level-readout" for="level" aria-live="off">46%</output>
+      </div>
+      <div class="dial" aria-hidden="true">
+        <div class="arc"></div>
+        <div class="ticks"></div>
+        <div class="rotor"><div class="marker"></div></div>
+        <div class="center"></div>
+      </div>
+      <div class="adjust">
+        <button type="button" data-step="-5" aria-label="Decrease output by five percentage points">−</button>
+        <label for="level" class="screen-reader">Output level</label>
+        <input type="range" min="0" max="100" step="1" value="46" id="level" aria-valuetext="46 percent">
+        <button type="button" data-step="5" aria-label="Increase output by five percentage points">+</button>
+      </div>
+      <p class="screen-reader" id="adjust-status" role="status"></p>
+    </div>
+    <div class="monitor">
+      <h2>Signal preview</h2>
+      <p>Simulated waveform. No audio is played.</p>
+      <canvas class="waveform" width="580" height="215" aria-hidden="true"></canvas>
+      <div class="presets" role="group" aria-label="Output presets">
+        <button type="button" data-value="18" aria-pressed="false">Quiet</button>
+        <button type="button" data-value="46" aria-pressed="true">Balanced</button>
+        <button type="button" data-value="77" aria-pressed="false">Wide</button>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
