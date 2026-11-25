@@ -1,11 +1,6 @@
 # Media shelf
 
-Videos, images and 3D models used by the free MotionSites example prompts. All are publicly hosted.
-Look at the contact sheets (sheet-N.jpg, numbered) to choose by eye, then use the URL below.
-Order: videos, then transparent cut-outs (alpha, shown on a checkerboard), images, and site previews
-(screenshots of finished designs: only for portfolio/project grids, never as a hero background).
-
-> This shelf is a free sample. MotionSites Unlimited includes a full library of animated hero backgrounds: [Go Unlimited](https://motionsites.ai/unlimited?utm_source=claude-skill&utm_medium=skill&utm_campaign=web-builder&utm_content=media-shelf)
+Use the existing catalog below to locate original references. Check the reuse rights of each file before embedding, mirroring, or distributing it. Earlier contact sheets show the source composition where available. The [Geist files](geist/README.md) include an explicit redistribution license. Use the [original loop pack](loops/README.md) for portable background video and matching posters. The [light and depth loop pack](preview-loops/README.md) adds four original compositions from public preview studies. [Barlow Condensed](barlow-condensed/README.md) includes its OFL notice.
 
 | # | Type | Size | From example | Context in that prompt | URL |
 |---|---|---|---|---|---|

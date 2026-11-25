@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Light and depth studies</title>
+<style>
+:root{font:100%/1.5 system-ui,sans-serif;color:#e9f0e9;background:#131d1b;color-scheme:dark}*{box-sizing:border-box}body{margin:0}
+main{width:min(100%,71rem);margin-inline:auto;padding:clamp(16px,5vw,62px)}h1{margin:0;font-size:clamp(2.7rem,9vw,7rem);line-height:.92;letter-spacing:-.075em}p{max-width:53ch;color:#bad0c6}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-block:21px 15px}.controls[hidden],button[hidden]{display:none}
+button{min-height:44px;border:1px solid #6f8b80;background:#22312c;color:#e9f0e9;padding:9px 13px;font:inherit;cursor:pointer}
+button[aria-pressed="true"]{background:#c1dcd1;color:#17241f;text-decoration:underline;text-underline-offset:.2em}
+button:focus-visible{outline:2px solid #f9cc85;outline-offset:3px}
+figure{margin:0}.stage{background:#21362f}canvas{width:100%;aspect-ratio:16/9;height:auto;display:block}figcaption{padding-top:9px;color:#bad0c6}
+</style>
+<script src="public-preview-backgrounds.js" defer></script>
+</head>
+<body>
+<main>
+  <h1>Light and depth studies</h1>
+  <p>Four original backgrounds drawn in Canvas. Select a scene, then play its motion.</p>
+  <div class="controls" role="group" aria-label="Background scenes" hidden>
+    <button type="button" data-scene="window" aria-pressed="true">Moving landscape</button>
+    <button type="button" data-scene="light" aria-pressed="false">Window light</button>
+    <button type="button" data-scene="water" aria-pressed="false">Water reflection</button>
+    <button type="button" data-scene="arches" aria-pressed="false">Layered arches</button>
+    <button type="button" id="playback" aria-pressed="false">Play motion</button>
+  </div>
+  <figure>
+    <div class="stage"><canvas width="960" height="540" aria-hidden="true"></canvas></div>
+    <figcaption id="scene-description" role="status">A fixed opening frames two moving horizons.</figcaption>
+  </figure>
+</main>
+</body>
+</html>
