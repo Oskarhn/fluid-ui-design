@@ -1,0 +1,39 @@
+/* Scoped adapter. A project can set these motion tokens on the host. */
+:where(.fluid-motion) {
+  --font-ui: var(--motion-font, system-ui, sans-serif);
+  --t: var(--font-ui);
+  --bg: var(--motion-ground, #ece9e0);
+  --board: var(--motion-surface, #f7f4eb);
+  --card: var(--board);
+  --surface: var(--board);
+  --surface-2: #eeeade;
+  --surface-3: #dcd7c8;
+  --ink: var(--motion-ink, #242821);
+  --ink-rgb: var(--motion-ink-rgb, 36, 40, 33);
+  --ink-2: #393f35;
+  --ink-3: #545c50;
+  --ink-4: #61685d;
+  --ink-5: #686f63;
+  --on-ink: #fffdf5;
+  --on-ink-rgb: 255, 253, 245;
+  --slab: var(--ink);
+  --on-slab: var(--on-ink);
+  --slab-dark: #161b16;
+  --fill-slab: var(--board);
+  --fill-on: var(--ink);
+  --fill-on-rgb: var(--ink-rgb);
+  --pane: var(--board);
+  --pane-edge: rgba(var(--ink-rgb), .12);
+  --pane-thumb: rgba(var(--ink-rgb), .08);
+  --inlay: #fffaf0;
+  --inlay-hi: rgba(var(--ink-rgb), .10);
+  --elev-rgb: 255, 253, 245;
+  --glass-rgb: 255, 253, 245;
+  --shadow-rgb: var(--ink-rgb);
+  --wash: .07;
+  --signal: var(--motion-accent, #3d6434);
+  --focus: var(--signal);
+  --pick: var(--signal);
+  --ok: #2c693a;
+  --ember: #9b4525;
+}
