@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Field Signal | Oscilloscope</title>
+  <link rel="stylesheet" href="scope.css">
+  <script src="scope.js" defer></script>
+</head>
+<body>
+  <main class="bench">
+    <header class="identity">
+      <div>
+        <h1>Field Signal</h1>
+        <p>Signal generator &amp; oscilloscope</p>
+      </div>
+      <span class="source">Simulated input</span>
+    </header>
+    <div class="device">
+      <span class="bolt top-left" aria-hidden="true"></span>
+      <span class="bolt top-right" aria-hidden="true"></span>
+      <span class="bolt bottom-left" aria-hidden="true"></span>
+      <span class="bolt bottom-right" aria-hidden="true"></span>
+      <section class="scope" aria-label="Oscilloscope display">
+        <div class="bezel">
+          <div class="glass">
+            <div class="screen-header">
+              <span class="channel">CH A</span>
+              <span id="screen-mode">Sine</span>
+              <span id="screen-state">READY</span>
+            </div>
+            <div class="plot" role="img" aria-label="Sine signal. 12 hertz. 42 percent gain.">
+              <canvas aria-hidden="true"></canvas>
+              <svg class="poster" viewBox="0 0 640 270" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M 0 0 H640 V270 H0 Z M 0 67.5 H640 M 0 135 H640 M 0 202.5 H640 M160 0 V270 M320 0 V270 M480 0 V270" fill="none" stroke="#536052" stroke-width="1"/>
+                <path d="M0 135 C44 43 89 43 133 135 S222 227 267 135 S355 43 400 135 S489 227 533 135 S622 43 640 94" fill="none" stroke="#d4f79d" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="time-axis" aria-hidden="true"><span>0</span><span>50</span><span>100</span><span>150</span><span>200 ms</span></div>
+          </div>
+        </div>
+        <div class="scope-footer">
+          <div class="measure"><span class="measure-label">Frequency</span><span class="reading"><output id="frequency-output">12</output><small>Hz</small></span></div>
+          <div class="measure"><span class="measure-label">Input gain</span><span class="reading"><output id="gain-output">42</output><small>%</small></span></div>
+          <button type="button" class="play" id="sweep" disabled><span class="sweep-symbol" aria-hidden="true"></span><span class="play-label">Sweep</span></button>
+        </div>
+      </section>
+      <section class="controls" aria-label="Signal controls">
+        <fieldset id="hardware" disabled>
+          <legend class="sr-only">Signal controls</legend>
+          <div class="mode-controls">
+            <span class="engraved" id="wave-label">Waveform</span>
+            <div class="waveforms" role="group" aria-labelledby="wave-label">
+              <button type="button" data-wave="sine" aria-label="Sine" aria-pressed="true">
+                <svg width="26" height="14" viewBox="0 0 26 14" aria-hidden="true"><path d="M1 7 Q7 -4 13 7 T25 7"/></svg>
+              </button>
+              <button type="button" data-wave="triangle" aria-label="Triangle" aria-pressed="false">
+                <svg width="26" height="14" viewBox="0 0 26 14" aria-hidden="true"><path d="M1 7 7 1 19 13 25 7"/></svg>
+              </button>
+              <button type="button" data-wave="square" aria-label="Square" aria-pressed="false">
+                <svg width="26" height="14" viewBox="0 0 26 14" aria-hidden="true"><path d="M1 7 4 7 4 2 13 2 13 12 22 12 22 7 25 7"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="knobs">
+            <div class="knob-control" data-knob="gain">
+              <div class="knob-head"><label id="gain-label">Gain</label><span aria-hidden="true">%</span></div>
+              <div class="knob-row">
+                <button type="button" class="nudge" data-delta="-1" aria-label="Decrease gain">−</button>
+                <div class="dial" role="slider" tabindex="0" aria-labelledby="gain-label" aria-valuemin="0" aria-valuemax="100" aria-valuenow="42" aria-valuetext="42 percent">
+                  <div class="dial-face" aria-hidden="true"></div>
+                </div>
+                <button type="button" class="nudge" data-delta="1" aria-label="Increase gain">+</button>
+              </div>
+            </div>
+            <div class="knob-control" data-knob="frequency">
+              <div class="knob-head"><label id="frequency-label">Frequency</label><span aria-hidden="true">Hz</span></div>
+              <div class="knob-row">
+                <button type="button" class="nudge" data-delta="-1" aria-label="Decrease frequency">−</button>
+                <div class="dial" role="slider" tabindex="0" aria-labelledby="frequency-label" aria-valuemin="4" aria-valuemax="32" aria-valuenow="12" aria-valuetext="12 hertz">
+                  <div class="dial-face" aria-hidden="true"></div>
+                </div>
+                <button type="button" class="nudge" data-delta="1" aria-label="Increase frequency">+</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" id="roll" aria-pressed="false"><span class="roll-mark" aria-hidden="true"></span>Roll signal</button>
+        </fieldset>
+      </section>
+    </div>
+    <p class="instructions">Drag the dials to tune the signal. Press <strong>Sweep</strong> to trace it across the screen.</p>
+    <span role="status" id="announcement" class="sr-only"></span>
+  </main>
+</body>
+</html>
