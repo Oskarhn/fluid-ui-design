@@ -39,7 +39,7 @@ One important caveat from blind testing ([`references/research.md` §11](referen
 
 ## What each integrated source contributes
 
-This repository combines five complementary lines of interface engineering:
+The [design skill coverage](references/design-skill-coverage.md) documents the integrated material and the available specialist lookups. The original foundation combined these sources:
 
 1. **Empirical art direction & automated DOM measurement (`design-taste-frontend` / `tasteskill v2`):**
    `scripts/draw.mjs` prevents model-default convergence by dealing researched compositions, type systems, and section blueprints from the 247-site library. `scripts/lint.mjs` and `scripts/inspect.mjs` measure the rendered DOM in headless Chrome at `1440px`, `768px`, and `390px` (checking headline line counts, outer margin symmetry, blank vertical stretches, contrast, and horizontal overflow).
