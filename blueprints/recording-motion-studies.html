@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion from recorded references</title>
+<style>
+:root{font:100%/1.5 system-ui,sans-serif;color:#142826;background:#e8efec;--ink:#142826;--edge:#83978e}*{box-sizing:border-box}body{margin:0}
+main{width:min(100%,66rem);margin-inline:auto;padding:clamp(15px,5vw,54px)}h1,h2,p{margin:0}h1{max-width:12ch;font-size:clamp(2.65rem,8vw,6.3rem);line-height:.92;letter-spacing:-.07em}
+h2{font-size:clamp(1.65rem,4vw,2.75rem);line-height:1;letter-spacing:-.045em}p{margin-top:.7rem;max-width:58ch}section{margin-top:clamp(35px,6vw,70px);padding-top:25px;border-top:1px solid var(--edge)}
+.stage{position:relative;overflow:hidden;width:100%;min-height:230px;aspect-ratio:2.4;margin-top:18px;background:#153b38;isolation:isolate}
+.treatment{position:absolute;inset:0;display:grid;place-items:center;isolation:isolate}
+.first{background:#19644f;color:#e8ffed;clip-path:inset(0 var(--covered,0%) 0 0)}
+.second{background:#ad5341;color:#fff5e9}
+.name{font-size:clamp(2rem,10vw,7rem);font-weight:770;letter-spacing:-.09em;transform:translateX(var(--type-x,0%))}
+.object{position:absolute;width:clamp(55px,15vw,152px);aspect-ratio:.66;border-radius:13%;background:linear-gradient(100deg,#122524,#648679 33%,#243c33 73%,#0b251e);box-shadow:0 17px 14px #12211e66;transform:translateX(var(--object-x,0%)) rotate(-16deg);display:grid;place-content:center}
+.second .object{background:linear-gradient(100deg,#3c251f,#ae8e72 32%,#613e29 73%,#3c251f)}
+.object::before{content:'';width:clamp(22px,6vw,62px);height:9px;border-radius:5px;background:#e9d391;box-shadow:0 13px 0 #2225}
+.mark{position:absolute;right:15%;bottom:18%;width:2.5%;aspect-ratio:1;border:1px solid currentColor;transform:translateX(var(--detail-x,0%)) rotate(30deg)}
+.controls{margin-top:13px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{min-height:44px;padding:8px 13px;border:1px solid var(--ink);background:#e8efec;color:var(--ink);font:inherit;cursor:pointer}
+button[aria-pressed=true]{background:var(--ink);color:#e8efec;text-decoration:underline;text-underline-offset:.2em}
+:focus-visible{outline:2px solid #177858;outline-offset:4px}input[type=range]{min-height:44px;flex:1 1 130px;max-width:310px;accent-color:#156449}
+label{font-size:.94rem}output{font-variant-numeric:tabular-nums;min-width:4ch}
+.rail{background:linear-gradient(90deg,#c9ddd3 0 33.33%,#b8cfc9 33.33% 66.66%,#c9ddd3 66.66%);color:#142826}
+.rail div[data-anchor]{position:absolute;bottom:10px;width:33.33%;text-align:center;font-size:clamp(.72rem,2.2vw,1rem)}
+.rail [data-anchor=overview]{left:0}.rail [data-anchor=inspection]{left:33.33%}.rail [data-anchor=storage]{left:66.66%}
+.traveller{position:absolute;left:var(--x,17%);top:var(--y,49%);width:clamp(42px,12vw,104px);aspect-ratio:.68;transform:translate(-50%,-50%) rotate(var(--angle,-19deg)) scale(var(--size,1));background:linear-gradient(130deg,#657c60,#3f584e 43%,#1c3c37);border:1px solid #29493d;border-radius:15%;box-shadow:0 13px 17px #2b493d62;display:grid;place-content:center}
+.traveller::before{content:'';width:clamp(12px,4vw,37px);height:10px;background:#e8c879;border-radius:4px}
+</style>
+</head>
+<body>
+<main>
+<header><h1>Motion from recorded references</h1><p>Two interactive studies. Play each movement or inspect it with the timeline.</p></header>
+<section aria-labelledby="wipe-title">
+ <h2 id="wipe-title">Layered material switch</h2>
+ <p>A single edge reveals the next material. The title, sample and small detail settle at different rates.</p>
+ <div class="stage" id="wipe" aria-hidden="true">
+  <div class="treatment second"><div class="name">Copper</div><div class="object"></div><div class="mark"></div></div>
+  <div class="treatment first"><div class="name">Jade</div><div class="object"></div><div class="mark"></div></div>
+ </div>
+ <div class="controls" role="group" aria-label="Material switch controls">
+  <button type="button" data-at="0" aria-pressed="true">Jade</button><button type="button" data-at="1" aria-pressed="false">Copper</button>
+  <label for="wipe-progress">Transition</label><input type="range" id="wipe-progress" min="0" max="100" value="0"><output for="wipe-progress" aria-live="off">0%</output>
+ </div>
+</section>
+<section aria-labelledby="handoff-title">
+ <h2 id="handoff-title">One specimen across three views</h2>
+ <p>Keep a single object and move it between defined positions. Its identity stays visible through both changes.</p>
+ <div class="stage rail" id="handoff" aria-hidden="true">
+   <div data-anchor="overview">Overview</div><div data-anchor="inspection">Inspection</div><div data-anchor="storage">Storage</div>
+   <div class="traveller"></div>
+ </div>
+ <div class="controls" role="group" aria-label="Specimen controls">
+  <button type="button" data-at="0" aria-pressed="true">Overview</button><button type="button" data-at=".5" aria-pressed="false">Inspection</button><button type="button" data-at="1" aria-pressed="false">Storage</button>
+  <label for="view-progress">Position</label><input type="range" id="view-progress" min="0" max="100" value="0"><output for="view-progress" aria-live="off">0%</output>
+ </div>
+</section>
+</main>
+<script>
+'use strict';
+const reduce=matchMedia('(prefers-reduced-motion: reduce)');
+const clamp=(value)=>Math.max(0,Math.min(1,value));
+const mix=(from,to,amount)=>from+(to-from)*amount;
+const ease=(t)=>t*t*(3-2*t);
+
+function bindTimeline(stage,draw,fullDuration){
+  const controls=stage.nextElementSibling;
+  const range=controls.querySelector('input');
+  const output=controls.querySelector('output');
+  const buttons=[...controls.querySelectorAll('button')];
+  let position=0, frame=0, target=null;
+  function render(value){
+    position=clamp(value);
+    draw(position);
+    const percent=Math.round(position*100);
+    range.value=String(percent);
+    range.setAttribute('aria-valuetext',percent+' percent');
+    output.value=percent+'%';
+    for(const button of buttons){
+      button.setAttribute('aria-pressed',String(Math.abs(position-Number(button.dataset.at))<.0001));
+    }
+  }
+  function go(next){
+    cancelAnimationFrame(frame);
+    target=next;
+    const start=position;
+    if(reduce.matches||next===start){render(next);target=null;return;}
+    let started;
+    const duration=fullDuration*Math.abs(next-start);
+    function step(now){
+      started??=now;
+      const elapsed=clamp((now-started)/duration);
+      render(mix(start,next,elapsed));
+      if(elapsed<1) frame=requestAnimationFrame(step);
+      else target=null;
+    }
+    frame=requestAnimationFrame(step);
+  }
+  range.addEventListener('input',()=>{
+    cancelAnimationFrame(frame);
+    target=null;
+    render(range.valueAsNumber/100);
+  });
+  for(const button of buttons) button.addEventListener('click',()=>go(Number(button.dataset.at)));
+  reduce.addEventListener('change',()=>{if(reduce.matches&&target!==null)go(target);});
+  render(0);
+}
+
+const wipe=document.querySelector('#wipe');
+const incoming=wipe.querySelector('.second');
+const outgoing=wipe.querySelector('.first');
+bindTimeline(wipe,(p)=>{
+  const slow=clamp(p/.48);
+  const middle=clamp((p-.48)/.26);
+  const tail=clamp((p-.74)/.26);
+  const coverage=.18*ease(slow)+.71*ease(middle)+.11*ease(tail);
+  outgoing.style.setProperty('--covered',coverage*100+'%');
+  outgoing.style.setProperty('--type-x',-coverage*12+'%');
+  outgoing.style.setProperty('--object-x',-coverage*40+'%');
+  incoming.style.setProperty('--type-x',(1-ease(p))*14+'%');
+  incoming.style.setProperty('--object-x',(1-ease(p))*65+'%');
+  incoming.style.setProperty('--detail-x',(1-ease(p))*115+'%');
+},900);
+
+const handoff=document.querySelector('#handoff');
+const anchors=[[17,48,1,-19],[50,45,1.32,8],[83,52,.76,0]];
+bindTimeline(handoff,(p)=>{
+  const from=p<.5?0:1;
+  const q=ease(p*2-from);
+  const [x,y,scale,angle]=anchors[from].map((n,index)=>mix(n,anchors[from+1][index],q));
+  handoff.style.setProperty('--x',x+'%');
+  handoff.style.setProperty('--y',y+'%');
+  handoff.style.setProperty('--size',scale);
+  handoff.style.setProperty('--angle',angle+'deg');
+},1000);
+</script>
+</body>
+</html>
