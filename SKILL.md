@@ -2,15 +2,15 @@
 name: fluid-ui-design
 description: >-
   Studio-grade web, UI/UX, motion, and 3D design skill. Enforces OKLCH color science, concentric
-  geometry, optical typography, Apple fluid spring physics, native mobile CSS, cognitive UX laws,
+  geometry, optical typography, Apple fluid spring physics, mobile web and native SwiftUI design, cognitive UX laws,
   WebGL/3D shader architectures, and real-browser anti-slop verification. Combines an empirical
   library of 247 studied gallery sites, 67 interface style systems, 40 full hero/page prompts,
-  74 motion and shader recipes, 31 curated 3-color palettes, and 20 historical aesthetics. Use
+  74 motion and shader recipes, 31 curated 3-color palettes, and a DESIGN.md library for first-pass builds. Use
   whenever designing, building, refactoring, or auditing any website, landing page, dashboard,
-  web app, or interactive 3D experience.
+  web app, native mobile interface, or interactive 3D experience.
 license: MIT
 metadata:
-  version: "2.1.0"
+  version: "2.9.0"
 ---
 
 # Fluid UI Design
@@ -21,17 +21,44 @@ This skill replaces defaults with concrete engineering and art-direction decisio
 
 ---
 
+## Choose the platform
+
+For mobile web or a PWA, use [mobile interfaces](references/mobile-platforms.md) and the Web Interface Guidelines with Apple Design for direct manipulation. For iOS or iPadOS, use the native branch of that guide and SwiftUI Pro. Preserve the deployment target and verify native interactions in Simulator or on device. Reuse intent and visual roles across platforms with native semantics.
+
+Use the mobile composition table to choose a route by task: a marketing page, an app workspace, a gesture-led control, or a product demo. [Design skill coverage](references/design-skill-coverage.md) identifies the integrated material and the specialist skill to consult when the brief needs more detail.
+
+## First-pass builds
+
+For a request to build a page, deliver the working page in the same run. Read the project's brief, brand, and existing DESIGN.md. A supplied document or gallery is reference material. Apply the user's current instructions to decide what to borrow.
+
+For HTML, CSS, and browser-side JavaScript, [search the bundled Modern Web Guidance](references/web-platform.md) before choosing APIs or adding dependencies. Retrieve the guides that match the implementation and check the project's browser support target and the documented fallbacks.
+
+Use [surface decisions and finish checks](references/surface-and-finish.md) to read the project's product context, distinguish a refinement from a redesign and verify the route and states that will ship.
+
+1. Pick the page's job, audience, primary action and strongest product-specific proof. Read one applicable [DESIGN.md study](references/design-library/INDEX.md) for composition and optionally one for its interaction. Use the subject and assets to pick the direction when the user leaves it open.
+2. Before coding, specify the first screen at desktop and mobile, the main image, footage, or visualization and its fallback, type and color tokens, section order, and the behavior and rest state of any signature motion. For tighter briefs the [one-page design plan](references/design-reference-workflow.md) is sufficient in place of dealing multiple speculative directions in step 2 below.
+3. Build the first viewport and main action around that proof, then finish the requested content and mobile states. Check web output in Chrome (step 5 below) and SwiftUI output in the Apple test environment for the project. Fix visible defects within this run. Use the [original motion studies](blueprints/design-motion-studies.html) for runnable examples of the effect, input and fallback.
+   For gestures, moving controls, transitions or 3D details, pick a state model from [motion composition](references/motion-composition.md) and reuse a [licensed Bencho block](blueprints/bencho/README.md) where it matches the task. Adapt the trigger, feedback and fallback to the project.
+   For GSAP, Lenis or React Bits, use the [pinned source checkouts](vendor/motion-sources/README.md) to identify the relevant source, integration and license.
+   If the user supplies a clip, use [recording motion studies](references/recording-motion-studies.md) to identify the visible phases and stable elements before setting implementation timing.
+   If the user supplies a website URL as a reference, use [URL reference studies](references/url-reference-study.md). The runner produces TypeUI DESIGN.md and SKILL.md along with available DesignLang layout, token, and motion evidence. Confirm design rights when exact recreation is requested.
+4. When using external references, follow [source selection and capture](references/design-reference-workflow.md). Study public watermarked previews where useful and keep the mark on reference captures. Follow [preview recipes](references/public-preview-recipes.md) for original adaptations. Verify project-use rights for each file before embedding it. Use MotionSites MCP only when the project has access and benefits from a matching example.
+
+---
+
 ## 1. Anti-AI-Slop Rules (Eliminate on Sight)
 
-Unless an existing brand specification explicitly mandates them, strip these patterns immediately:
+Use these defaults for unconstrained briefs. Existing brand, project and chosen type systems take priority. When a brief selects brutalism, hand-drawn illustration, skeuomorphism or neumorphism, apply the matching design study. Scope visible rules, material shading and directional shadows to elements where the treatment explains the interface.
 
-- **Banned default fonts:** Do not use `Geist`, `Space Grotesk`, `Bricolage Grotesque`, `Instrument Sans`, `Instrument Serif`, or `JetBrains Mono`.
-- **Approved sans-serif faces:** `Switzer`, `ABC Diatype`, `TWK Lausanne`, `PP Mori`, `Aeonik`, `Degular`, `GT Walsheim`, `Circular`, `Apfel Grotesk`, `Aktiv Grotesk`, `ABC Favorit`, `Familjen Grotesk`, `ABC Monument Grotesk`, `ABC Oracle`, `Studio Feixen Sans`, `Strichpunkt Sans`, `Arial`.
-- **Approved monospace faces (numbers, prices, timestamps, and real code only):** `IBM Plex Mono`, `ABC Diatype Mono`, `Söhne Mono`, `GT America Mono`, `Commit Mono`, `Departure Mono`. Always pair with `font-variant-numeric: tabular-nums`.
+- **Avoid using these faces by habit:** `Geist`, `Space Grotesk`, `Bricolage Grotesque`, `Instrument Sans`, `Instrument Serif`, or `JetBrains Mono`.
+- **Sans-serif examples:** `Switzer`, `ABC Diatype`, `TWK Lausanne`, `PP Mori`, `Aeonik`, `Degular`, `GT Walsheim`, `Circular`, `Apfel Grotesk`, `Aktiv Grotesk`, `ABC Favorit`, `Familjen Grotesk`, `ABC Monument Grotesk`, `ABC Oracle`, `Studio Feixen Sans`, `Strichpunkt Sans`, `Arial`.
+- **Monospace examples for numbers and code:** `IBM Plex Mono`, `ABC Diatype Mono`, `Söhne Mono`, `GT America Mono`, `Commit Mono`, `Departure Mono`. Always pair with `font-variant-numeric: tabular-nums`.
 - **No decorative eyebrows or index numbers:** Remove `[ 01 / OVERVIEW ]`, fake code breadcrumbs, sparkle icons (`✨`), and all-caps tracked subtitles above every heading.
 - **No random italicized or gradient-colored words** inside headlines, and **no periods at the end of display titles**.
 - **No container-inside-container border clutter:** Group related content with spatial proximity (`gap-outer >= 2 * gap-inner`) and tonal surface steps rather than 1px divider lines and bordered boxes everywhere.
 - **Show the product:** Replace fake gray dashboard skeleton bars and abstract blobs with a live interactive HTML fragment (`data-ui`), a 3D/shader canvas, or authentic photography.
+
+Before shipping, apply the [design defaults](references/design-defaults.md) to the actual screenshots and copy. Keep section content visible on scroll. Use animation for feedback or for a change the visitor needs to understand.
 
 Full 21-point refactoring checklist: [`references/typography-and-geometry.md`](references/typography-and-geometry.md#4-indicators-of-ai-slop--the-21-point-refactoring-protocol).
 
@@ -44,7 +71,7 @@ Full 21-point refactoring checklist: [`references/typography-and-geometry.md`](r
 3. **Dark-mode depth via surface lightness:** Drop shadows barely register on dark grounds. Step elevation upward in `oklch()` lightness (`L = 0.14` canvas → `0.18` card → `0.22` raised well → `0.26` floating menu).
 4. **Match icon stroke to font weight:** Thin `1px` icons look fragile inside bold cards. Scale SVG `stroke-width` with adjacent typography (`1.5px` for regular `400`, `1.75px–2.0px` for medium/semibold `500–600`, `2.25px` for bold `700`).
 5. **Fade carousels with a CSS mask:** Apply `mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent)` so horizontal rails dissolve cleanly instead of clipping hard.
-6. **Knock out white product backgrounds:** On stone, cream, or tinted cards, set `mix-blend-mode: multiply` on white-background product JPEGs so the white box disappears.
+6. **Knock out white product backgrounds:** On neutral or tinted panels, set `mix-blend-mode: multiply` on white-background product JPEGs so the white box disappears.
 
 ---
 
@@ -82,7 +109,7 @@ Code implementations: [`references/typography-and-geometry.md`](references/typog
 
 ### Ten Mobile CSS & HTML Rules
 1. **`font-size: max(16px, 1rem)`** on all inputs (`<input>`, `<select>`, `<textarea>`) to stop iOS Safari auto-zoom on tap, paired with **`>= 44–48px` touch targets** (use invisible `::before { inset: -10px; }` hit slop on compact icons).
-2. **`-webkit-tap-highlight-color: transparent`** on all links and controls.
+2. **Press feedback.** Keep platform tap feedback or replace it with a visible pressed state. Preserve a distinct keyboard focus ring.
 3. **`inputmode="numeric"`** (or `"decimal"`) on numeric fields so mobile opens the number pad.
 4. **Wrap `:hover` styles** inside `@media (hover: hover) and (pointer: fine)` so hovers never stick on touch devices.
 5. **`autocomplete="one-time-code"`** on SMS/2FA verification inputs.
@@ -90,7 +117,7 @@ Code implementations: [`references/typography-and-geometry.md`](references/typog
 7. **`type="email" autocapitalize="none" autocorrect="off" spellcheck="false"`** on email fields.
 8. **`touch-action: manipulation`** on interactive buttons to eliminate double-tap zoom delay.
 9. **`enterkeyhint="send"`** (or `"search"`, `"done"`, `"next"`) on chat and search inputs.
-10. **`scroll-snap-type: x mandatory`** + `scroll-snap-align: start` on carousels, **`100dvh`** instead of `100vh`, and **`env(safe-area-inset-*)`** for notched displays.
+10. **Scrolling and device edges.** Use a snap rail where it helps orientation. Choose stable `svh` or adaptive `dvh` for the surface, and respect `env(safe-area-inset-*)` where content reaches the screen edge.
 
 ### Apple Fluid Motion & Micro-Interaction Laws
 - **Never scale from `0`:** Enter modals from `scale(0.97)` and popovers from `scale(0.95)`, anchored to the trigger (`transform-origin`), and collapse back into the trigger on close.
@@ -120,7 +147,7 @@ When a brief calls for a spatial or shader-driven signature moment, use the test
 - **3D Portal Cards** (`@react-three/drei` `<MeshPortalMaterial>` with SDF rounded planes and full-screen `blend` transitions).
 - **Persistent WebGL Shared-Element Route Transitions** (`react-reverse-portal` + Framer Motion `layoutId` + frame-synced camera aspect `<Resizer>`).
 - **Single-File Zero-Build Interactive 3D World** (vanilla Three.js + custom GLSL bus/clock shaders + guided camera spline tour + 3-level progressive disclosure, full 170 KB blueprint in [`blueprints/inside-the-microchip-3d.html`](blueprints/inside-the-microchip-3d.html)).
-- **Shader & Effect Stack:** `Paper Shaders` (`LiquidMetal` / `LiquidLogo`, `MeshGradient`, `Dithering`), `Glisse` (Apple Liquid Glass SVG optical refraction), `Three-Geospatial` (live volumetric clouds over 3D terrain), `WebGPU` fullscreen quad shaders, `WebGL-Fluid-Simulation` (Navier-Stokes cursor fluid), `ThreeUI` (Catmull-Rom scroll camera rails), `Shader Lab` (stackable halftone dither + CRT + chromatic aberration), `GLTransitions` (100+ GLSL transitions), `React Bits` (63+ animated backgrounds), `Pokemon Cards CSS` (pure CSS holographic foil & 3D tilt), `Vanta.js`, `Canvas UI`, `Preact` 3 KB widget wrappers, and `ShaderGradient` (React & Python Reflex/NiceGUI/Gradio/Streamlit).
+- **Shader & Effect Stack:** `Paper Shaders` (`LiquidMetal` / `LiquidLogo`, `MeshGradient`), `Glisse` (Apple Liquid Glass SVG optical refraction), `Three-Geospatial` (live volumetric clouds over 3D terrain), `WebGPU` fullscreen quad shaders, `WebGL-Fluid-Simulation` (Navier-Stokes cursor fluid), `ThreeUI` (Catmull-Rom scroll camera rails), `Shader Lab` (opt-in material studies), `GLTransitions` (100+ GLSL transitions), `React Bits` (63+ animated backgrounds), `Pokemon Cards CSS` (pure CSS holographic foil & 3D tilt), `Vanta.js`, `Canvas UI`, `Preact` 3 KB widget wrappers, and `ShaderGradient` (React & Python Reflex/NiceGUI/Gradio/Streamlit).
 
 ---
 
@@ -169,11 +196,11 @@ Never invent dead image URLs or leave empty gray boxes:
    node <skill>/scripts/assets.mjs --get <ref>
    node <skill>/scripts/assets.mjs --credits
    ```
-3. Pick curated public video loops and transparent cutouts from [`media/MEDIA.md`](media/MEDIA.md) and visual contact sheets `media/sheet-1.jpg`..`sheet-6.jpg`.
+3. Use the [media shelf](media/MEDIA.md) for reference and record a reuse license before shipping a listed file. Prefer an original illustration or procedural background when the source is unclear.
 
-### Step 4: Build with One Signature & Quiet Supporting Craft
+### Step 4: Build around the primary task
 - Start from tokens (`--bg`, `--surface-1`, `--ink`, `--accent`, `--border`).
-- Include **one interactive live element** native to the subject on the page, and choose **one signature motion or 3D technique** from [`references/techniques/INDEX.md`](references/techniques/INDEX.md) (74 recipes across 8 files).
+- Add a subject-specific interaction if it helps the visitor. Use a motion or 3D technique from [`references/techniques/INDEX.md`](references/techniques/INDEX.md) when it explains a meaningful change.
 - If the user requested a **prompt for another builder** (Lovable, Bolt, v0, Cursor, AI Studio), format the spec using [`references/spec-template.md`](references/spec-template.md) and [`references/builders.md`](references/builders.md).
 - When choosing frontend packages (dialogs, `⌘K`, toasts, OTP, charts, virtualization, drag-and-drop), consult [`references/ui-library-picks.md`](references/ui-library-picks.md).
 
@@ -182,7 +209,7 @@ Run the automated gate across source files and a live headless browser at `1440p
 
 ```bash
 node <skill>/scripts/lint.mjs <source-folder-or-files>
-node <skill>/scripts/inspect.mjs <url-or-path/to/index.html>
+node <skill>/scripts/inspect.mjs <url-or-path/to/index.html> --finish
 node <skill>/scripts/scenes.mjs <url-or-path/to/index.html>   # if using pinned scroll scenes
 ```
 
@@ -196,6 +223,7 @@ Open the generated screenshots, score them against [`references/critique.md`](re
 
 | Module | Contents |
 | --- | --- |
+| [DESIGN.md library](references/design-library/INDEX.md) and [reference workflow](references/design-reference-workflow.md) | First-pass design planning, ten original design references, media permissions, and MotionSites MCP setup |
 | [`references/palettes-and-aesthetics.md`](references/palettes-and-aesthetics.md) | `OKLCH` color science, 16 perceptual phenomena, 31 curated 3-color studio palettes, 20 historical aesthetics, 22 non-flat background recipes |
 | [`references/typography-and-geometry.md`](references/typography-and-geometry.md) | Approved vs. banned fonts, 10 optical CSS typography fixes, concentric corner math, alpha borders, dark-mode elevation, 21-point refactoring protocol |
 | [`references/motion-mobile-and-ux-patterns.md`](references/motion-mobile-and-ux-patterns.md) | 10 native mobile CSS/HTML rules, Apple-grade micro-interactions, 12 Disney principles, 22 cognitive UX laws, Amazon Safe Triangle, CopyButton, Optimistic UI, Idempotency, SWR |

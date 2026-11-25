@@ -20,10 +20,16 @@ Choose it when generated pages or application screens need specific engineering 
 - **Apply Apple-grade fluid motion and native mobile CSS.** Translates WWDC *Designing Fluid Interfaces* into web primitives: pointer-down `scale(0.97)` feedback, trigger-anchored popovers (`scale(0.95 → 1)`), exits 20% faster than entrances, critically damped springs (`ζ = 1.0`) vs. momentum flick springs (`ζ = 0.8`), progressive rubber-banding, `interpolate-size: allow-keywords` accordions, `100dvh`, `16px` mobile inputs, `inputmode="numeric"`, `autocomplete="one-time-code"`, and Amazon Safe Triangles.
 - **Draw from 800+ empirical blueprints, style systems, product-UI demos, and 3D recipes.** Combines data from **247 studied Awwwards and One Page Love sites** (`library/`), **69 Stageshow product-UI scenes and cursor demos** (`stageshow/`), **67 design systems** (`styles/`), **40 full hero/page prompts** (`examples/`), **50+ public video loops and 30 cutouts** (`media/`), and **74 motion, shader, and Three.js/WebGL recipes** (`references/techniques/` and `blueprints/`).
 - **Measure the render in a real browser.** `scripts/lint.mjs` scans source code for stock patterns; `scripts/inspect.mjs` renders the page at `1440px`, `768px`, and `390px` over the Chrome DevTools Protocol to verify two-line headlines, outer margin symmetry, contrast, and zero layout collapse; `stageshow/scripts/film.mjs --gate` films multi-frame contact sheets of scripted UI demos to catch layout jumps and loop seams before delivery.
+- **Code against browser guidance.** The [bundled Modern Web Guidance CLI](references/web-platform.md) retrieves implementation guides and Baseline fallback advice before you choose web APIs.
+- **Study web references by URL.** The [URL study](references/url-reference-study.md) runs TypeUI for DESIGN.md and SKILL.md and collects responsive and motion evidence with DesignLang when installed.
 
 ---
 
-## An example
+## Runnable example
+
+[Field Signal](blueprints/field-signal/index.html) is an oscilloscope with drag and keyboard controls, waveform morphing, and a sweep you can pause and resume. Open the HTML file from a local checkout. [Motion implementation notes](references/motion-composition.md)
+
+## CSS examples
 
 **Before (typical model default)**
 
@@ -84,9 +90,17 @@ Choose it when generated pages or application screens need specific engineering 
 
 1. **Inventory and argument.** List 8–12 specific facts that belong to this subject and no competitor (its materials, street, output, constraint, or artifacts), and write the page's argument as one claim per section.
 2. **Deal an empirical direction or style.** Run `node scripts/draw.mjs --sector <sector> --brief "<subject>" --sections ... --options 3` to deal three directions from the 247-site library (or `--app` for dashboards and workspaces), or select one of the 67 design systems in [`styles/INDEX.md`](styles/INDEX.md).
-3. **Source authentic media.** Use the project's own assets, search open museum and archival collections with `node scripts/assets.mjs "<query>"` (Openverse, Wikimedia Commons, Art Institute of Chicago, The Met, Internet Archive, NASA) with automatic license recording, or select from the curated public video and cutout shelf in [`media/MEDIA.md`](media/MEDIA.md).
+3. **Source authentic media.** Start with project-owned assets, or search open archives with `node scripts/assets.mjs "<query>"` and retain the license record. Check individual file permissions before using a reference from the [media shelf](media/MEDIA.md).
 4. **Build with one signature and fluid physics.** Implement the token system first, build one interactive live element native to the subject, and add one signature motion or 3D technique from [`references/techniques/INDEX.md`](references/techniques/INDEX.md).
 5. **Gate and visual critique.** Run `node scripts/lint.mjs` and `node scripts/inspect.mjs` (at `1440px`, `768px`, and `390px`), open the saved screenshots, score them against [`references/critique.md`](references/critique.md), fix every `FAIL` and the top three visual weaknesses, and re-run until clean.
+
+**For a first build**, pick one [DESIGN.md reference](references/design-library/INDEX.md) based on the brief and the strongest product image, footage, or illustration you have. The [reference workflow](references/design-reference-workflow.md) covers media rights, MotionSites MCP and browser checks. Open the [motion demo](blueprints/design-motion-studies.html) or choose from the [original background loops](media/loops/README.md).
+
+For interactive controls, [motion composition](references/motion-composition.md) pairs reusable mechanisms with [twelve MIT Bencho components](blueprints/bencho/README.md) and an original 3D material study.
+
+[Pinned motion-library sources](vendor/motion-sources/README.md) gives local lookup paths, integration guidance and upstream revisions for GSAP, Lenis and React Bits.
+
+[Mobile interfaces](references/mobile-platforms.md) distinguishes responsive web from native SwiftUI. The [four-style control study](blueprints/mobile/control-styles.html) shares one dial across three input paths. [Public-preview recipes](references/public-preview-recipes.md) link to four original background videos and their source.
 
 ![8 of the 40 example hero designs shown alongside their public media shelf footage](media/preview-media.jpg)
 
