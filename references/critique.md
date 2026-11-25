@@ -18,6 +18,9 @@ the code, so you will read your intentions into it. The pictures only show what 
 Open `desktop-fold.jpg`, then the `desktop-page-*.jpg` sheets, then `mobile-fold.jpg` and the mobile
 sheets. Make each pass on its own; do not blend them.
 
+Apply the [design defaults](design-defaults.md) to the actual render and visible copy. Check that
+sections remain readable during scroll and that any motion serves an interaction or explains a change.
+
 1. **One second, then five.** Glance and look away. What did you see? There should be exactly one
    answer: a word, an image, an object. If the answer is "a website", there is no focal point. Then
    give the first screen five seconds as a stranger: can you say what this is, who it is for and

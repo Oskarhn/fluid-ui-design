@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // tasteskill / inspect — render the page in a real browser, measure it, and photograph it.
 //
-//   node inspect.mjs <url | path/to/file.html> [--out DIR] [--widths 1440,768,390] [--allow rule,rule] [--app] [--film] [--json]
+//   node inspect.mjs <url | path/to/file.html> [--out DIR] [--widths 1440,768,390] [--allow rule,rule] [--app] [--film] [--finish] [--json]
 //
 // --film also photographs the scroll as a visitor sees it (a frame every third of a screen, real wheel
 // input) into desktop-film-NN.jpg, so a scroll scene is judged by its in-between states. A direction
@@ -9,6 +9,8 @@
 //
 // --app judges an app screen (dashboard, admin, settings) by the rules in references/app-screens.md; a
 // direction dealt with draw.mjs --app switches it on by itself.
+// --finish checks each requested viewport for completed navigation, browser-visible HTTP errors,
+// uncaught JavaScript errors and missing captures, alongside the normal design findings.
 //
 // Exit code 0 = no FAIL findings. Exit code 1 = at least one FAIL (the page is not done).
 // Zero dependencies: drives an installed Chrome/Edge/Chromium. Node 22+.
@@ -23,15 +25,21 @@ const args = process.argv.slice(2);
 const flag = (name, def) => { const i = args.indexOf('--' + name); if (i === -1) return def; const v = args[i + 1]; args.splice(i, 2); return v; };
 const has = (name) => { const i = args.indexOf('--' + name); if (i === -1) return false; args.splice(i, 1); return true; };
 const outDir = resolve(flag('out', '.taste-skill/inspect'));
-const widths = flag('widths', '1440,768,390').split(',').map(Number).filter(Boolean);
+const requestedWidths = String(flag('widths', '1440,768,390')).split(',').map(Number);
+const widths = [...new Set(requestedWidths.filter((width) => Number.isInteger(width) && width > 0))];
 let allow = flag('allow', '').split(',').filter(Boolean);
 const asJson = has('json');
+const finish = has('finish');
 let appMode = has('app');
 let film = has('film');
 let dealtFonts = []; // the faces the saved sheet dealt, to catch a build that quietly fell back to a default
 const target = args[0];
 if (!target || target === '-h' || target.startsWith('--')) {
-  console.error('usage: node inspect.mjs <url | file.html> [--out DIR] [--widths 1440,768,390] [--allow rule,rule] [--app] [--film] [--json]');
+  console.error('usage: node inspect.mjs <url | file.html> [--out DIR] [--widths 1440,768,390] [--allow rule,rule] [--app] [--film] [--finish] [--json]');
+  process.exit(2);
+}
+if (requestedWidths.some((width) => !Number.isInteger(width) || width <= 0)) {
+  console.error('--widths requires a comma-separated list of positive integer widths.');
   process.exit(2);
 }
 // Allowances granted by the drawn direction (written by draw.mjs) apply automatically.
@@ -65,12 +73,11 @@ const name = (w) => (w >= 1100 ? 'desktop' : w >= 600 ? 'tablet' : 'mobile');
 
 mkdirSync(outDir, { recursive: true });
 // Screenshots from an earlier run would sit beside the new ones when the page got shorter.
-for (const f of readdirSync(outDir)) if (/^(desktop|tablet|mobile)-(fold|page-\d+|film-\d+)\.jpg$/.test(f)) unlinkSync(join(outDir, f));
+for (const f of readdirSync(outDir)) if (/^(desktop|tablet|mobile)(?:-\d+)?-(fold|page-\d+|film-\d+)\.jpg$/.test(f)) unlinkSync(join(outDir, f));
 const browser = await Browser.launch();
 const helper = await browser.newPage({ width: 1600, height: 1000 });
 const report = { url: server ? target : url, at: new Date().toISOString(), allow, viewports: [], findings: [], images: [] };
 
-const MOTION_MIN = 8, MOTION_GOOD = 16; // distinct moving elements over load + one scroll through the page
 // Runs in the page before any of its own scripts: counts the distinct elements that actually move while
 // the page loads and is scrolled (CSS animations, CSS transitions, Web Animations, and script-driven
 // transform/opacity changes such as GSAP), so a page that never moves can be told from one that does.
@@ -116,10 +123,12 @@ async function sheet(frames, cols, cellW, cellH, path) {
 try {
   for (const w of widths) {
     const h = HEIGHT[w] || Math.round(w * 0.625);
-    const label = name(w);
+    const family = name(w);
+    const label = widths.filter((width) => name(width) === family).length > 1 ? `${family}-${w}` : family;
     const page = await browser.newPage({ width: w, height: h, dsf: 1, mobile: w < 600 });
     await page.send('Page.addScriptToEvaluateOnNewDocument', { source: MOTION_RECORDER }).catch(() => {});
     const how = await page.goto(url, { timeoutMs: 30000, settleMs: 600 });
+    const status = finish ? await page.eval(() => performance.getEntriesByType('navigation')[0]?.responseStatus || null) : null;
     await sleep(600); // about 1.2s after the load event: is the title there to read yet?
     const early = await page.eval(TITLE_SEEN).catch(() => null);
     await page.eval('document.fonts.ready.then(() => true)').catch(() => {});
@@ -222,14 +231,8 @@ try {
     frameChecks.forEach((f, i) => { for (const t of f?.big || []) { const r = runs.get(t) || { start: i, last: i - 1, best: 0 }; if (r.last === i - 1) r.last = i; else { r.start = i; r.last = i; } r.best = Math.max(r.best, r.last - r.start + 1); runs.set(t, r); } });
     const longPins = [...runs.entries()].filter(([, r]) => r.best >= 3);
     if (w >= 1100 && longPins.length && !allow.includes('long-pin')) findings.push({ level: 'WARN', id: 'long-pin', width: w, message: `The same large text stays on screen for ${Math.max(...longPins.map(([, r]) => r.best))} screens in a row: ` + longPins.slice(0, 2).map(([t]) => `"${t}"`).join('; '), fix: 'A pinned element earns two screens, and something must change at each. Shorten the run or give every screen its own content.' });
-    // a page that barely moves: counted from what really animated while it loaded and was scrolled
-    if (w >= 1100 && motion && !allow.includes('still-page')) {
-      const moving = motion.elements + motion.playingVideos * 4;
-      if (moving < MOTION_MIN) findings.push({ level: 'FAIL', id: 'still-page', width: w, message: `Only ${motion.elements} element(s) moved while the page loaded and scrolled${motion.playingVideos ? ` (plus ${motion.playingVideos} playing video)` : ''}.`, fix: 'Build the motion layer (SKILL.md step 9, references/motion.md): the signature move, an entrance for the parts of every section, feedback on every control, and one moving picture. Transform and opacity only, with a reduced-motion fallback.' });
-      else if (moving < MOTION_GOOD) findings.push({ level: 'WARN', id: 'still-page', width: w, message: `Little motion: ${motion.elements} element(s) moved while the page loaded and scrolled.`, fix: 'Give every section an entrance for its parts (not one fade of the whole block) and add one moving picture: a looping clip or a slow move on a photograph.' });
-    }
     if (w >= 1100 && empty.length >= 2 && !allow.includes('empty-screens')) findings.push({ level: 'FAIL', id: 'empty-screens', width: w, message: `${empty.length} of ${frameChecks.length} desktop screens are almost empty ground (under 20% of the screen holds text, a picture or a colour field): screens ${empty.map(({ i }) => i + 1).join(', ')}.`, fix: 'An empty screen is a rest only once per page. Elsewhere it means the section is underbuilt: set its content larger, give it the full information, put it on a colour field, or cut it.' });
-    report.viewports.push({ width: w, height: h, load: how, screens: frames.length, filled: frameChecks.map((f) => f?.filled ?? null), motion, metrics: m, layout: lay, app: appM, consoleErrors: page.consoleErrors.slice(0, 5) });
+    report.viewports.push({ width: w, height: h, load: how, ...(finish ? { status } : {}), screens: frames.length, filled: frameChecks.map((f) => f?.filled ?? null), motion, metrics: m, layout: lay, app: appM, consoleErrors: page.consoleErrors.slice(0, 5) });
     report.findings.push(...(appMode ? findings.filter((f) => !APP_SKIP.has(f.id)) : findings));
     report.images.push({ viewport: label, width: w, fold, pages: sheets, film: filmSheets });
     await page.close();
@@ -258,6 +261,20 @@ try {
   if (server) server.close();
 }
 
+if (finish) {
+  for (const width of widths) {
+    const view = report.viewports.find((item) => item.width === width);
+    const captures = report.images.find((item) => item.width === width);
+    const fail = (id, message, fix) => report.findings.push({ level: 'FAIL', id, width, message, fix });
+    if (!captures || !captures.pages.length || [captures.fold, ...captures.pages].some((p) => !existsSync(p) || statSync(p).size === 0)) {
+      fail('finish-capture', 'The requested viewport has incomplete screenshots.', 'Capture the current page again and check the output directory.');
+    }
+    if (view?.load !== 'load') fail('finish-navigation', 'The browser did not report a completed page load.', 'Check the target or its loading dependencies.');
+    if (view?.status >= 400) fail('finish-http', `The document returned HTTP ${view.status}.`, 'Open a working build of the intended route.');
+    if (view?.consoleErrors.length) fail('finish-exception', view.consoleErrors[0], 'Diagnose the uncaught exception on the rendered page.');
+  }
+}
+
 // de-duplicate findings that repeat across viewports (keep the widest occurrence, note the others)
 const merged = [];
 for (const f of report.findings) {
@@ -266,6 +283,7 @@ for (const f of report.findings) {
   merged.push(f);
 }
 report.findings = merged;
+if (finish) report.finish = { passed: !merged.some((f) => f.level === 'FAIL'), widths };
 writeFileSync(join(outDir, 'report.json'), JSON.stringify(report, null, 1));
 
 if (asJson) { console.log(JSON.stringify(report, null, 1)); process.exit(merged.some((f) => f.level === 'FAIL') ? 1 : 0); }

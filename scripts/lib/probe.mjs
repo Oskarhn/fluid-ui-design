@@ -294,8 +294,11 @@ export function probe() {
     if (grad && bg.a < 0.5) { const first = cs.backgroundImage.match(/(rgba?\([^)]+\)|oklch\([^)]+\)|color\([^)]+\)|#[0-9a-f]{3,8})/i); if (first) bg = rgba(first[1]); }
     if (bg.a < 0.5 && bw < 1) continue;
     const rad = parseFloat(cs.borderTopLeftRadius) || 0;
+    const buttonText = (el.innerText || el.value || '').replace(/\s+/g, ' ').trim();
+    const arrow = /[←↑→↓↗↘↙↖➜➝⟶]/u.test(buttonText)
+      || !!el.querySelector('svg[class*="arrow-"], [data-lucide^="arrow-"]');
     buttons.push({
-      text: (el.innerText || el.value || '').replace(/\s+/g, ' ').trim().slice(0, 40), filled: bg.a >= 0.5, bg: bg.a >= 0.5 ? hex(bg) : null, bgHsl: bg.a >= 0.5 ? hsl(bg) : null, fg: hex(rgba(cs.color)),
+      text: buttonText.slice(0, 40), arrow, filled: bg.a >= 0.5, bg: bg.a >= 0.5 ? hex(bg) : null, bgHsl: bg.a >= 0.5 ? hsl(bg) : null, fg: hex(rgba(cs.color)),
       radius: rad >= r.height / 2 - 1 ? 'pill' : Math.round(rad), h: Math.round(r.height), top: Math.round(r.top + SY),
       shadow: cs.boxShadow !== 'none' && !/^rgba?\(0, 0, 0, 0\)/.test(cs.boxShadow), gradient: grad, upper: cs.textTransform === 'uppercase', mono: isMono(cs.fontFamily),
     });
@@ -427,6 +430,12 @@ export function probe() {
   const sideScrollers = all.filter((el) => { if (el.closest('[data-ui], table, pre, code')) return false; const cs = getComputedStyle(el); return /auto|scroll/.test(cs.overflowX) && el.scrollWidth > el.clientWidth + 24 && el.clientHeight > 40; }).length;
   const blendText = texts.filter((t) => { for (let p = t.el, i = 0; p && p !== document.body && i < 6; p = p.parentElement, i++) if (/difference|exclusion/.test(getComputedStyle(p).mixBlendMode)) return true; return false; }).length;
   const bodyText = document.body.innerText || '';
+  const prose = [...new Set(texts.filter((t) => !t.inCode && t.el.closest('p, h1, h2, h3, figcaption')
+    && !t.el.closest('button, a, [role="button"]')).map((t) => t.text))];
+  const editorial = {
+    dots: prose.filter((t) => /\p{L}\s+[·•]\s+\p{L}/u.test(t)).slice(0, 3),
+    filler: prose.filter((t) => /(?<![\p{L}-])(?:quiet|real)(?![\p{L}-])/iu.test(t)).slice(0, 3),
+  };
   const emoji = (bodyText.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu) || []);
   const doc = document.documentElement; const pageH = Math.max(doc.scrollHeight, document.body.scrollHeight);
   const headingStats = headings.map(({ _el, ...h }) => h);
@@ -457,7 +466,8 @@ export function probe() {
       button: filledBtns.length ? { bg: mode(filledBtns.map((b) => b.bg)), hsl: mode(filledBtns.map((b) => b.bgHsl)), fg: mode(filledBtns.map((b) => b.fg)) } : null,
       lowContrast: lowContrast.slice(0, 6),
     },
-    buttons: { count: buttons.length, inHero: buttons.filter((b) => b.top < H).length, radius: mode(buttons.map((b) => b.radius)), height: mode(buttons.map((b) => b.h)), withShadow: buttons.filter((b) => b.shadow).length, withGradient: buttons.filter((b) => b.gradient).length, mono: buttons.filter((b) => b.mono).length, upper: buttons.filter((b) => b.upper).length, heroLabels: buttons.filter((b) => b.top < H).map((b) => b.text).filter(Boolean).slice(0, 5) },
+    editorial,
+    buttons: { count: buttons.length, labeled: buttons.filter((b) => /\p{L}/u.test(b.text)).length, withArrows: buttons.filter((b) => b.arrow && /\p{L}/u.test(b.text)).length, inHero: buttons.filter((b) => b.top < H).length, radius: mode(buttons.map((b) => b.radius)), height: mode(buttons.map((b) => b.h)), withShadow: buttons.filter((b) => b.shadow).length, withGradient: buttons.filter((b) => b.gradient).length, mono: buttons.filter((b) => b.mono).length, upper: buttons.filter((b) => b.upper).length, heroLabels: buttons.filter((b) => b.top < H).map((b) => b.text).filter(Boolean).slice(0, 5) },
     surfaces: { shadowStatic, shadowOverlay, shadowSamples, gradients, scrims, gradientSamples, gradientText, hairlines, hairlineSamples, outlinedBoxes, dashed, blurred, roundedBoxes, boxRadius: mode(boxRadii) ?? 0, squareMedia, roundedMedia, mediaRadius: mode(mediaRadii) ?? 0, textShadow: texts.filter((t) => t.textShadow).length, cardRows: cardRows.slice(0, 8) },
     heroMedia: heroMedia.slice(0, 4), nav,
     fontsLoaded: [...loaded].slice(0, 12),
