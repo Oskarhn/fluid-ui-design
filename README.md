@@ -22,6 +22,7 @@ Choose it when generated pages or application screens need specific engineering 
 - **Measure the render in a real browser.** `scripts/lint.mjs` scans source code for stock patterns; `scripts/inspect.mjs` renders the page at `1440px`, `768px`, and `390px` over the Chrome DevTools Protocol to verify two-line headlines, outer margin symmetry, contrast, and zero layout collapse; `stageshow/scripts/film.mjs --gate` films multi-frame contact sheets of scripted UI demos to catch layout jumps and loop seams before delivery.
 - **Code against browser guidance.** The [bundled Modern Web Guidance CLI](references/web-platform.md) retrieves implementation guides and Baseline fallback advice before you choose web APIs.
 - **Study web references by URL.** The [URL study](references/url-reference-study.md) runs TypeUI for DESIGN.md and SKILL.md and collects responsive and motion evidence with DesignLang when installed.
+- **Measure performance before and after.** The [Chrome Lighthouse workflow](references/web-performance.md) measures a served page under matching mobile settings and reports how LCP, layout stability, startup blocking, and transfer size changed.
 
 ---
 

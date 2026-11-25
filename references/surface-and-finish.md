@@ -33,6 +33,8 @@ node <skill>/scripts/inspect.mjs <local-url-or-file> --finish --out .taste-skill
 
 Use `--app` for an operational web workspace and `--widths` when specific target widths need coverage. The finish check adds evidence for page load, browser-reported HTTP errors, uncaught JavaScript exceptions and screenshots. Review captured layout and interaction yourself. Compare to the pre-change capture on a redesign. For a site with several relevant routes, repeat the check on each route in a separate output directory.
 
+4. For a new site or a performance-sensitive change, run [Chrome Lighthouse](web-performance.md) against the served build. Keep comparable before and after reports and exercise the main action separately on a throttled mobile connection. If an earlier baseline is unavailable, report the current measurement.
+
 Record the route, widths and checks that ran. Address issues that prevent the user from completing the task, then fix the biggest visual issues together. Recheck the current build. In the handoff, give the evidence and any remaining gaps. The report measures the rendered route; task success and visual quality still require inspection.
 
 ## Sources

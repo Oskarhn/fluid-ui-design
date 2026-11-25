@@ -10,7 +10,7 @@ description: >-
   web app, native mobile interface, or interactive 3D experience.
 license: MIT
 metadata:
-  version: "2.9.0"
+  version: "2.10.0"
 ---
 
 # Fluid UI Design
@@ -34,6 +34,8 @@ For a request to build a page, deliver the working page in the same run. Read th
 For HTML, CSS, and browser-side JavaScript, [search the bundled Modern Web Guidance](references/web-platform.md) before choosing APIs or adding dependencies. Retrieve the guides that match the implementation and check the project's browser support target and the documented fallbacks.
 
 Use [surface decisions and finish checks](references/surface-and-finish.md) to read the project's product context, distinguish a refinement from a redesign and verify the route and states that will ship.
+
+For new sites and web changes that affect performance, use the [Lighthouse workflow](references/web-performance.md). Measure the runnable baseline, fix the largest bottlenecks, and repeat under matching mobile conditions.
 
 1. Pick the page's job, audience, primary action and strongest product-specific proof. Read one applicable [DESIGN.md study](references/design-library/INDEX.md) for composition and optionally one for its interaction. Use the subject and assets to pick the direction when the user leaves it open.
 2. Before coding, specify the first screen at desktop and mobile, the main image, footage, or visualization and its fallback, type and color tokens, section order, and the behavior and rest state of any signature motion. For tighter briefs the [one-page design plan](references/design-reference-workflow.md) is sufficient in place of dealing multiple speculative directions in step 2 below.
