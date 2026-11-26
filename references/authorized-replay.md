@@ -35,7 +35,11 @@ node <skill>/scripts/replay-ui.mjs open .taste-skill/example-replay
 
 Use either a unique CSS selector or an accessible role and name. The plan also accepts scroll, hover, navigation keys, and fills with synthetic values. A drag uses explicit accessible names for both controls. Use real pointer input for moving elements. Keep forms, purchases, and account actions out of reference plans. The optional `fakeMedia` flag supplies Chrome's test device to an explicitly selected recording demo.
 
+Give a key step a selector when the focus target matters. For example, use `{"action":"key","key":"ArrowRight","selector":"input[type=range]"}` on a page with one slider. Check the starting and ending values in both receipts.
+
 The capture records same-origin application responses, public static CDN assets, and original video files when they are available. The replay uses the source URLs in an isolated Chrome window so relative imports and navigation keep working. Missing requests remain blocked and are listed in the receipt. The browser profile starts without the user's cookies, and the archive keeps neither cookie headers nor credentials. Range requests are served from verified full media files when available.
+
+A client-side navigation may fetch a framework payload with a session-specific URL. Save the full HTML for routes the plan actually visits so the browser can fall back to document navigation during replay. The receipt marks stills taken through Chrome's screenshot protocol after a normal screenshot times out. Check those frames for unfinished fonts or media.
 
 For an editable static page served from a new host, use the [static export](url-reference-study.md). A browser replay is useful when rewriting a frontend with framework data, dynamic imports or several asset origins would change the behavior being compared.
 
@@ -43,6 +47,7 @@ For an editable static page served from a new host, use the [static export](url-
 
 - Open the original and copy at the same viewport. Compare typography, heading placement, color roles, media crop, and what stays fixed during scroll. Resolve meaningful differences before adding new content or styling.
 - Repeat the same user action. Compare the state before it, while it is moving, and at rest. Use a short wait for early motion and a longer wait for the settled result. An executed action still needs a state check.
+- Keep separate plans for links on desktop and expandable menus on mobile. Check the destination URL for the link and the open state for the menu. For a wheel gesture with no change in document scroll, check whether a nested scroller, canvas, or fixed animation moved before calling it a match.
 - When a Source panel was captured, compare its visible code from both runs. The PanelUI and Loading archives can also be installed directly as dependencies, with their upstream licenses.
 - Review missing graphics, dynamic branding, playback, and blocked pages separately. Preserve the actual differences in the report. A template page, API dependency, or private route can require a source handoff to reproduce outside the recorded actions.
 - Test responsiveness and reduced motion where they matter to the new page.
