@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Motion loops | Fluid UI Design</title>
+  <link rel="stylesheet" href="library.css">
+  <script src="library.js" defer></script>
+  <noscript><style>.toolbar, .results { display: none; }</style></noscript>
+</head>
+<body>
+  <main class="shell">
+    <header class="intro">
+      <h1>Motion loops</h1>
+      <p>Preview an original loop for your next background.</p>
+    </header>
+    <div class="toolbar" inert>
+      <div class="filters" role="group" aria-label="Filter by subject">
+        <button type="button" data-filter="all" aria-pressed="true">All</button>
+        <button type="button" data-filter="geometry" aria-pressed="false">Geometry</button>
+        <button type="button" data-filter="light" aria-pressed="false">Light</button>
+      </div>
+      <button class="find" type="button" id="open-search">Search <kbd>Ctrl K</kbd></button>
+    </div>
+    <div class="results">
+      <p id="count" role="status">7 loops</p>
+      <button type="button" id="clear-search" hidden>Clear search</button>
+    </div>
+    <ul class="gallery">
+        <li class="study" data-group="geometry">
+          <a href="../../media/loops/tidal-contours.mp4">
+            <div class="thumb"><img src="posters/tidal-contours.webp" alt="" width="960" height="540" fetchpriority="high"></div>
+            <div class="caption">
+              <h2>Tidal contours</h2>
+              <span class="kind">Geometry</span>
+            </div>
+            <p class="description">Curved contour lines on a dark ground.</p>
+          </a>
+        </li>
+        <li class="study" data-group="light">
+          <a href="../../media/loops/amber-reflection.mp4">
+            <div class="thumb"><img src="posters/amber-reflection.webp" alt="" width="960" height="540"></div>
+            <div class="caption">
+              <h2>Amber reflection</h2>
+              <span class="kind">Light</span>
+            </div>
+            <p class="description">Warm bands of light across a dark surface.</p>
+          </a>
+        </li>
+        <li class="study" data-group="geometry">
+          <a href="../../media/loops/oblique-lattice.mp4">
+            <div class="thumb"><img src="posters/oblique-lattice.webp" alt="" width="960" height="540" loading="lazy"></div>
+            <div class="caption">
+              <h2>Oblique lattice</h2>
+              <span class="kind">Geometry</span>
+            </div>
+            <p class="description">A tilted grid with soft violet edges.</p>
+          </a>
+        </li>
+        <li class="study" data-group="light">
+          <a href="../../media/preview-loops/window.mp4">
+            <div class="thumb"><img src="posters/window.webp" alt="" width="960" height="540" loading="lazy"></div>
+            <div class="caption">
+              <h2>Moving landscape</h2>
+              <span class="kind">Light</span>
+            </div>
+            <p class="description">A landscape seen through overlapping panes.</p>
+          </a>
+        </li>
+        <li class="study" data-group="light">
+          <a href="../../media/preview-loops/light.mp4">
+            <div class="thumb"><img src="posters/light.webp" alt="" width="960" height="540" loading="lazy"></div>
+            <div class="caption">
+              <h2>Window light</h2>
+              <span class="kind">Light</span>
+            </div>
+            <p class="description">A bright window reflected across a surface.</p>
+          </a>
+        </li>
+        <li class="study" data-group="light">
+          <a href="../../media/preview-loops/water.mp4">
+            <div class="thumb"><img src="posters/water.webp" alt="" width="960" height="540" loading="lazy"></div>
+            <div class="caption">
+              <h2>Water reflection</h2>
+              <span class="kind">Light</span>
+            </div>
+            <p class="description">Slow bands of reflected light on water.</p>
+          </a>
+        </li>
+        <li class="study" data-group="geometry">
+          <a href="../../media/preview-loops/arches.mp4">
+            <div class="thumb"><img src="posters/arches.webp" alt="" width="960" height="540" loading="lazy"></div>
+            <div class="caption">
+              <h2>Layered arches</h2>
+              <span class="kind">Geometry</span>
+            </div>
+            <p class="description">Nested arches with a slow change in depth.</p>
+          </a>
+        </li>
+    </ul>
+    <p id="empty" hidden>No matching loops. Choose another subject or clear the search.</p>
+  </main>
+
+  <dialog id="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="close"><button type="submit">Close</button></form>
+    <h1 id="search-title">Find a loop</h1>
+    <form id="search-form" role="search">
+      <label for="search-input">Name or description</label>
+      <div class="search-row">
+        <input id="search-input" type="search" maxlength="80" autofocus enterkeyhint="search">
+        <button type="submit">Search</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="preview-dialog" aria-labelledby="preview-title">
+    <form method="dialog" class="close"><button type="submit" autofocus>Close</button></form>
+    <h1 id="preview-title"></h1>
+    <p id="preview-description"></p>
+    <div class="preview-frame">
+      <img id="preview-image" alt="" width="960" height="540">
+      <video id="preview-video" controls playsinline loop muted preload="none" aria-label="Loop preview" hidden></video>
+    </div>
+    <div class="preview-actions">
+      <button type="button" id="play">Play preview</button>
+      <a id="open-video">Open video file</a>
+    </div>
+    <p id="play-status" role="status" hidden></p>
+  </dialog>
+</body>
+</html>

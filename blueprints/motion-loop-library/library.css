@@ -1,0 +1,83 @@
+@font-face {
+  font-family: Plex;
+  src: url("../../media/ibm-plex/ibm-plex-sans.woff2") format("woff2");
+  font-weight: 100 700;
+  font-display: swap;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: #14181b; color: #edf2f0; font: 1rem/1.5 Plex, Arial, sans-serif; }
+:where(button,input) { font: inherit; }
+:where(a,button,input):focus-visible { outline: 2px solid #b7f1db; outline-offset: 4px; }
+:where(button,input) { min-block-size: 44px; }
+button { cursor: pointer; }
+.shell { width: min(100%, 1280px); margin: auto; padding: clamp(24px,7vw,92px) clamp(16px,5vw,66px); }
+.intro { margin-bottom: clamp(26px,5vw,56px); }
+.intro h1 { margin: 0; font: 400 clamp(2.8rem,8.5vw,7rem)/.92 Georgia,serif; letter-spacing: -.058em; }
+.intro p { margin: 17px 0 0; color: #b8c3c3; }
+.toolbar,.results,.caption,.preview-actions,.search-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.toolbar { justify-content: space-between; border-block: 1px solid #485456; padding: 10px 0; }
+.filters { display: flex; flex-wrap: wrap; gap: 4px; }
+button { border: 1px solid transparent; background: transparent; color: #edf2f0; padding: 6px 13px; border-radius: 5px; }
+button[aria-pressed="true"], #search-form button,#play { color: #14241e; background: #b7e8d5; }
+.find { display: flex; gap: 12px; align-items: center; padding-inline: 10px; border-color: #485456; }
+kbd,.kind,.results { color: #aebcc0; font-size: .82rem; }
+kbd { font-family: Plex,Arial,sans-serif; }
+.results { min-block-size: 48px; }
+.results p { margin: 0; }
+#clear-search { text-decoration: underline; text-underline-offset: .22em; }
+.gallery { list-style: none; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 30px 22px; padding: 0; margin: 0; }
+.study a { display: block; color: inherit; text-decoration: none; }
+.thumb,.preview-frame { overflow: hidden; aspect-ratio: 16/9; background: #202a2b; }
+.thumb img,.preview-frame :is(img,video) { display: block; width: 100%; height: 100%; object-fit: cover; }
+.caption { justify-content: space-between; margin-top: 10px; }
+.caption h2 { margin: 0; font-size: clamp(1.08rem,2.4vw,1.55rem); font-weight: 550; line-height: 1.2; }
+.description { margin: 4px 0 0; color: #b8c3c3; }
+dialog {
+  width: min(calc(100% - 32px), 680px);
+  max-block-size: calc(100% - 32px);
+  border: 1px solid #657578;
+  border-radius: 10px;
+  padding: clamp(16px,4vw,27px);
+  background: #20292c;
+  color: #edf2f0;
+}
+dialog:modal { overscroll-behavior: contain; }
+dialog::backdrop { overflow: hidden; overscroll-behavior: contain; background: rgb(4 9 12 / .76); }
+dialog h1 { font-size: 1.55rem; margin: 0 0 10px; }
+dialog p { margin: 0 0 12px; color: #b8c3c3; }
+.close { display: flex; justify-content: flex-end; }
+.close button { padding-inline: 10px; }
+.search-row { margin-top: 6px; }
+.search-row input { min-inline-size: 0; flex: 1 0 160px; padding: 6px 10px; border: 1px solid #728086; border-radius: 5px; color: inherit; background: #12181a; font-size: 1rem; }
+.preview-actions { margin-top: 13px; }
+.preview-actions a { padding-block: 10px; color: #b7e8d5; text-underline-offset: 3px; }
+#play-status { margin-top: 12px; }
+@media (max-width: 630px) {
+  .gallery { grid-template-columns: 1fr; }
+}
+@media (hover: hover) and (pointer: fine) {
+  button:not([aria-pressed="true"]):hover { border-color: #8baca3; }
+  .study a:hover h2 { text-decoration: underline; text-underline-offset: .2em; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  dialog {
+    opacity: 0;
+    transform: translateY(8px) scale(.98);
+    transition: opacity 150ms ease-out, transform 150ms ease-out, overlay 150ms, display 150ms;
+    transition-behavior: allow-discrete;
+  }
+  dialog[open] {
+    opacity: 1;
+    transform: none;
+    transition-duration: 200ms;
+  }
+  @starting-style {
+    dialog[open] { opacity: 0; transform: translateY(8px) scale(.98); }
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  .thumb img { transition: transform 260ms cubic-bezier(.22,1,.36,1); }
+  .study a:hover .thumb img { transform: scale(1.045); }
+}
