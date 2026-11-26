@@ -43,7 +43,7 @@ Keep original photos with a clear crop, working proof, and one reason to be visi
 
 ### X references
 
-Direct Chrome navigation did not provide a reliable media view. The official public embed response recovered the descriptions for all fifteen posts. Treat these notes as leads until the footage can confirm exact behavior.
+Direct Chrome navigation was unreliable in the first pass. The official public embed later provided all fifteen original videos. See [authorized browser replay](authorized-replay.md#what-the-recovered-clips-show) for observations from the recovered footage. The table below records the study leads from the public descriptions.
 
 | Reference | Study target from the public description |
 | --- | --- |
