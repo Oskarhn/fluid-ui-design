@@ -1,5 +1,7 @@
 # Design references
 
+For the first screen of a marketing or product page, [compare five hero layouts](../hero-composition.md) by how they frame the subject, text, and action on desktop and mobile.
+
 Start with the page's job and the strongest evidence the project can show. Select one reference below for the main composition. When the brief calls for a second pattern, borrow a supporting interaction that can coexist with the first without competing for attention.
 
 | Project and available evidence | Reference | Main interaction |
