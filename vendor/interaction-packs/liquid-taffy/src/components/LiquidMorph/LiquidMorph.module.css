@@ -1,0 +1,68 @@
+/* Liquid morph — the in-place variant, after Apple's Liquid Glass: the button
+   itself pours out into the dropdown, which OCCUPIES the button's spot;
+   closing pours it back into the circle.
+
+   Everything the two dropdowns share — bodies, goo, rows, wash, glyph,
+   trigger — is ONE file: liquid/dropdown.module.css. What is left here is the
+   only thing that makes this variant itself: the panel's bottom edge sits ON
+   the button's, so it grows up and sideways out of the button's own spot. */
+
+.anchor {
+  composes: anchor from "../liquid/dropdown.module.css";
+}
+
+.bodies {
+  composes: bodies from "../liquid/dropdown.module.css";
+}
+
+.triggerBody {
+  composes: triggerBody from "../liquid/dropdown.module.css";
+}
+
+/* The panel's spot: the button's own — bottom edges aligned. */
+.panelBody {
+  composes: panelBody from "../liquid/dropdown.module.css";
+  bottom: 0; /* panel bottom = button bottom */
+}
+
+.panelBodyShape {
+  composes: panelBodyShape from "../liquid/dropdown.module.css";
+}
+
+.goo {
+  composes: goo from "../liquid/dropdown.module.css";
+}
+
+.blob {
+  composes: blob from "../liquid/dropdown.module.css";
+}
+
+/* The rows ride the same rect as the body under them. */
+.panel {
+  composes: panel from "../liquid/dropdown.module.css";
+  bottom: 0;
+}
+
+.item {
+  composes: item from "../liquid/dropdown.module.css";
+}
+
+.itemIcon {
+  composes: itemIcon from "../liquid/dropdown.module.css";
+}
+
+.itemInner {
+  composes: itemInner from "../liquid/dropdown.module.css";
+}
+
+.itemLabel {
+  composes: itemLabel from "../liquid/dropdown.module.css";
+}
+
+.trigger {
+  composes: trigger from "../liquid/dropdown.module.css";
+}
+
+.triggerIcon {
+  composes: triggerIcon from "../liquid/dropdown.module.css";
+}

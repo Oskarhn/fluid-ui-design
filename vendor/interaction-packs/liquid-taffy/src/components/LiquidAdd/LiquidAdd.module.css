@@ -1,0 +1,71 @@
+/* Liquid add — Figma "Admin" 9672:1879. A plus circle that pours a dropdown
+   out of itself, CENTERED above the button.
+
+   Everything the two dropdowns share — bodies, goo, seam, rows, wash, glyph,
+   trigger — is ONE file: liquid/dropdown.module.css. What is left here is the
+   only thing that makes this variant itself: the panel hangs 14px ABOVE the
+   button, which is a single number, twice. */
+
+.anchor {
+  composes: anchor from "../liquid/dropdown.module.css";
+}
+
+.bodies {
+  composes: bodies from "../liquid/dropdown.module.css";
+}
+
+.triggerBody {
+  composes: triggerBody from "../liquid/dropdown.module.css";
+}
+
+/* The panel's spot: centered on the button, 14px of air above it. */
+.panelBody {
+  composes: panelBody from "../liquid/dropdown.module.css";
+  bottom: 46px; /* button 32 + 14 gap */
+}
+
+.panelBodyShape {
+  composes: panelBodyShape from "../liquid/dropdown.module.css";
+}
+
+.goo {
+  composes: goo from "../liquid/dropdown.module.css";
+}
+
+.blob {
+  composes: blob from "../liquid/dropdown.module.css";
+}
+
+.seam {
+  composes: seam from "../liquid/dropdown.module.css";
+}
+
+/* The rows ride the same rect as the body above them. */
+.panel {
+  composes: panel from "../liquid/dropdown.module.css";
+  bottom: 46px;
+}
+
+.item {
+  composes: item from "../liquid/dropdown.module.css";
+}
+
+.itemIcon {
+  composes: itemIcon from "../liquid/dropdown.module.css";
+}
+
+.itemInner {
+  composes: itemInner from "../liquid/dropdown.module.css";
+}
+
+.itemLabel {
+  composes: itemLabel from "../liquid/dropdown.module.css";
+}
+
+.trigger {
+  composes: trigger from "../liquid/dropdown.module.css";
+}
+
+.triggerIcon {
+  composes: triggerIcon from "../liquid/dropdown.module.css";
+}
