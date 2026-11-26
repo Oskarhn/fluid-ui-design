@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Interaction controls | Fluid UI Design</title>
+    <link rel="stylesheet" href="./controls.css" />
+    <script src="./controls.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Interaction controls</h1>
+        <p>Try the input, playback, navigation, and feedback states.</p>
+      </header>
+      <div class="studies">
+        <section>
+          <h2>Switch tabs</h2>
+          <div class="tabs" data-tabs aria-label="Import method">
+            <div class="tab-row" role="tablist" aria-label="Import method">
+              <button
+                type="button"
+                role="tab"
+                id="switch-tab-0"
+                aria-controls="switch-panel-0"
+                aria-selected="true"
+                tabindex="0"
+              >
+                Schedule</button
+              ><button
+                type="button"
+                role="tab"
+                id="switch-tab-1"
+                aria-controls="switch-panel-1"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                On demand
+              </button>
+            </div>
+            <p
+              class="tab-panel"
+              role="tabpanel"
+              id="switch-panel-0"
+              aria-labelledby="switch-tab-0"
+            >
+              Run each import at the hour you choose.
+            </p>
+            <p
+              class="tab-panel"
+              role="tabpanel"
+              id="switch-panel-1"
+              aria-labelledby="switch-tab-1"
+              hidden
+            >
+              Run an import from the project menu.
+            </p>
+          </div>
+        </section>
+        <section>
+          <h2>Password rules</h2>
+          <label for="password">New password</label
+          ><input
+            id="password"
+            type="password"
+            autocomplete="new-password"
+            aria-describedby="rules"
+          />
+          <ul id="rules" class="rules">
+            <li data-rule="length">At least eight characters</li>
+            <li data-rule="number">One number</li>
+            <li data-rule="letter">One uppercase letter</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Duration picker</h2>
+          <label for="duration">Preview length</label>
+          <div class="row">
+            <button id="decrease" type="button" aria-label="Shorten preview">
+              −</button
+            ><input
+              id="duration"
+              type="number"
+              min="15"
+              max="900"
+              step="15"
+              value="90"
+            /><span>seconds</span
+            ><button id="increase" type="button" aria-label="Lengthen preview">
+              +
+            </button>
+          </div>
+          <output id="duration-label" for="duration"
+            >1 minute 30 seconds</output
+          >
+        </section>
+        <section>
+          <h2>Wave loader</h2>
+          <div class="row">
+            <button type="button" data-toggle-wave aria-pressed="false">
+              Show indeterminate loader</button
+            ><span id="loading-status" role="status">Ready</span>
+          </div>
+          <div class="wave" hidden aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i>
+          </div>
+        </section>
+        <section>
+          <h2>Record waveform</h2>
+          <p>Simulated audio input</p>
+          <canvas
+            id="waveform"
+            width="570"
+            height="100"
+            role="img"
+            aria-label="Preview of a simulated signal"
+          ></canvas>
+          <div class="row">
+            <button id="record" type="button" aria-pressed="false">
+              Record</button
+            ><output id="elapsed" aria-live="off">0.0 s</output>
+          </div>
+        </section>
+        <section>
+          <h2>Process button</h2>
+          <div class="row">
+            <button id="process" type="button">Prepare preview</button
+            ><button id="cancel-process" hidden type="button">Cancel</button
+            ><output id="process-status" role="status"></output>
+          </div>
+          <progress
+            id="process-progress"
+            max="100"
+            value="0"
+            aria-label="Preview preparation"
+            hidden
+          ></progress>
+        </section>
+        <section>
+          <h2>Copy tabs</h2>
+          <div class="tabs" data-tabs>
+            <div
+              class="tab-row"
+              role="tablist"
+              aria-label="Installation command"
+            >
+              <button
+                type="button"
+                role="tab"
+                id="npm-tab"
+                aria-controls="npm-panel"
+                aria-selected="true"
+              >
+                npm</button
+              ><button
+                type="button"
+                role="tab"
+                id="pnpm-tab"
+                aria-controls="pnpm-panel"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                pnpm
+              </button>
+            </div>
+            <pre
+              id="npm-panel"
+              role="tabpanel"
+              aria-labelledby="npm-tab"
+            ><code>npm install loading-dev</code></pre>
+            <pre
+              id="pnpm-panel"
+              role="tabpanel"
+              aria-labelledby="pnpm-tab"
+              hidden
+            ><code>pnpm add loading-dev</code></pre>
+            <button id="copy" type="button">Copy command</button
+            ><output id="copy-status" role="status"></output>
+          </div>
+        </section>
+        <section>
+          <h2>Segmented navigation</h2>
+          <div class="row">
+            <fieldset>
+              <legend>Compare time range</legend>
+              <label
+                ><input type="radio" name="range" value="Today" checked />
+                Today</label
+              ><label
+                ><input type="radio" name="range" value="This week" /> This
+                week</label
+              ><label
+                ><input type="radio" name="range" value="This month" /> This
+                month</label
+              >
+            </fieldset>
+          </div>
+          <p id="selected-range">Showing today</p>
+        </section>
+        <section>
+          <h2>One-time code</h2>
+          <label for="otp">Six-digit code</label
+          ><input
+            id="otp"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            aria-describedby="otp-note"
+          />
+          <div class="digits" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span
+            ><span></span>
+          </div>
+          <p id="otp-note">Use any six digits in this local demo.</p>
+          <output id="otp-status" role="status"></output>
+        </section>
+        <section>
+          <h2>Wobble tabs</h2>
+          <div class="tabs" data-tabs aria-label="Asset view">
+            <div class="tab-row" role="tablist" aria-label="Asset view">
+              <button
+                type="button"
+                role="tab"
+                id="wobble-tab-0"
+                aria-controls="wobble-panel-0"
+                aria-selected="true"
+                tabindex="0"
+              >
+                Output</button
+              ><button
+                type="button"
+                role="tab"
+                id="wobble-tab-1"
+                aria-controls="wobble-panel-1"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                Preview</button
+              ><button
+                type="button"
+                role="tab"
+                id="wobble-tab-2"
+                aria-controls="wobble-panel-2"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                Source
+              </button>
+            </div>
+            <p
+              class="tab-panel"
+              role="tabpanel"
+              id="wobble-panel-0"
+              aria-labelledby="wobble-tab-0"
+            >
+              Use a still image as the default.
+            </p>
+            <p
+              class="tab-panel"
+              role="tabpanel"
+              id="wobble-panel-1"
+              aria-labelledby="wobble-tab-1"
+              hidden
+            >
+              Play the loop when a visitor asks.
+            </p>
+            <p
+              class="tab-panel"
+              role="tabpanel"
+              id="wobble-panel-2"
+              aria-labelledby="wobble-tab-2"
+              hidden
+            >
+              Keep the project files editable.
+            </p>
+          </div>
+        </section>
+        <section>
+          <h2>Draggable list</h2>
+          <p>Drag the handle or use the move buttons.</p>
+          <ul id="reorder">
+            <li>
+              <button class="handle" type="button" aria-label="Drag Scene">
+                ⋮⋮</button
+              ><span>Scene</span
+              ><button type="button" data-move="-1" aria-label="Move Scene up">
+                ↑</button
+              ><button type="button" data-move="1" aria-label="Move Scene down">
+                ↓
+              </button>
+            </li>
+            <li>
+              <button class="handle" type="button" aria-label="Drag Sound">
+                ⋮⋮</button
+              ><span>Sound</span
+              ><button type="button" data-move="-1" aria-label="Move Sound up">
+                ↑</button
+              ><button type="button" data-move="1" aria-label="Move Sound down">
+                ↓
+              </button>
+            </li>
+            <li>
+              <button class="handle" type="button" aria-label="Drag Export">
+                ⋮⋮</button
+              ><span>Export</span
+              ><button type="button" data-move="-1" aria-label="Move Export up">
+                ↑</button
+              ><button
+                type="button"
+                data-move="1"
+                aria-label="Move Export down"
+              >
+                ↓
+              </button>
+            </li>
+          </ul>
+          <output id="order-status" role="status"></output>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
