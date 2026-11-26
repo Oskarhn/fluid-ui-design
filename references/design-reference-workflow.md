@@ -17,6 +17,7 @@ Choose one primary design from the [design library](design-library/INDEX.md) or 
 
 ## Study a gallery example
 
+- [A1 Gallery](https://www.a1.gallery/) supports targeted lookups of whole pages, sections, and measured design values. Use [the gallery study workflow](gallery-design-patterns.md) to decide what to look up and which interaction to verify on the original site.
 - Landbook is useful for page divisions and section lookup. [Motion was added to website pages](https://land-book.com/changelog). [Landbook's terms](https://land-book.com/terms-of-service) limit use of gallery data. Follow available links and study the original site.
 - [Layers](https://layers.to/) surfaces small UI interactions and process details. Its [terms](https://layers.to/legal/terms-and-conditions) require the creator's permission to copy or download their work. Follow the creator link when looking for licensed source material.
 - [SEESAW](https://www.seesaw.website/) links to original sites and lists typography. Use it to find a reference with a similar page job. Check the primary source for reusable fonts, media and code.

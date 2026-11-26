@@ -10,7 +10,7 @@ description: >-
   web app, native mobile interface, or interactive 3D experience.
 license: MIT
 metadata:
-  version: "2.12.0"
+  version: "2.13.0"
 ---
 
 # Fluid UI Design
@@ -47,6 +47,7 @@ For new sites and web changes that affect performance, use the [Lighthouse workf
    If the user supplies a clip, use [recording motion studies](references/recording-motion-studies.md) to identify the visible phases and stable elements before setting implementation timing.
    If the user supplies a website URL as a reference, use [URL reference studies](references/url-reference-study.md). The runner produces TypeUI DESIGN.md and SKILL.md along with available DesignLang layout, token, and motion evidence. Confirm design rights when exact recreation is requested.
 4. When using external references, follow [source selection and capture](references/design-reference-workflow.md). Study public watermarked previews where useful and keep the mark on reference captures. Follow [preview recipes](references/public-preview-recipes.md) for original adaptations. Verify project-use rights for each file before embedding it. Use MotionSites MCP only when the project has access and benefits from a matching example.
+   Use [gallery design patterns](references/gallery-design-patterns.md) when a targeted A1 lookup or a browse, search, or preview interaction can inform the brief.
 
 ---
 
