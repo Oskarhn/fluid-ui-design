@@ -35,6 +35,8 @@ Use `node <skill>/scripts/export-static-ui.mjs <url> --owned-design --out NEW_DI
 
 Review the report's skipped resources, then test the copy from its own origin. This export covers a single navigation and the resources it actually loaded. API data, private state, assets loaded only after input, other routes, cross-origin media, and hard-coded origin URLs need separate handling. Use Chrome to verify scope, appearance, interaction, mobile layout, and external dependencies before calling a transfer complete.
 
+For an authorized route with dynamic imports, media loaded after interaction, or public assets on several origins, use [authorized browser replay](authorized-replay.md). It records interaction states and tests the archived response set in an isolated Chrome context.
+
 In the Field Signal comparison, DesignLang 13.4.1 produced a Next.js starter that compiled and retained the Sweep label. The starter had no canvas or sliders and pressing Sweep left its label unchanged. The Fluid UI capture recorded start, pause, resume, and waveform selection. The authorized export preserved the original HTML, stylesheet, script, and two fonts byte for byte. The copy ran those controls from a different origin with external requests blocked. Settled Chrome screenshots matched at 1280×800 and 390×844 with reduced motion.
 
 1. Inspect the actual route and read the generated design description, token files and available motion data. Describe what you observed, including viewport and input. Use screenshots for shape and placement and direct browser or recording evidence for hover, drag, scroll, keyboard and reversed states.
