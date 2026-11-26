@@ -60,7 +60,8 @@ function validatePlan(input) {
       || (step.action === 'fill' && target && typeof step.value === 'string' && step.value.length <= 80)
       || (step.action === 'drag' && role && ['button', 'tab'].includes(step.toRole) && typeof step.toName === 'string' && step.toName.length <= 180)
       || (step.action === 'scroll' && Number.isInteger(step.delta) && Math.abs(step.delta) <= 2500)
-      || (step.action === 'key' && ['Escape', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(step.key));
+      || (step.action === 'key' && (target || (step.selector === undefined && step.role === undefined))
+        && ['Escape', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(step.key));
     if (!valid) throw Error('Specify a CSS or accessible target, a scroll delta, or a navigation key.');
     if(step.waitMs!==undefined&&(!Number.isInteger(step.waitMs)||step.waitMs<100||step.waitMs>2500)){
       throw Error('Use a step delay from 100 to 2500 ms.');
@@ -150,7 +151,8 @@ async function runLook(page) {
     const controls=[...document.querySelectorAll('button,[role=button],[role=tab],[role=radio],input,select')].filter(visible).slice(0,38).map(el=>({
       tag:el.tagName,id:el.id||null,role:el.getAttribute('role'),label:el.getAttribute('aria-label')||el.innerText?.trim().slice(0,100)||null,
       type:el.getAttribute('type'),placeholder:el.getAttribute('placeholder'),pressed:el.getAttribute('aria-pressed'),
-      selected:el.getAttribute('aria-selected'),expanded:el.getAttribute('aria-expanded')
+      selected:el.getAttribute('aria-selected'),expanded:el.getAttribute('aria-expanded'),checked:el.getAttribute('aria-checked'),
+      value:el.matches('input[type=range]')?el.value:el.getAttribute('aria-valuenow')
     }));
     const b = getComputedStyle(document.body);
     const bounds = heading?.getBoundingClientRect();
@@ -169,6 +171,26 @@ async function observedMedia(page) {
     [el.currentSrc,el.src,el.getAttribute('data-src')].filter(value=>value&&/^https?:/.test(new URL(value,location.href).protocol))
   ).map(value=>new URL(value,location.href).href))].slice(0,30));
 }
+
+async function captureViewport(page, path) {
+  try {
+    await page.screenshot({ path, type:'jpeg', quality:85, timeout:6500 });
+    return 'playwright';
+  } catch (error) {
+    if (error.name !== 'TimeoutError') throw error;
+    const cdp = await page.context().newCDPSession(page);
+    try {
+      // Preserve the current frame even if a remote font keeps the normal capture waiting.
+      const frame = await deadline(cdp.send('Page.captureScreenshot', { format:'jpeg', quality:85 }), 6000);
+      if (!frame?.data) throw error;
+      await writeFile(path, Buffer.from(frame.data, 'base64'));
+      return 'chrome';
+    } finally {
+      await cdp.detach().catch(() => {});
+    }
+  }
+}
+
 async function observeSequence(page, url, plan, folder, side, hook) {
   const shots=[];
   let navigationError;
@@ -184,8 +206,8 @@ async function observeSequence(page, url, plan, folder, side, hook) {
   if (hook) await hook(page);
   async function sample(label,i,result,readSource = false) {
     const file=side+'-'+String(i).padStart(2,'0')+'.jpg';
-    await page.screenshot({path:join(folder,file),type:'jpeg',quality:85,timeout:6500});
-    const shot={label,file,result,url:page.url(),state:await runLook(page)};
+    const screenshotMethod=await captureViewport(page,join(folder,file));
+    const shot={label,file,result,screenshotMethod,url:page.url(),state:await runLook(page)};
     if(readSource&&result==='executed'){
       const snippets=await page.locator('pre:visible').allTextContents();
       const code=snippets.join('\n\n').trim();
@@ -203,12 +225,13 @@ async function observeSequence(page, url, plan, folder, side, hook) {
       if(step.action==='scroll'){
         await page.mouse.move(Math.round(plan.viewport.width*.86),Math.round(plan.viewport.height*.75));
         await page.mouse.wheel(0,step.delta);
-      }else if(step.action==='key'){
+      }else if(step.action==='key'&&!step.selector&&!step.role){
         await page.keyboard.press(step.key);
       }else{
         const target=(step.selector?page.locator(step.selector):page.getByRole(step.role,{name:step.name,exact:true})).filter({visible:true});
         if(await target.count()!==1)throw Error('The selector needs one visible target');
-        if(step.action==='hover')await target.hover({timeout:2200});
+        if(step.action==='key')await target.press(step.key,{timeout:2200});
+        else if(step.action==='hover')await target.hover({timeout:2200});
         else if(step.action==='fill')await target.fill(step.value,{timeout:2200});
         else if(step.action==='drag'){
           const end=page.getByRole(step.toRole,{name:step.toName,exact:true}).filter({visible:true});
@@ -335,6 +358,25 @@ async function capture(operand) {
     report.checks.original=original;
     report.finalUrl=original.shots[0].url;
     while(jobs.size)await Promise.allSettled([...jobs]);
+    // A client-side link can load only a framework payload. Preserve the document
+    // for that visited route so an offline browser can also navigate to it directly.
+    const visited = new Set(original.shots.filter(shot => shot.result === 'executed')
+      .map(shot => publicUrl(shot.url)).filter(visitedUrl => visitedUrl.origin === url.origin)
+      .map(visitedUrl => visitedUrl.href));
+    for (const href of visited) {
+      if (entries.has(href)) continue;
+      const response = await api.get(href, { maxRedirects:0, failOnStatusCode:false }).catch(() => null);
+      const headers = response?.headers();
+      if (response?.status() === 200 && headers['content-type']?.startsWith('text/html')
+          && !(Number(headers['content-length']) > maxFile)) {
+        const body = await deadline(response.body().catch(() => null), 8000, null);
+        if (body) {
+          await store(href, 200, headers, body, 'document');
+          continue;
+        }
+      }
+      gaps.add('Document unavailable for visited route: '+href);
+    }
     const supplement=[...media].filter(value=>!entries.has(value)).map(value=>[value,'media']);
     supplement.push(...[...attempted].filter(([value])=>!entries.has(value)).slice(0,24));
     for(let i=0;i<supplement.length;i+=4)
