@@ -3,29 +3,43 @@ import { control, listen } from './shared.mjs';
 const FRAME = { w: 1440, h: 960 };
 const PANEL = { x: 77, y: 179, w: 1286, h: 703 };
 const NAV = { x: 77, y: 82, w: 1286, h: 84 };
+const PRINT_OFFSET = 13.5;
 const clamp = value => Math.max(0, Math.min(1, value));
+const placements = {
+  studio: [0, 115, 25, 76, 35], materials: [0, 204, 25, 100, 35],
+  pricing: [0, 314, 25, 75, 35], signin: [0, 1154, 22, 109, 40],
+  'open-studio': [1, 48, 437, 111, 36], paper: [1, 172, 437, 116, 36]
+};
+const definitions = [
+  ['Iridescence','Thin layers can tint a reflection according to the viewing angle.'],
+  ['Index of refraction','This determines how a ray bends between materials.'],
+  ['Dispersion','A prism bends wavelengths by different amounts.'],
+  ['Transmission','Some light passes through the surface instead of reflecting.'],
+  ['Roughness','The microstructure spreads out the reflected light.']
+];
+const destinations = {
+  studio: ['Material studio', 'Choose a surface to see its material notes.'],
+  materials: ['Materials', 'Compare the transparency, roughness and reflectance of three surfaces.'],
+  pricing: ['Studio plans', 'The studio preview is free to explore.'],
+  signin: ['Sign in to the demo studio', 'Set a display name for this session.']
+};
 
 export function glassTransfer(root, { signal }) {
   root.innerHTML = `
     <div class="facet-stage" data-renderer="html" aria-label="Facet material studio">
       <div class="facet-view">
         <div class="facet-fallback-shards" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-        <div class="facet-nav"><span>◆ Facet</span><span>Studio &nbsp;&nbsp; Materials &nbsp;&nbsp; Pricing</span><span>Sign in</span></div>
+        <nav class="facet-nav" aria-label="Facet"><span>◆ Facet</span><button type="button" data-facet-control="studio">Studio</button><button type="button" data-facet-control="materials">Materials</button><button type="button" data-facet-control="pricing">Pricing</button><button type="button" data-facet-control="signin">Sign in</button></nav>
         <div class="facet-copy">
           <p>Real-time material studio</p><h3>Designed<br>in glass.</h3>
           <p>Author dispersion, transmission, and refraction in the browser.<br>Live previews, real materials.</p>
-          <div><button type="button" data-open-studio>Open studio</button><button type="button" data-open-paper>Read paper <span aria-hidden="true">→</span></button></div>
+          <div><button type="button" data-facet-control="open-studio">Open studio</button><button type="button" data-facet-control="paper">Read paper <span aria-hidden="true">→</span></button></div>
         </div>
       </div>
       <div class="facet-paper" hidden>
         <button type="button" data-close-paper><span aria-hidden="true">←</span> Back</button>
         <article>
-          <h3 tabindex="-1">Real-time glass, in five terms.</h3>
-          <p><b>Iridescence.</b> Thin layers can tint a reflection according to the viewing angle.</p>
-          <p><b>Index of refraction.</b> This determines how a ray bends between materials.</p>
-          <p><b>Dispersion.</b> A prism bends wavelengths by different amounts.</p>
-          <p><b>Transmission.</b> Some light passes through the surface instead of reflecting.</p>
-          <p><b>Roughness.</b> The microstructure spreads out the reflected light.</p>
+          <h3 tabindex="-1"></h3><div class="facet-destination"></div>
         </article>
       </div>
     </div>
@@ -33,8 +47,8 @@ export function glassTransfer(root, { signal }) {
   const stage = control(root, '.facet-stage');
   const view = control(root, '.facet-view');
   const paper = control(root, '.facet-paper');
-  const trigger = control(root, '[data-open-paper]');
-  const studio = control(root, '[data-open-studio]');
+  const paintedControls = [...root.querySelectorAll('[data-facet-control]')];
+  const trigger = control(root, '[data-facet-control="paper"]');
   const back = control(root, '[data-close-paper]');
   const heading = control(paper, 'h3');
   const preference = matchMedia('(prefers-reduced-motion: reduce)');
@@ -42,13 +56,51 @@ export function glassTransfer(root, { signal }) {
   let open = false;
   let lastTrigger = trigger;
   let timer;
-  function turn(next, button) {
+  let displayName = '';
+  const content = control(paper,'.facet-destination');
+  function renderDestination(name) {
+    content.replaceChildren();
+    if (name === 'paper') {
+      heading.textContent = 'Real-time glass, in five terms.';
+      for (const [word,description] of definitions) {
+        const paragraph=document.createElement('p'), label=document.createElement('b');
+        label.textContent=word+'. ';
+        paragraph.append(label,document.createTextNode(description));content.append(paragraph);
+      }
+      return;
+    }
+    const [title, description] = destinations[name];
+    heading.textContent=title;
+    const detail=document.createElement('p');detail.textContent=description;
+    content.append(detail);
+    if (name === 'signin') {
+      const form=document.createElement('form');
+      const label=document.createElement('label'), input=document.createElement('input');
+      const apply=document.createElement('button'), status=document.createElement('output');
+      label.textContent='Display name';input.value=displayName;input.maxLength=54;input.required=true;
+      input.autocomplete='off';label.append(input); apply.textContent='Enter studio';apply.type='submit';
+      status.setAttribute('role','status');form.append(label,apply,status);content.append(form);
+      listen(form,'submit',event=>{
+        event.preventDefault();displayName=input.value.trim();
+        if(!displayName){input.focus();return;}
+        heading.textContent='Studio workspace';
+        content.replaceChildren();detail.textContent='Welcome, '+displayName+'.';
+        content.append(detail);heading.focus({preventScroll:true});
+      },signal);
+    } else if (name==='studio'||name==='materials') {
+      const control=document.createElement('button');control.type='button';control.textContent='Show material notes';
+      listen(control,'click',()=>{renderDestination('paper');heading.focus({preventScroll:true});},signal);
+      content.append(control);
+    }
+  }
+  function turn(next, button, destinationName) {
     if (next === open) return;
     open = next;
     stage.dataset.phase = next ? 'shattering' : 'returning';
     clearTimeout(timer);
     engine?.travel(next);
     if (open) {
+      renderDestination(destinationName === 'open-studio'?'studio':destinationName);
       lastTrigger = button;
       view.inert = true;
       timer = setTimeout(() => {
@@ -60,14 +112,16 @@ export function glassTransfer(root, { signal }) {
       }, preference.matches ? 0 : 285);
     } else {
       paper.inert = true;
-      paper.hidden = true;
-      view.inert = false;
-      lastTrigger.focus({ preventScroll:true });
-      stage.dataset.phase = 'hero';
+      timer=setTimeout(()=>{
+        if (signal.aborted) return;
+        paper.hidden = true;
+        view.inert = false;
+        stage.dataset.phase = 'hero';
+        lastTrigger.focus({ preventScroll:true });
+      },preference.matches?0:290);
     }
   }
-  listen(trigger, 'click', () => turn(true, trigger), signal);
-  listen(studio, 'click', () => turn(true, studio), signal);
+  paintedControls.forEach(button=>listen(button,'click',()=>turn(true,button,button.dataset.facetControl),signal));
   listen(back, 'click', () => turn(false), signal);
   listen(stage, 'keydown', event => { if (event.key === 'Escape' && open) turn(false); }, signal);
   listen(stage, 'pointermove', event => {
@@ -96,10 +150,10 @@ export function glassTransfer(root, { signal }) {
 
 function printFace(THREE, width, height, paint) {
   const canvas = document.createElement('canvas');
-  canvas.width = width * 1.5;
-  canvas.height = height * 1.5;
+  canvas.width = width * 2.5;
+  canvas.height = height * 2.5;
   const ctx = canvas.getContext('2d');
-  ctx.scale(1.5,1.5);
+  ctx.scale(2.5,2.5);
   paint(ctx);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -109,17 +163,13 @@ function printFace(THREE, width, height, paint) {
 
 function drawNav(ctx) {
   ctx.fillStyle = '#cbd0ce';
-  ctx.font = '600 12px Arial';
-  ctx.fillText('◆ Facet', 42, 44);
-  ctx.font = '400 11px Arial';
-  ctx.fillStyle = '#a5aca9';
-  ctx.fillText('Studio      Materials      Pricing', 126, 44);
-  ctx.fillText('Sign in', 1196, 44);
+  ctx.font = '600 18px Arial';
+  ctx.fillText('◆ Facet', 39, 48);
 }
 
 function drawPanel(ctx) {
-  ctx.fillStyle = '#8f9794';
-  ctx.font = '600 8px Arial';
+  ctx.fillStyle = '#bcc2bc';
+  ctx.font = '600 13px Arial';
   ctx.letterSpacing = '2px';
   ctx.fillText('REAL-TIME MATERIAL STUDIO', 45, 99);
   ctx.letterSpacing = '0px';
@@ -132,21 +182,12 @@ function drawPanel(ctx) {
   ctx.fillText('Designed', 43, 224);
   ctx.fillText('in glass.', 43, 322);
   ctx.letterSpacing = '0px';
-  ctx.fillStyle = '#aeb3b0';
-  ctx.font = '400 12px Arial';
+  ctx.fillStyle = '#c5cac7';
+  ctx.font = '400 17px Arial';
   ctx.fillText('Author dispersion, transmission, and refraction in the browser.', 46, 382);
   ctx.fillText('Live previews, real materials.', 46, 400);
-  ctx.fillStyle = '#e2e4e7';
-  ctx.beginPath();
-  ctx.roundRect(48,437,94,30,4);
-  ctx.fill();
-  ctx.fillStyle = '#23252b';
-  ctx.font = '500 10px Arial';
-  ctx.fillText('Open studio', 62,456);
-  ctx.fillStyle = '#d2d0d6';
-  ctx.fillText('Read paper →', 162,456);
-  ctx.fillStyle = '#7d8381';
-  ctx.font = '400 9px Arial';
+  ctx.fillStyle = '#b2b7b4';
+  ctx.font = '400 12px Arial';
   ctx.fillText('© Facet Lab',48,688);
   ctx.fillText('KHR_materials_dispersion',1150,688);
 }
@@ -170,7 +211,7 @@ function renderGlass(THREE, RoomEnvironment, stage, view, preference, signal) {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.55));
+  renderer.setPixelRatio(Math.min(2, Math.max(1.25, devicePixelRatio)));
   renderer.domElement.setAttribute('aria-hidden', 'true');
   renderer.domElement.className = 'facet-canvas';
   stage.prepend(renderer.domElement);
@@ -202,6 +243,14 @@ function renderGlass(THREE, RoomEnvironment, stage, view, preference, signal) {
   });
   const bits = [];
   const bodies = [];
+  const hits = [...view.querySelectorAll('[data-facet-control]')].map(element => {
+    const rect = placements[element.dataset.facetControl];
+    element.style.width = rect[3]+'px';
+    element.style.height = rect[4]+'px';
+    return {element, rect};
+  });
+  const corner = new THREE.Vector3();
+  let viewWidth=0,viewHeight=0;
   let pointer = {x:.5,y:.5,in:false};
   let focus = -1;
   let movingToPaper = false;
@@ -271,7 +320,7 @@ function renderGlass(THREE, RoomEnvironment, stage, view, preference, signal) {
       uv.setXY(i,(position.getX(i)+center[0]+FRAME.w/2-area.x)/area.w,
         1-(FRAME.h/2-position.getY(i)-center[1]-area.y)/area.h);
     }
-    face.translate(0,0,13.5);
+    face.translate(0,0,PRINT_OFFSET);
     bit.body.geometry.dispose();
     bit.ink.geometry.dispose();
     bit.body.geometry=volume;
@@ -284,6 +333,22 @@ function renderGlass(THREE, RoomEnvironment, stage, view, preference, signal) {
   }
   drawShape(bits[0], [[0,0],[1,0],[1,1],[0,1]]);
   cut();
+  function projectControls() {
+    if (!viewWidth||!viewHeight) return;
+    for (const {element,rect:[index,left,top,width,height]} of hits) {
+      const bit=bits[index];
+      element.style.visibility=bit.joint.visible?'':'hidden';
+      if (!bit.joint.visible) continue;
+      const project=(x,y)=>{
+        corner.set(bit.area.x+x-FRAME.w/2-bit.base[0],FRAME.h/2-bit.area.y-y-bit.base[1],PRINT_OFFSET+.1);
+        corner.applyMatrix4(bit.joint.matrixWorld).project(camera);
+        return [(.5+corner.x*.5)*viewWidth,(.5-corner.y*.5)*viewHeight];
+      };
+      const a=project(left,top),b=project(left+width,top),d=project(left,top+height);
+      element.style.transform='matrix('+[(b[0]-a[0])/width,(b[1]-a[1])/width,
+        (d[0]-a[0])/height,(d[1]-a[1])/height,a[0],a[1]].join(',')+')';
+    }
+  }
   function paint(now) {
     frame = 0;
     if (signal.aborted || !visible || document.hidden) {last=0;return;}
@@ -308,7 +373,7 @@ function renderGlass(THREE, RoomEnvironment, stage, view, preference, signal) {
     glowCenter.value.set(dx*FRAME.w*.5,-dy*FRAME.h*.5);
     glowAmount.value += ((pointer.in && !calm ? 1 : 0) - glowAmount.value) * rotate;
     const target = movingToPaper ? 1 : 0;
-    travel = calm ? target : Math.max(0,Math.min(1,travel+(movingToPaper?1:-1)*dt/.84));
+    travel = calm ? target : clamp(travel+(movingToPaper?dt/.84:-dt/.76));
     for (const bit of bits) {
       const hovering = focus === bit.index;
       const lift = hovering ? (bit.index === 0 ? 31 : 49) : 0;
@@ -325,6 +390,7 @@ function renderGlass(THREE, RoomEnvironment, stage, view, preference, signal) {
       bit.material.envMapIntensity=.42+Math.max(0,bit.lift)*.018;
     }
     renderer.render(scene,camera);
+    projectControls();
     initial=false;
     if (!calm) schedule();
   }
@@ -332,7 +398,8 @@ function renderGlass(THREE, RoomEnvironment, stage, view, preference, signal) {
     if (!frame && visible && !document.hidden && !signal.aborted) frame=requestAnimationFrame(paint);
   }
   const size = new ResizeObserver(([entry])=>{
-    renderer.setSize(Math.round(entry.contentRect.width),Math.round(entry.contentRect.height),false);
+    viewWidth=Math.round(entry.contentRect.width);viewHeight=Math.round(entry.contentRect.height);
+    renderer.setSize(viewWidth,viewHeight,false);
     schedule();
   });
   size.observe(stage);
