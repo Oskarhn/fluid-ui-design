@@ -66,6 +66,11 @@ function validatePlan(input) {
     if(step.waitMs!==undefined&&(!Number.isInteger(step.waitMs)||step.waitMs<100||step.waitMs>2500)){
       throw Error('Use a step delay from 100 to 2500 ms.');
     }
+    if (step.point !== undefined && (!['click', 'hover'].includes(step.action) || step.pointer !== true
+        || !Array.isArray(step.point) || step.point.length !== 2
+        || !step.point.every(value => Number.isFinite(value) && value > 0 && value < 1))) {
+      throw Error('A pointer point must contain two fractions between zero and one for a click or hover.');
+    }
   }
   return { viewport, steps, mobile: input.mobile === true, fakeMedia: input.fakeMedia === true };
 }
@@ -231,7 +236,7 @@ async function observeSequence(page, url, plan, folder, side, hook) {
         const target=(step.selector?page.locator(step.selector):page.getByRole(step.role,{name:step.name,exact:true})).filter({visible:true});
         if(await target.count()!==1)throw Error('The selector needs one visible target');
         if(step.action==='key')await target.press(step.key,{timeout:2200});
-        else if(step.action==='hover')await target.hover({timeout:2200});
+        else if(step.action==='hover' && step.pointer!==true)await target.hover({timeout:2200});
         else if(step.action==='fill')await target.fill(step.value,{timeout:2200});
         else if(step.action==='drag'){
           const end=page.getByRole(step.toRole,{name:step.toName,exact:true}).filter({visible:true});
@@ -245,13 +250,14 @@ async function observeSequence(page, url, plan, folder, side, hook) {
           finally{await page.mouse.up();}
         }
         else if(step.pointer===true){
-          const point=await target.evaluate(el=>{
+          const point=await target.evaluate((el,[horizontal,vertical])=>{
             const r=el.getBoundingClientRect();
-            const x=r.left+r.width/2,y=r.top+r.height/2;
+            const x=r.left+r.width*horizontal,y=r.top+r.height*vertical;
             return !el.disabled&&el.contains(document.elementFromPoint(x,y))?{x,y}:null;
-          });
+          },step.point??[0.5,0.5]);
           if(!point)throw Error('The moving control does not accept pointer input here');
-          await page.mouse.click(point.x,point.y);
+          if(step.action==='hover')await page.mouse.move(point.x,point.y);
+          else await page.mouse.click(point.x,point.y);
         }
         else await target.click({timeout:2200});
       }
