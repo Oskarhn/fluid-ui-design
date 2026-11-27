@@ -10,7 +10,7 @@ description: >-
   web app, native mobile interface, or interactive 3D experience.
 license: MIT
 metadata:
-  version: "2.18.0"
+  version: "2.19.0"
 ---
 
 # Fluid UI Design
@@ -43,6 +43,7 @@ For new sites and web changes that affect performance, use the [Lighthouse workf
    For a marketing or product hero, use [hero composition studies](references/hero-composition.md) to place the main subject, the headline, and the primary action before adding motion.
 3. Build the first viewport and main action around that proof, then finish the requested content and mobile states. Check web output in Chrome (step 5 below) and SwiftUI output in the Apple test environment for the project. Fix visible defects within this run. Use the [original motion studies](blueprints/design-motion-studies.html) for runnable examples of the effect, input and fallback.
    For gestures, moving controls, transitions or 3D details, pick a state model from [motion composition](references/motion-composition.md) and reuse a [licensed Bencho block](blueprints/bencho/README.md) where it matches the task. Adapt the trigger, feedback and fallback to the project.
+   For a custom gesture, scrubbable timeline, moving layout, SVG sequence, or a change to an existing study, check the [Anime.js guide](references/animejs.md) and [runnable examples](blueprints/animejs/index.html). Reuse the relevant API when the design needs it and verify the same controls and rest state with reduced motion.
    For GSAP, Lenis or React Bits, use the [pinned source checkouts](vendor/motion-sources/README.md) to identify the relevant source, integration and license.
    If the user supplies a clip, use [recording motion studies](references/recording-motion-studies.md) to identify the visible phases and stable elements before setting implementation timing.
    For a known reference URL or a reusable interaction, find its runnable example in the [reference component library](blueprints/reference-components/README.md). Load the selected module and its styles, then verify the transition in the receiving layout.
