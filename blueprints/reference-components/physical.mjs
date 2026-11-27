@@ -2,39 +2,7 @@ import { control, controls, listen, motion, text, timer } from './shared.mjs';
 
 const spring = 'cubic-bezier(.24,1.32,.35,1)';
 
-export function fileDrawer(root, { signal }) {
-  root.innerHTML = `
-    <div class="file-study">
-      <div class="file-object">
-        <div class="file-housing" aria-hidden="true"></div>
-        <div class="file-tray">
-          <div class="file-stack" inert>
-            <button type="button">Field notes</button><button type="button">Proof sheets</button><button type="button">Type tests</button>
-          </div>
-          <button type="button" class="file-handle" aria-expanded="false">Open archive</button>
-        </div>
-      </div>
-      <dialog aria-label="Archive item"><div class="file-page"><h3></h3><p>Filed in the studio archive.</p><form method="dialog"><button type="submit">Return to drawer</button></form></div></dialog>
-    </div>
-  `;
-  const object = control(root, '.file-object');
-  const stack = control(root, '.file-stack');
-  const handle = control(root, '.file-handle');
-  const dialog = control(root, 'dialog');
-  function open(value) {
-    object.toggleAttribute('data-open', value);
-    stack.inert = !value;
-    handle.setAttribute('aria-expanded', String(value));
-    handle.textContent = value ? 'Close archive' : 'Open archive';
-  }
-  listen(handle, 'click', () => open(stack.inert), signal);
-  controls(stack, 'button').forEach(button => listen(button, 'click', () => {
-    control(dialog, 'h3').textContent = button.textContent;
-    dialog.showModal();
-    motion(control(dialog, '.file-page'), [{ transform: 'translateY(35px) rotateX(-18deg)' }, { transform: 'none' }],
-      { duration: 360, easing: spring }, signal);
-  }, signal));
-}
+export { fileDrawer } from './fidelity-archive.mjs';
 
 export function taskChecks(root, { signal }) {
   root.innerHTML = `

@@ -1,4 +1,4 @@
-import { control, controls, listen, motion, timer } from './shared.mjs';
+import { control, listen } from './shared.mjs';
 
 const previewMedia = name => new URL('../../media/preview-loops/' + name, import.meta.url).href;
 
@@ -102,76 +102,4 @@ export function unmaskTrail(root, { signal }) {
   signal.addEventListener('abort', () => { resize.disconnect(); cancelAnimationFrame(frame); }, { once: true });
 }
 
-export function glassTransfer(root, { signal }) {
-  root.innerHTML = `
-    <div class="glass-stage">
-      <div class="glass-view">
-        <div class="glass-shards" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-        <div class="glass-copy"><h3>Material in motion</h3><p>Reflection changes with the viewing angle.</p><button type="button" data-open-paper>Read material notes</button></div>
-      </div>
-      <div class="glass-paper" hidden>
-        <h3 tabindex="-1">Material notes</h3><p><strong>Transmission.</strong> Light travelling through a surface.</p>
-        <p><strong>Roughness.</strong> How widely a surface scatters the reflected light.</p>
-        <button type="button" data-close-paper>Back to material</button>
-      </div>
-    </div>
-  `;
-  const stage = control(root, '.glass-stage');
-  const view = control(root, '.glass-view');
-  const paper = control(root, '.glass-paper');
-  const shards = controls(root, '.glass-shards i');
-  const copy = control(root, '.glass-copy');
-  const open = control(root, '[data-open-paper]');
-  const back = control(root, '[data-close-paper]');
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const vectors = [[-63, -35], [5, -56], [75, -20], [-41, 48], [60, 65]];
-  let pending;
-  function move(event) {
-    if (reduced.matches || view.inert) return;
-    const box = stage.getBoundingClientRect();
-    const dx = (event.clientX - box.left) / box.width - .5;
-    const dy = (event.clientY - box.top) / box.height - .5;
-    view.style.setProperty('--tilt-x', (-dy * 9) + 'deg');
-    view.style.setProperty('--tilt-y', (dx * 11) + 'deg');
-  }
-  function restoreTilt() {
-    view.style.removeProperty('--tilt-x');
-    view.style.removeProperty('--tilt-y');
-  }
-  function animateShards(opening) {
-    shards.forEach((shard, index) => {
-      for (const animation of shard.getAnimations()) animation.cancel();
-      const [x, y] = vectors[index];
-      const origin = { transform: 'none', opacity: 1 };
-      const departed = { transform: `translate3d(${x}px,${y}px,50px) rotate(${index * 8 - 15}deg)`, opacity: 0 };
-      motion(shard, opening ? [origin, departed] : [departed, origin],
-        { duration: 720, delay: index * 32, fill: opening ? 'forwards' : 'backwards',
-          easing: opening ? 'cubic-bezier(.7,.02,.9,.5)' : 'cubic-bezier(.2,.8,.25,1.13)' }, signal);
-    });
-    for (const animation of copy.getAnimations()) animation.cancel();
-    const origin = { transform: 'none', opacity: 1 };
-    const departed = { transform: 'translate3d(-45px,-24px,40px) rotate(-8deg)', opacity: 0 };
-    motion(copy, opening ? [origin, departed] : [departed, origin],
-      { duration: 560, fill: opening ? 'forwards' : 'backwards', easing: 'cubic-bezier(.25,.76,.24,1)' }, signal);
-  }
-  listen(stage, 'pointermove', move, signal);
-  listen(stage, 'pointerleave', restoreTilt, signal);
-  listen(open, 'click', () => {
-    view.inert = true;
-    restoreTilt();
-    animateShards(true);
-    pending = timer(() => {
-      view.hidden = true;
-      paper.hidden = false;
-      control(paper, 'h3').focus();
-    }, reduced.matches ? 0 : 850, signal);
-  }, signal);
-  listen(back, 'click', () => {
-    pending?.();
-    paper.hidden = true;
-    view.hidden = false;
-    view.inert = false;
-    animateShards(false);
-    open.focus();
-  }, signal);
-}
+export { glassTransfer } from './fidelity-glass.mjs';
