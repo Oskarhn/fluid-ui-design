@@ -1,0 +1,70 @@
+:root {
+  color-scheme: light;
+  font: 16px/1.55 system-ui, sans-serif;
+  color: #222b2c;
+  background: #f4f6f5;
+}
+body { margin: 0; }
+a { color: #22534f; text-underline-offset: .22em; }
+.library {
+  display: grid;
+  grid-template-columns: minmax(180px, 250px) minmax(0, 1fr);
+  gap: 38px 46px;
+  max-width: 1260px;
+  margin-inline: auto;
+  padding: clamp(20px, 5vw, 70px);
+}
+.library-header {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #c7d0cd;
+}
+.library-header h1,
+.library-detail h2 { margin: 0; font-family: Georgia, serif; font-weight: 400; letter-spacing: -.045em; line-height: 1; }
+.library-header h1 { font-size: clamp(2.3rem, 6vw, 4.6rem); }
+.library-detail h2 { font-size: clamp(1.9rem, 5vw, 3.1rem); }
+.library-header nav,
+.library-meta { display: flex; gap: 14px 20px; flex-wrap: wrap; align-items: center; }
+.library-header nav { font-size: .9rem; }
+.library-list { align-self: start; display: grid; gap: 6px; min-width: 0; }
+.library-list label { font-size: .84rem; font-weight: 650; }
+.library-list input, .library-list select { width: 100%; max-width: 100%; margin-bottom: 12px; }
+#results {
+  display: grid;
+  align-content: start;
+  overflow: auto;
+  height: min(60vh, 760px);
+  border-block: 1px solid #c7d0cd;
+  overscroll-behavior: contain;
+}
+#results a { color: #273b37; text-decoration: none; padding: 10px 9px; line-height: 1.28; }
+#results a:hover { text-decoration: underline; }
+#results a[aria-current] { color: #153d31; background: #deeae3; font-weight: 650; }
+.library-detail { min-width: 0; }
+.library-detail > header { margin-block: 0 21px; min-height: 136px; }
+.library-detail > header > p { max-width: 58ch; margin: 10px 0 14px; color: #455353; }
+.library-meta { font-size: .86rem; }
+.library-meta button { margin-inline-start: auto; }
+.library-preview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  min-height: 396px;
+  padding: clamp(12px, 4vw, 38px);
+  background: #e9eeeb;
+  border: 1px solid #cdd9d4;
+  border-radius: 8px;
+}
+.library-preview > * { min-width: 0; max-width: 100%; }
+@media (max-width: 760px) {
+  .library { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  #results { height: 18rem; }
+  .library-detail > header { min-height: 178px; }
+  .library-meta button { margin-inline-start: 0; }
+  .library-detail h2 { scroll-margin-top: 1rem; }
+}

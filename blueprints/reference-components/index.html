@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reference components · Fluid UI Design</title>
+  <link rel="stylesheet" href="./components.css">
+  <link rel="stylesheet" href="./gallery.css">
+  <script type="module" src="./gallery.mjs"></script>
+</head>
+<body>
+  <main class="library">
+    <header class="library-header">
+      <h1>Reference components</h1>
+      <nav aria-label="More components">
+        <a href="../interaction-controls/index.html">Craft controls</a>
+        <a href="../bencho/README.md">Bencho blocks</a>
+      </nav>
+    </header>
+    <aside class="library-list" aria-label="Component picker">
+      <label for="find">Find a component</label>
+      <input id="find" type="search" autocomplete="off">
+      <label for="collection">Collection</label>
+      <select id="collection"><option value="">All collections</option></select>
+      <div id="results"></div>
+    </aside>
+    <section class="library-detail" aria-labelledby="component-name">
+      <header>
+        <h2 id="component-name" tabindex="-1"></h2>
+        <p id="component-info"></p>
+        <div class="library-meta">
+          <a id="reference-source" target="_blank" rel="noopener noreferrer">Original reference</a>
+          <a id="component-source" target="_blank" rel="noopener">Component source</a>
+          <button id="reset" type="button">Reset demo</button>
+        </div>
+      </header>
+      <div id="preview" class="library-preview" role="region" aria-label="Interactive component"></div>
+    </section>
+  </main>
+</body>
+</html>
