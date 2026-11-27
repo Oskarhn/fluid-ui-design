@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Component sources · Fluid UI Design</title>
+  <link rel="stylesheet" href="./catalog.css">
+  <script type="module" src="./catalog.mjs"></script>
+</head>
+<body>
+  <main>
+    <header class="masthead">
+      <a href="../reference-components/index.html?reference-assets=1">Reference library</a>
+      <h1>Component sources</h1>
+      <p id="coverage"></p>
+    </header>
+    <search>
+      <form id="filters" aria-label="Filter components">
+        <div><label for="query">Search</label><input id="query" name="q" type="search" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
+        <div><label for="source">Source</label><select name="source" id="source"><option value="">All sources</option></select></div>
+        <div><label for="category">Category</label><select name="category" id="category"><option value="">All categories</option></select></div>
+        <div><label for="access">Access</label><select name="access" id="access"><option value="">Any access</option><option value="available">Source listed</option><option value="premium">Premium</option><option value="reference">Reference page</option></select></div>
+      </form>
+    </search>
+
+    <div class="workspace">
+      <aside class="results" aria-label="Components">
+        <p id="result-count" role="status">Loading the catalog</p>
+        <ol id="results"></ol>
+        <nav id="paging" aria-label="Result pages" hidden>
+          <button id="previous" type="button">Previous</button><span id="page"></span><button id="next" type="button">Next</button>
+        </nav>
+      </aside>
+      <section class="detail" aria-labelledby="entry-title" hidden>
+        <header class="entry-heading">
+          <div>
+            <h2 id="entry-title" tabindex="-1"></h2>
+            <p id="entry-meta"></p>
+          </div>
+          <div class="links">
+            <a id="original" target="_blank" rel="noopener">Original</a>
+            <a id="license" target="_blank" rel="noopener">Terms</a>
+            <a id="registry" target="_blank" rel="noopener" hidden>Registry</a>
+          </div>
+        </header>
+        <div id="preview" class="preview" hidden>
+          <div class="preview-controls">
+            <button id="theme" type="button" aria-pressed="false">Dark preview</button>
+            <button id="reset" type="button">Reset preview</button>
+          </div>
+          <iframe id="stage" title="Component preview" sandbox=""></iframe>
+        </div>
+        <p id="entry-status" role="status"></p>
+        <div id="dependencies" hidden></div>
+        <div id="code-panel" hidden>
+          <div><label for="file">Source file</label><select id="file"></select></div>
+          <div class="code-actions"><button id="copy" type="button">Copy code</button><button id="download" type="button">Download file</button></div>
+          <label class="code-label" for="code">Code</label>
+          <p id="code-note" class="code-label" role="status" hidden></p>
+          <textarea id="code" readonly spellcheck="false"></textarea>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

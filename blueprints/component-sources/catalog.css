@@ -1,0 +1,69 @@
+:root {
+  color-scheme: light;
+  color: #192332;
+  background: #f0f3f8;
+  font: 16px/1.45 system-ui, sans-serif;
+  --line: #b8c4d2;
+  --blue: #244e9e;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+main { width: min(100%,1220px); margin-inline: auto; padding: 24px 28px 60px; }
+a { color: var(--blue); text-underline-offset: .18em; }
+button, input, select, textarea { font: inherit; }
+button, input, select { min-height: 48px; }
+button, input, select, textarea { color: inherit; background: #fdfdff; border: 1px solid #8295af; border-radius: 4px; padding: .52rem .66rem; }
+button { cursor: pointer; }
+button:disabled { cursor: default; color: #667186; background: #e8edf5; }
+button:not(:disabled):hover { background: #dce9ff; }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+h1,h2,p { margin: 0; }
+.masthead { padding-bottom: 25px; border-bottom: 2px solid #283644; }
+.masthead > a { font-size: .88rem; }
+h1 { font: 850 clamp(2.55rem,7vw,5.2rem)/.98 system-ui,sans-serif; letter-spacing: -.075em; margin: .25em 0 .14em; }
+#coverage { color: #4c5c70; }
+#filters { display: grid; grid-template-columns: minmax(180px,1.4fr) repeat(3,minmax(120px,1fr)); gap: 12px; padding: 18px 0 24px; }
+#filters > div { min-width: 0; }
+label { display: block; margin-bottom: 4px; font-size: .9rem; font-weight: 635; min-width: 0; }
+input, select { width: 100%; min-width: 0; font-size: 1rem; }
+.workspace { display: grid; grid-template-columns: minmax(255px,.43fr) minmax(0,1fr); gap: 21px 30px; align-items: start; }
+.results,.detail { min-width: 0; }
+#result-count { min-height: 30px; font-size: .82rem; color: #51627a; }
+#results { max-height: 66vh; overflow: auto; overscroll-behavior: contain; border: 1px solid var(--line); padding: 0; margin: 0; list-style: none; background: #fbfcfe; }
+#results li + li { border-top: 1px solid #d5dfec; }
+#results button {
+  display: grid; width: 100%; gap: .13rem; text-align: left; min-height: 54px; border: 0; border-radius: 0;
+  padding-inline: 11px; background: transparent;
+}
+#results button:focus-visible { outline-offset: -3px; }
+#results button[aria-current=true] { background: #d9e6fa; }
+#results strong { font-weight: 700; }
+#results span { font-size: .76rem; color: #4f5f73; }
+#paging { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 7px; margin-top: 9px; }
+#page { color: #51627a; font-size: .8rem; white-space: nowrap; }
+.detail { min-height: 330px; border-top: 1px solid var(--line); padding-top: 16px; }
+.entry-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+h2 { font-size: clamp(1.65rem,3.8vw,2.5rem); letter-spacing: -.062em; line-height: 1.05; overflow-wrap: anywhere; }
+#entry-meta,#dependencies { color: #4f5f73; font-size: .83rem; margin-top: 5px; overflow-wrap: anywhere; }
+.links,.code-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.preview { overflow: hidden; border: 1px solid var(--line); background: #dce6f5; }
+.preview-controls { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; }
+.preview-controls button { min-height: 42px; font-size: .83rem; }
+#stage { display: block; width: 100%; border: 0; height: clamp(220px,38vh,350px); background: #eaf0f8; }
+#entry-status { font-size: .88rem; margin-block: 13px; min-height: 1.3em; color: #445877; }
+#code-panel {
+  display: grid; grid-template-columns: minmax(130px,1fr) auto; align-items: end; gap: 7px 12px;
+  margin-top: 16px;
+}
+.code-label,#code { grid-column: 1 / -1; }
+#code { width: 100%; min-height: 210px; background: #192333; color: #e4ecf9; font: .83rem/1.45 ui-monospace,monospace; resize: vertical; white-space: pre; }
+@media (max-width:750px) {
+  main { padding-inline: 15px; }
+  #filters { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  .workspace { grid-template-columns: minmax(0,1fr); gap: 18px; }
+  #results { max-height: 250px; }
+}
+@media (max-width:430px) {
+  #code-panel { grid-template-columns: minmax(0,1fr); }
+}
