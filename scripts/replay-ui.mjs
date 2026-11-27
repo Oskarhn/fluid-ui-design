@@ -51,6 +51,14 @@ function validatePlan(input) {
   if (!Number.isInteger(viewport.width) || viewport.width < 240 || viewport.width > 1920
    || !Number.isInteger(viewport.height) || viewport.height < 240 || viewport.height > 1200) throw Error('Choose a viewport from 240–1920 by 240–1200.');
   if (!Array.isArray(steps) || steps.length > 10) throw Error('The plan accepts up to ten steps.');
+  const openingWaitMs=input.openingWaitMs??1100;
+  if(!Number.isInteger(openingWaitMs)||openingWaitMs<500||openingWaitMs>7000)throw Error('Choose an opening wait from 500 to 7000 ms.');
+  const observe=input.observe??[];
+  if(!Array.isArray(observe)||observe.length>8||observe.some(probe=>
+    !probe||!/^[a-z][a-z0-9-]{0,39}$/.test(probe.name??'')||typeof probe.selector!=='string'||!probe.selector||probe.selector.length>180||
+    !['count','left','top','scrollTop','text','checked'].includes(probe.read))||new Set(observe.map(o=>o.name)).size!==observe.length){
+    throw Error('Observation entries need a unique name, CSS selector, and supported reading.');
+  }
   for (const step of steps) {
     const css = typeof step.selector === 'string' && step.selector.length > 0 && step.selector.length <= 400;
     const role = ['button', 'tab', 'checkbox', 'radio', 'link', 'textbox', 'spinbutton'].includes(step.role)
@@ -63,6 +71,11 @@ function validatePlan(input) {
       || (step.action === 'key' && (target || (step.selector === undefined && step.role === undefined))
         && ['Escape', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(step.key));
     if (!valid) throw Error('Specify a CSS or accessible target, a scroll delta, or a navigation key.');
+    if(step.expect!==undefined&&(!step.expect||typeof step.expect!=='object'||Array.isArray(step.expect)||
+      Object.entries(step.expect).some(([key,value])=>!observe.some(probe=>probe.name===key)||
+        !(typeof value==='boolean'||typeof value==='number'||typeof value==='string')))){
+      throw Error('An expected state must refer to a named observation.');
+    }
     if(step.waitMs!==undefined&&(!Number.isInteger(step.waitMs)||step.waitMs<100||step.waitMs>2500)){
       throw Error('Use a step delay from 100 to 2500 ms.');
     }
@@ -72,7 +85,7 @@ function validatePlan(input) {
       throw Error('A pointer point must contain two fractions between zero and one for a click or hover.');
     }
   }
-  return { viewport, steps, mobile: input.mobile === true, fakeMedia: input.fakeMedia === true };
+  return { viewport, steps, openingWaitMs, observe, mobile: input.mobile === true, fakeMedia: input.fakeMedia === true };
 }
 async function playwright() {
   try { return require(process.env.PLAYWRIGHT_MODULE || 'playwright'); }
@@ -144,8 +157,8 @@ async function replayRoutes(context, folder, entries, misses) {
   });
 }
 
-async function runLook(page) {
-  return page.evaluate(() => {
+async function runLook(page, observe = []) {
+  return page.evaluate(observe => {
     const visible = el => {
       const r = el.getBoundingClientRect();
       const s = getComputedStyle(el);
@@ -159,6 +172,16 @@ async function runLook(page) {
       selected:el.getAttribute('aria-selected'),expanded:el.getAttribute('aria-expanded'),checked:el.getAttribute('aria-checked'),
       value:el.matches('input[type=range]')?el.value:el.getAttribute('aria-valuenow')
     }));
+    const observations=Object.fromEntries(observe.map(({name,selector,read})=>{
+      const matches=[...document.querySelectorAll(selector)];
+      const node=matches[0];
+      if(read==='count')return [name,matches.filter(el=>el.getClientRects().length&&getComputedStyle(el).visibility==='visible').length];
+      if(!node)return [name,null];
+      if(read==='text')return [name,node.textContent.replace(/\s+/g,' ').trim().slice(0,180)];
+      if(read==='checked')return [name,node.checked===true];
+      if(read==='scrollTop')return [name,Math.round(node.scrollTop)];
+      return [name,Math.round(node.getBoundingClientRect()[read])];
+    }));
     const b = getComputedStyle(document.body);
     const bounds = heading?.getBoundingClientRect();
     return {
@@ -166,10 +189,10 @@ async function runLook(page) {
       headingBox: bounds ? [bounds.x,bounds.y,bounds.width,bounds.height].map(Math.round) : null,
       scroll:Math.round(scrollY), height:document.documentElement.scrollHeight,
       color:b.color, background:b.backgroundColor, font:b.fontFamily,
-      controls, playing:media.filter(v=>!v.paused&&v.readyState>=2).length,
+      controls, observations, playing:media.filter(v=>!v.paused&&v.readyState>=2).length,
       videos:media.map(v=>{let source=null;try{source=new URL(v.currentSrc).pathname;}catch{}return {source,ready:v.readyState,paused:v.paused};})
     };
-  });
+  }, observe);
 }
 async function observedMedia(page) {
   return page.locator('video, video source, audio, audio source').evaluateAll(nodes=>[...new Set(nodes.flatMap(el=>
@@ -200,7 +223,7 @@ async function observeSequence(page, url, plan, folder, side, hook) {
   const shots=[];
   let navigationError;
   const response=await page.goto(url,{waitUntil:'commit',timeout:20000}).catch(error=>{navigationError=error.message.split('\n')[0];return null;});
-  await clock(1100);
+  await clock(plan.openingWaitMs);
   await deadline(page.evaluate(()=>document.fonts.ready).catch(()=>{}),3000);
   const status=response?.status();
   const bodyText=await page.locator('body').innerText({timeout:2000}).then(x=>x.slice(0,380)).catch(()=>'');
@@ -212,7 +235,7 @@ async function observeSequence(page, url, plan, folder, side, hook) {
   async function sample(label,i,result,readSource = false) {
     const file=side+'-'+String(i).padStart(2,'0')+'.jpg';
     const screenshotMethod=await captureViewport(page,join(folder,file));
-    const shot={label,file,result,screenshotMethod,url:page.url(),state:await runLook(page)};
+    const shot={label,file,result,screenshotMethod,url:page.url(),state:await runLook(page,plan.observe)};
     if(readSource&&result==='executed'){
       const snippets=await page.locator('pre:visible').allTextContents();
       const code=snippets.join('\n\n').trim();
@@ -267,6 +290,12 @@ async function observeSequence(page, url, plan, folder, side, hook) {
       status='not verified: '+error.message.split('\n')[0];
     }
     await sample(step.label??step.action,i+1,status,step.readSource===true);
+    const shot=shots.at(-1);
+    for(const [key,value] of Object.entries(step.expect??{})){
+      if(shot.result==='executed'&&shot.state.observations[key]!==value){
+        shot.result='not verified: '+key+' did not reach the expected value';
+      }
+    }
     if(status.startsWith('not verified: Action left'))break;
   }
   if(hook)await hook(page);

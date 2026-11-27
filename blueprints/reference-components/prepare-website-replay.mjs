@@ -66,20 +66,30 @@ function matchesTarget(expected, recorded) {
   const path=url=>url.pathname.replace(/\/$/,'');
   return b.protocol==='https:' && host(a)===host(b) && path(a)===path(b);
 }
+function sameObservations(first,second,tolerance=0){
+  return (report.plan.observe??[]).every(({name,read})=>{
+    if(!Object.hasOwn(first.state.observations??{},name)||!Object.hasOwn(second.state.observations??{},name))return false;
+    const a=first.state.observations[name],b=second.state.observations[name];
+    return ['left','top','scrollTop'].includes(read)&&typeof a==='number'&&typeof b==='number'
+      ?Math.abs(a-b)<=tolerance:a===b;
+  });
+}
 function compareStates(first, second) {
   return first.url===second.url&&Math.abs(first.state.scroll-second.state.scroll)<=12&&
-    first.state.heading===second.state.heading&&changes(first.state)===changes(second.state);
+    first.state.heading===second.state.heading&&changes(first.state)===changes(second.state)&&sameObservations(first,second,12);
 }
 function hasChange(first,second){
   return first.url!==second.url||first.state.scroll!==second.state.scroll||
-    first.state.heading!==second.state.heading||changes(first.state)!==changes(second.state);
+    first.state.heading!==second.state.heading||changes(first.state)!==changes(second.state)||!sameObservations(first,second,12);
 }
 const valid=entry&&original?.length>1&&copy?.length===original.length&&
   matchesTarget(strict?.target??entry.url,report.finalUrl)&&
   report.entries.some(resource=>resource.url===report.finalUrl&&resource.type==='document')&&
   original.every((shot,i)=>{
     const replay=copy[i];
+    const expected=Object.entries(report.plan.steps[i-1]?.expect??{});
     return (i===0||(shot.result==='executed'&&replay.result==='executed'))&&
+      expected.every(([name,value])=>shot.state.observations?.[name]===value&&replay.state.observations?.[name]===value)&&
       new URL(shot.url).origin===new URL(report.finalUrl).origin&&compareStates(shot,replay);
   })&&original.slice(1).some((shot,i)=>hasChange(original[i],shot))&&
   (!strict||[original,copy].every(shots=>strict.verify(shots)));
