@@ -1,6 +1,7 @@
 import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { catalog as entries } from './catalog.mjs';
 
 const [, , suppliedId, suppliedPath] = process.argv;
 if (!/^[a-z][a-z0-9-]{0,69}$/.test(suppliedId ?? '') || !suppliedPath) {
@@ -51,22 +52,55 @@ const catalog = {
     }
   }
 };
-const item=catalog[suppliedId];
+const strict = catalog[suppliedId];
+const entry = entries.find(item=>item.id===suppliedId && ['Website interactions','Reference galleries'].includes(item.collection));
 const original=report.checks?.original?.shots;
 const copy=report.checks?.copy?.shots;
-if(!item||report.finalUrl!==item.target||!original||!copy||
-  ![original,copy].every(shots=>shots.slice(1).every(shot=>shot.result==='executed')&&item.verify(shots))){
-  throw Error('The requested website needs matching interaction states in both recordings.');
+const changes = state => state.controls
+  .filter(control=>['pressed','selected','expanded','checked','value'].some(key=>control[key]!=null&&control[key]!==''))
+  .map(control=>JSON.stringify([control.role,control.label,control.pressed,control.selected,control.expanded,control.checked,control.value]))
+  .sort().join('\u001f');
+function matchesTarget(expected, recorded) {
+  const a=new URL(expected),b=new URL(recorded);
+  const host=url=>url.host.replace(/^www\./,'');
+  const path=url=>url.pathname.replace(/\/$/,'');
+  return b.protocol==='https:' && host(a)===host(b) && path(a)===path(b);
 }
+function compareStates(first, second) {
+  return first.url===second.url&&Math.abs(first.state.scroll-second.state.scroll)<=12&&
+    first.state.heading===second.state.heading&&changes(first.state)===changes(second.state);
+}
+function hasChange(first,second){
+  return first.url!==second.url||first.state.scroll!==second.state.scroll||
+    first.state.heading!==second.state.heading||changes(first.state)!==changes(second.state);
+}
+const valid=entry&&original?.length>1&&copy?.length===original.length&&
+  matchesTarget(strict?.target??entry.url,report.finalUrl)&&
+  report.entries.some(resource=>resource.url===report.finalUrl&&resource.type==='document')&&
+  original.every((shot,i)=>{
+    const replay=copy[i];
+    return (i===0||(shot.result==='executed'&&replay.result==='executed'))&&
+      new URL(shot.url).origin===new URL(report.finalUrl).origin&&compareStates(shot,replay);
+  })&&original.slice(1).some((shot,i)=>hasChange(original[i],shot))&&
+  (!strict||[original,copy].every(shots=>strict.verify(shots)));
+if(!valid)throw Error('Both recordings must execute and reproduce the recorded location and visible UI states.');
+const item=strict??{
+  title:entry.title+' · originalkode',
+  target:report.finalUrl,
+  hint:'Registrerte steg: '+report.plan.steps.map(step=>step.label||step.action).join(' / ')+'.'
+};
 const here=dirname(fileURLToPath(import.meta.url));
 const privateRoot=join(here,'private-reference');
 const target=join(privateRoot,'website-replays',suppliedId);
 mkdirSync(target,{recursive:true});
 cpSync(join(capture,'assets'),join(target,'assets'),{recursive:true});
 for(const name of ['archive.json','original.webm','copy.webm'])copyFileSync(join(capture,name),join(target,name));
+const poster=original[0].file;
+if(!/^original-00\.(jpg|png)$/.test(poster))throw Error('Expected a recorded opening frame.');
+copyFileSync(join(capture,poster),join(target,poster));
 const manifestPath=join(privateRoot,'websites.json');
 const manifest=existsSync(manifestPath)?JSON.parse(readFileSync(manifestPath,'utf8')):[];
 const size=report.plan.viewport;
-const classification={id:suppliedId,title:item.title,ratio:size.width+' / '+size.height,hint:item.hint,url:item.target};
+const classification={id:suppliedId,title:item.title,ratio:size.width+' / '+size.height,hint:item.hint,url:item.target,poster,states:original.length,missingRoutes:report.replayMisses?.length??0};
 writeFileSync(manifestPath,JSON.stringify([...manifest.filter(entry=>entry.id!==suppliedId),classification],null,2)+'\n');
 console.log(JSON.stringify({id:suppliedId,resources:report.entries.length,matchedStates:copy.length,missingRoutes:report.replayMisses?.length??0}));

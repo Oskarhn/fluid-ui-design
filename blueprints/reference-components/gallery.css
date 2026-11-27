@@ -73,3 +73,7 @@ a { color: #22534f; text-underline-offset: .22em; }
   .library-meta button { margin-inline-start: 0; }
   .library-detail h2 { scroll-margin-top: 1rem; }
 }
+
+.library-archive {width:100%;max-width:960px;}
+.library-archive img {display:block;width:100%;height:auto;border:1px solid #8884;}
+.library-archive-actions {display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px;}

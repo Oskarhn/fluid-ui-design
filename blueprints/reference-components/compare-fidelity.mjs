@@ -21,8 +21,11 @@ try {
   const response=await fetch('./private-reference/websites.json');
   if(response.ok){
     const sites=await response.json();
-    for(const site of sites)cases.push([site.id,site.title,site.ratio,site.hint,[['Start',0]],
-      './private-reference/website-replays/'+site.id+'/original.webm',site]);
+    for(const site of sites){
+      const failures=site.missingRoutes>0?' '+site.missingRoutes+' forespørsler manglet i arkivet.':'';
+      cases.push([site.id,site.title,site.ratio,site.hint+failures,[['Start',0]],
+        './private-reference/website-replays/'+site.id+'/original.webm',site]);
+    }
   }
 } catch {}
 try {
@@ -67,9 +70,19 @@ function show() {
   }
 }
 movie.addEventListener('error', () => { missing.hidden = false; });
-movie.addEventListener('play',()=>{if(!localMovie.hidden)localMovie.play().catch(()=>{});});
-movie.addEventListener('pause',()=>{if(!localMovie.hidden)localMovie.pause();});
-movie.addEventListener('seeked',()=>{if(!localMovie.hidden&&localMovie.readyState>=1)localMovie.currentTime=Math.min(movie.currentTime,localMovie.duration);});
+for(const [track,other] of [[movie,localMovie],[localMovie,movie]]){
+  track.addEventListener('play',()=>{
+    if(!localMovie.hidden&&other.paused)other.play().catch(()=>{});
+  });
+  track.addEventListener('pause',()=>{
+    if(!localMovie.hidden&&!other.paused)other.pause();
+  });
+  track.addEventListener('seeked',()=>{
+    if(localMovie.hidden||other.readyState<1)return;
+    const paired=Math.min(track.currentTime,other.duration);
+    if(Math.abs(other.currentTime-paired)>.1)other.currentTime=paired;
+  });
+}
 document.querySelector('#open-site').addEventListener('click',async()=>{
   try{
     const response=await fetch('/open-archived-site/'+encodeURIComponent(picker.value),{method:'POST',headers:{'X-Reference-Replay':'1'}});
@@ -77,6 +90,10 @@ document.querySelector('#open-site').addEventListener('click',async()=>{
   }catch{status.textContent='Kopien kunne ikke åpnes.';}
 });
 picker.addEventListener('change', () => { history.replaceState(null,'','#'+picker.value); show(); });
-const requested = location.hash.slice(1);
-if (cases.some(([id]) => id === requested)) picker.value = requested;
-show();
+function readHash() {
+  const requested=location.hash.slice(1);
+  if (cases.some(([id]) => id === requested)) picker.value=requested;
+  show();
+}
+window.addEventListener('hashchange',readHash);
+readHash();

@@ -14,18 +14,20 @@ const byId = new Map(catalog.map(entry => [entry.id, entry]));
 const mode = new URLSearchParams(location.search);
 document.body.toggleAttribute('data-demo-mode', mode.has('demo'));
 let privateAssets = {};
-let websiteIds = new Set();
+let websiteReplays = new Map();
+let showComponent = false;
 if (mode.has('reference-assets')) {
   try {
     const [result,websiteData] = await Promise.all([fetch('./private-reference/manifest.json'),fetch('./private-reference/websites.json')]);
     if (result.ok) privateAssets = await result.json();
-    if (websiteData.ok) websiteIds=new Set((await websiteData.json()).map(record=>record.id));
+    if (websiteData.ok) websiteReplays=new Map((await websiteData.json()).map(record=>[record.id,record]));
   } catch {}
 }
 let current;
 let session;
 
 function render(entry) {
+  if(entry!==current)showComponent=false;
   session?.abort();
   session = new AbortController();
   current = entry;
@@ -37,10 +39,26 @@ function render(entry) {
   entryInfo.textContent = entry.description;
   reference.href = entry.url;
   reference.textContent = entry.referenceLabel ?? 'Original reference';
-  replay.hidden=!websiteIds.has(entry.id);
+  const archive=websiteReplays.get(entry.id);
+  replay.hidden=!archive;
   if(!replay.hidden)replay.href='./compare-fidelity.html#'+entry.id;
   source.href = './' + file;
-  mount(preview, { signal: session.signal, options: { ...entry.options, ...privateAssets[entry.id] } });
+  const compare = archive && !showComponent && !mode.has('demo') && archive.poster;
+  reset.hidden=Boolean(compare);
+  source.hidden=Boolean(compare);
+  if (compare) {
+    const stage=document.createElement('div');stage.className='library-archive';
+    const poster=new Image();poster.src='./private-reference/website-replays/'+entry.id+'/'+archive.poster;
+    poster.alt='Recorded opening frame';
+    const details=document.createElement('div');details.className='library-archive-actions';
+    const view=document.createElement('a');view.href=replay.href;view.textContent='Open side-by-side capture';
+    const demo=document.createElement('button');demo.type='button';demo.textContent='Try standalone component';
+    demo.addEventListener('click',()=>{showComponent=true;render(entry);reset.focus();},{signal:session.signal});
+    details.append(view,demo);stage.append(poster,details);preview.append(stage);
+    entryInfo.textContent=archive.hint;
+  } else {
+    mount(preview, { signal: session.signal, options: { ...entry.options, ...privateAssets[entry.id] } });
+  }
   renderList();
 }
 
