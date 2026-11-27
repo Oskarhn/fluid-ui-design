@@ -101,6 +101,8 @@ The [reference component library](blueprints/reference-components/README.md) lin
 
 For interactive controls, [motion composition](references/motion-composition.md) pairs reusable mechanisms with [twelve MIT Bencho components](blueprints/bencho/README.md) and an original 3D material study.
 
+[Component sources](blueprints/component-sources/index.html) searches Uiverse, ForgeUI and Uilora by category and framework. Browse the [source selection guide](references/component-sourcing.md) for licensing, imports and testing.
+
 [Pinned motion-library sources](vendor/motion-sources/README.md) gives local lookup paths, integration guidance and upstream revisions for Anime.js, GSAP, Lenis and React Bits. The [Anime.js guide](references/animejs.md) and [workbench](blueprints/animejs/index.html) cover custom timelines, SVG drawing, drag, layout, scroll, text and pointer-driven animation.
 
 [Mobile interfaces](references/mobile-platforms.md) distinguishes responsive web from native SwiftUI. The [four-style control study](blueprints/mobile/control-styles.html) shares one dial across three input paths. [Public-preview recipes](references/public-preview-recipes.md) link to four original background videos and their source.

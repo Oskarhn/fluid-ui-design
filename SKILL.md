@@ -10,7 +10,7 @@ description: >-
   web app, native mobile interface, or interactive 3D experience.
 license: MIT
 metadata:
-  version: "2.19.0"
+  version: "2.20.0"
 ---
 
 # Fluid UI Design
@@ -46,6 +46,7 @@ For new sites and web changes that affect performance, use the [Lighthouse workf
    For a custom gesture, scrubbable timeline, moving layout, SVG sequence, or a change to an existing study, check the [Anime.js guide](references/animejs.md) and [runnable examples](blueprints/animejs/index.html). Reuse the relevant API when the design needs it and verify the same controls and rest state with reduced motion.
    For GSAP, Lenis or React Bits, use the [pinned source checkouts](vendor/motion-sources/README.md) to identify the relevant source, integration and license.
    If the user supplies a clip, use [recording motion studies](references/recording-motion-studies.md) to identify the visible phases and stable elements before setting implementation timing.
+   When the brief needs existing buttons, loaders, motion, sections, or widgets, check the [component sources catalog](blueprints/component-sources/index.html) and [source selection guide](references/component-sourcing.md). Choose by behavior, platform, and dependencies. Preserve the project's content and interaction semantics, and keep the source terms with the component.
    For a known reference URL or a reusable interaction, find its runnable example in the [reference component library](blueprints/reference-components/README.md). Load the selected module and its styles, then verify the transition in the receiving layout.
    For an authorized website replay, work through each URL independently. Promote a source archive only after the same input produces the expected state in both the original and replay. Keep the side-by-side evidence with the selected archive. Reuse its media and interaction code when available. Check the real input, intermediate frame and settled state before offering it as a usable example. Record which controls, scroll regions and viewport sizes were tested. Read the offset of the element that actually scrolls, measure translated canvases at matching settled states, and check rendered filter results as well as the selected control.
    When matching a reference, reproduce the observed input first. Compare opening, mid-gesture, and settled frames at matching viewport bounds. For an object or material study, inspect the camera, silhouette, lighting, and depth along with timing and the final state.
