@@ -10,6 +10,15 @@ const source = document.getElementById('component-source');
 const reset = document.getElementById('reset');
 const entryInfo = document.getElementById('component-info');
 const byId = new Map(catalog.map(entry => [entry.id, entry]));
+const mode = new URLSearchParams(location.search);
+document.body.toggleAttribute('data-demo-mode', mode.has('demo'));
+let privateAssets = {};
+if (mode.has('reference-assets')) {
+  try {
+    const result = await fetch('./private-reference/manifest.json');
+    if (result.ok) privateAssets = await result.json();
+  } catch {}
+}
 let current;
 let session;
 
@@ -26,7 +35,7 @@ function render(entry) {
   reference.href = entry.url;
   reference.textContent = entry.referenceLabel ?? 'Original reference';
   source.href = './' + file;
-  mount(preview, { signal: session.signal, options: entry.options ?? {} });
+  mount(preview, { signal: session.signal, options: { ...entry.options, ...privateAssets[entry.id] } });
   renderList();
 }
 

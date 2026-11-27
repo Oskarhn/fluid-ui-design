@@ -4,9 +4,15 @@ import * as physical from './physical.mjs';
 import * as sites from './sites.mjs';
 import * as patterns from './patterns.mjs';
 import * as promptEffects from './prompt-effects.mjs';
+import * as fidelityInterface from './fidelity-interface.mjs';
+import * as fidelityInstruments from './fidelity-instruments.mjs';
+import * as fidelityArchive from './fidelity-archive.mjs';
+import * as fidelityGlass from './fidelity-glass.mjs';
 
 export const components = Object.fromEntries(
-  Object.entries({ navigation, instrument, physical, sites, patterns, 'prompt-effects': promptEffects }).flatMap(([file, module]) =>
+  Object.entries({ navigation, instrument, physical, sites, patterns, 'prompt-effects': promptEffects,
+    'fidelity-interface': fidelityInterface, 'fidelity-instruments': fidelityInstruments,
+    'fidelity-archive': fidelityArchive, 'fidelity-glass': fidelityGlass }).flatMap(([file, module]) =>
     Object.entries(module).map(([name, mount]) => [name, { mount, file: file + '.mjs' }])
   )
 );
@@ -14,12 +20,12 @@ export const components = Object.fromEntries(
 export const catalog = [
   { id: 'video-hero', title: 'Video backdrop and poster', component: 'videoHero', collection: 'Supplied prompts', description: 'Play and pause an original sample loop beneath accessible HTML text.', url: '../../references/website-and-control-studies.md#adapt-the-supplied-motion-prompts', referenceLabel: 'Prompt notes' },
   { id: 'unmask-trail', title: 'Pointer unmask trail', component: 'unmaskTrail', collection: 'Supplied prompts', description: 'Move the pointer to cut a fading trail, or reveal a sample by keyboard and touch.', url: '../../references/website-and-control-studies.md#adapt-the-supplied-motion-prompts', referenceLabel: 'Prompt notes' },
-  { id: 'glass-transfer', title: 'Glass breakaway and return', component: 'glassTransfer', collection: 'Supplied prompts', description: 'Tilt a CSS glass panel, split it open, then let the pieces reassemble on Back.', url: '../../references/website-and-control-studies.md#adapt-the-supplied-motion-prompts', referenceLabel: 'Prompt notes' },
-  {"id":"collapse-icon","title":"Collapsing sidebar","component":"collapseIcon","description":"Fold the menu strokes into an arrow while the workspace moves aside.","collection":"X motion studies","url":"https://x.com/iconists/status/2125150712216863014"},
+  { id: 'glass-transfer', title: 'Glass breakaway and return', component: 'glassTransfer', collection: 'Supplied prompts', description: 'Tilt the beveled slabs, lift a shard, then open the material paper and reassemble on Back.', url: 'https://motionsites.ai/?prompt=facet-glass-hero' },
+  {"id":"collapse-icon","title":"Collapsing sidebar","component":"collapseIcon","description":"Drag the phone surface horizontally. The panel and icon follow the pointer, then settle on release.","collection":"X motion studies","url":"https://x.com/iconists/status/2125150712216863014"},
   {"id":"quick-actions","title":"Quick action tiles","component":"quickActions","description":"Open a staggered action grid above the current surface.","collection":"X motion studies","url":"https://x.com/sonia_axion/status/2123584148648399175"},
   {"id":"patient-funnel","title":"Patient funnel","component":"conversionFunnel","description":"Change the period to recompute the funnel and its conversion rate.","collection":"X motion studies","url":"https://x.com/umitceliks/status/2120476578622669278"},
-  {"id":"calorie-flame","title":"Energy flame meter","component":"burnMeter","description":"Set a sample intensity and pause the moving flame.","collection":"X motion studies","url":"https://x.com/Anuar_DesignX/status/2120143554244686288"},
-  {"id":"file-drawer","title":"Archive drawer","component":"fileDrawer","description":"Extend a tray, select a folder, and close the overlay.","collection":"X motion studies","url":"https://x.com/justynabuilds/status/2114725547209314359"},
+  {"id":"calorie-flame","title":"Energy flame meter","component":"burnMeter","description":"Switch the sample workout and pause the continuously moving heat field.","collection":"X motion studies","url":"https://x.com/Anuar_DesignX/status/2120143554244686288"},
+  {"id":"file-drawer","title":"Archive drawer","component":"fileDrawer","description":"Move the dark housing and metal tray, then lift and return a printed file.","collection":"X motion studies","url":"https://x.com/justynabuilds/status/2114725547209314359"},
   {"id":"completion-checks","title":"Completion checkmarks","component":"taskChecks","description":"Check a task and reset the list without changing its order.","collection":"X motion studies","url":"https://x.com/barret_jessy/status/2114756442804949307"},
   {"id":"floating-nav","title":"Expanding navigation","component":"floatingNav","description":"Expand a compact nav with rollovers and a light or dark surface.","collection":"X motion studies","url":"https://x.com/Matthias_Oel/status/2108211031432695852"},
   {"id":"tool-folders","title":"Tool folders","component":"toolFolders","description":"Open one folder to lift its available tools above the row.","collection":"X motion studies","url":"https://x.com/raul_dronca/status/2103409890781720977"},
