@@ -81,7 +81,7 @@ export function volumeElastic(root, { signal }) {
     thumb.style.left=x+'px';thumb.style.top=y+'px';
     label.textContent=input.value;
     ctx.setTransform(scale,0,0,scale,0,0);ctx.clearRect(0,0,w,h);
-    ctx.lineWidth=2.4;ctx.lineCap='round';
+    ctx.lineWidth=3.6;ctx.lineCap='round';
     const mid = h/2;
     ctx.beginPath();ctx.strokeStyle='#e39331';ctx.moveTo(inset,mid);
     ctx.bezierCurveTo(x*.44,mid,x-14,y,x,y);ctx.stroke();
@@ -89,16 +89,15 @@ export function volumeElastic(root, { signal }) {
     ctx.bezierCurveTo(x+14,y,x+(w-x)*.52,mid,w-inset,mid);ctx.stroke();
     for(let i=0;i<=10;i++){
       const mark=inset+(w-inset*2)*i/10;
-      const fall=Math.max(0,1-Math.abs(mark-x)/(w*.24));
       ctx.fillStyle=i/10<=split()?'#d79a55':'#aeb6b0';
-      ctx.beginPath();ctx.arc(mark,mid+12+current*fall*.39,i%5===0?1.2:.85,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(mark,mid+18,i%5===0?1.42:1,0,Math.PI*2);ctx.fill();
     }
   }
   function tick(now) {
     frame=0;
     const dt=last?Math.min(.03,(now-last)/1000):.016;last=now;
     if(reduce()){current=desired;velocity=0;}
-    else {velocity+=(185*(desired-current)-20*velocity)*dt;current+=velocity*dt;}
+    else {const tension=gesture?365:196,damping=gesture?31:19;velocity+=(tension*(desired-current)-damping*velocity)*dt;current+=velocity*dt;}
     draw();
     if (Math.abs(current-desired)>.08||Math.abs(velocity)>.14) run();
     else last=0;
@@ -108,18 +107,23 @@ export function volumeElastic(root, { signal }) {
   listen(input,'input',draw,signal);
   listen(input,'pointerdown',e=>{
     if(e.button!==0||!e.isPrimary)return;
+    e.preventDefault();
     gesture={id:e.pointerId,origin:e.clientY};
+    input.focus({preventScroll:true});
     input.setPointerCapture(e.pointerId);
     track.dataset.active='';
+    seek(e.clientX);
   },signal);
+  function seek(clientX){
+    const box=track.getBoundingClientRect();
+    input.value=Math.round(100*clamp((clientX-box.left-8)/(box.width-16),0,1));
+    draw();
+  }
   listen(input,'pointermove',e=>{
     if (gesture?.id!==e.pointerId) return;
-    const box=track.getBoundingClientRect();
-    const x=clamp((e.clientX-box.left-8)/(box.width-16),0,1);
-    input.value=Math.round(x*100);
-    desired=clamp((e.clientY-gesture.origin)*.93,-42,42);
-    if(!reduce()){current=desired;velocity=0;}
-    draw();
+    seek(e.clientX);
+    desired=clamp((e.clientY-gesture.origin)*1.24,-54,54);
+    run();
   },signal);
   function release(e) {
     if(gesture?.id!==e.pointerId) return;
@@ -133,21 +137,21 @@ export function volumeElastic(root, { signal }) {
 export function couponDissolve(root, { signal }) {
   root.innerHTML=`
     <div class="coupon-stage">
-      <div class="coupon-phone"><div class="coupon-header">Coupons</div><div class="coupon-choices">
+      <div class="coupon-phone"><div class="coupon-header"><span>Coupons</span><small>Add a coupon</small></div><div class="coupon-choices">
         <button type="button" data-rate=".7">MOCHEO <small>70%</small></button>
         <button type="button" data-rate=".45">MOCHEO <small>45%</small></button>
         <button type="button" data-rate=".2">MOCHEO <small>20%</small></button>
       </div>
       <div class="coupon-delivery"><h3>Delivery</h3><small>Home · Studio address</small></div>
-      <label class="coupon-row"><input type="radio" name="service" checked> Standard <span>Free</span></label>
-      <label class="coupon-row"><input type="radio" name="service" value="express"> Express <span>£12.00</span></label>
-      <div class="coupon-total"><div><small>Total</small><output aria-live="polite">£134.00</output><span class="coupon-saving" hidden></span></div><button type="button" class="coupon-reset">Reset</button></div>
+      <label class="coupon-row"><input type="radio" name="service" checked> <div>Standard<small>2–5 business days</small></div><span>Free</span></label>
+      <label class="coupon-row"><input type="radio" name="service" value="express"> <div>Express<small>1–2 business days</small></div><span>£12.00</span></label>
+      <div class="coupon-total"><div><small>Total</small><output aria-live="polite">£134.00</output><span class="coupon-saving" hidden></span></div><button type="button" class="coupon-order">Place order</button></div><div class="coupon-review"><button type="button" class="coupon-reset">Reset</button><span role="status"></span></div>
       <canvas aria-hidden="true"></canvas></div>
     </div>`;
   const coupons=controls(root,'[data-rate]');
   const phone=control(root,'.coupon-phone');
   const canvas=control(phone,'canvas'),ctx=canvas.getContext('2d');
-  const total=control(phone,'output');
+  const total=control(phone,'output'),message=control(phone,'.coupon-review span');
   const radio=controls(root,'input');
   let rate=0,frame=0;
   const currency = new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'});
@@ -164,24 +168,24 @@ export function couponDissolve(root, { signal }) {
     const dpr=Math.min(devicePixelRatio,2);
     canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    const particles=Array.from({length:145},(_,i)=>({
+    const particles=Array.from({length:420},(_,i)=>({
       x:a.left-rect.left+((i*53)%101)/100*a.width,
       y:a.top-rect.top+((i*29)%61)/60*a.height,
-      phase:(i%29)/190, dx:Math.sin(i*2.4)*31, dy:Math.cos(i*3.8)*26
+      phase:(i%39)/170, dx:Math.sin(i*2.4)*25, dy:Math.cos(i*3.8)*17
     }));
     const start=performance.now();
     const ends=[b.left-rect.left+b.width/2,b.top-rect.top+b.height/2];
     let applied=false;
     function paint(now) {
-      const time=clamp((now-start)/770,0,1);
+      const time=clamp((now-start)/930,0,1);
       ctx.clearRect(0,0,rect.width,rect.height);
       ctx.fillStyle='#e7dbea';
       for (const p of particles) {
         const t=clamp((time-p.phase)/(1-p.phase),0,1);
         const shift=Math.sin(t*Math.PI);
-        ctx.globalAlpha=(1-t)*.75;
-        const turn=Math.sin(t*7+p.phase*37)*16*shift;
-        ctx.fillRect(p.x+(ends[0]-p.x)*t+shift*p.dx+turn,p.y+(ends[1]-p.y)*t+shift*p.dy,1.1,1.1);
+        ctx.globalAlpha=Math.min(1,t*7)*(1-t)*.88;
+        const turn=Math.sin(t*5.1)*29*shift;
+        ctx.fillRect(p.x+(ends[0]-p.x)*t+shift*p.dx+turn,p.y+(ends[1]-p.y)*t+shift*p.dy,.8,.8);
       }
       if (!applied&&time>.79){applied=true;update();}
       if (time<1&&!signal.aborted)frame=requestAnimationFrame(paint);
@@ -198,10 +202,11 @@ export function couponDissolve(root, { signal }) {
     });
   },signal));
   radio.forEach(item=>listen(item,'change',update,signal));
+  listen(control(phone,'.coupon-order'),'click',()=>{message.textContent='Order preview · '+total.textContent;},signal);
   listen(control(root,'.coupon-reset'),'click',()=>{
     cancelAnimationFrame(frame);ctx?.clearRect(0,0,canvas.width,canvas.height);
     coupons.forEach(item=>{item.disabled=false;item.classList.remove('coupon-used');});
-    rate=0;radio[0].checked=true;update();
+    rate=0;radio[0].checked=true;message.textContent='';update();
   },signal);
   signal.addEventListener('abort',()=>cancelAnimationFrame(frame),{once:true});
 }
@@ -210,8 +215,8 @@ export function circularDownload(root, { signal, options = {} }) {
   root.innerHTML=`
     <div class="download-ring-stage">
       <div class="download-pane">
-        <header><div><span data-caption>Restoring</span><small data-count>0 of 2,481 photos</small></div><button type="button" data-minimize aria-label="Minimize restoring progress" aria-expanded="true">↙</button></header>
-        <div class="download-dial"><canvas width="320" height="320" aria-hidden="true"></canvas><output role="status">00</output><span class="download-percent" aria-hidden="true">%</span></div>
+        <header><div><span data-caption>Restoring</span><small data-count>0 of 2,481 photos</small></div><button type="button" data-minimize aria-label="Minimize restoring progress" aria-expanded="true">↗</button></header>
+        <div class="download-dial"><canvas width="320" height="320" aria-hidden="true"></canvas><output role="status" class="a11y-only">00</output></div>
         <div class="download-details"><div><strong data-bytes>0.0 GB</strong><span>Downloaded</span></div><div><strong data-rate>Idle</strong><span>Speed</span></div><div><strong data-remain>—</strong><span>Remaining</span></div></div>
         <div class="download-actions"><button type="button" data-start>Start</button><button type="button" data-cancel disabled aria-label="Cancel download">Cancel</button></div>
       </div>
@@ -223,7 +228,7 @@ export function circularDownload(root, { signal, options = {} }) {
   const rate=control(root,'[data-rate]'), bytes=control(root,'[data-bytes]'), remain=control(root,'[data-remain]');
   const caption=control(root,'[data-caption]'), count=control(root,'[data-count]');
   const go=control(root,'[data-start]'), cancel=control(root,'[data-cancel]'), minimize=control(root,'[data-minimize]');
-  const duration=5400, capacity=8.7;
+  const duration=5400, capacity=3.8;
   let frame=0,start,progress=0;
   function paint(completed=false){
     if(!ctx)return;
@@ -235,20 +240,34 @@ export function circularDownload(root, { signal, options = {} }) {
       ctx.arc(160+Math.cos(angle)*142,160+Math.sin(angle)*142,lit?2.9:2.55,0,Math.PI*2);
       ctx.fill();
     }
-    if(!completed)return;
-    const grid=['00000000001','00000000010','00000000100','00000001000','10000010000','01000100000','00101000000','00010000000'];
-    ctx.fillStyle='#fff4dc';
-    grid.forEach((line,y)=>[...line].forEach((dot,x)=>{
-      if(dot!=='1')return;
-      ctx.beginPath();ctx.arc(104+x*10,123+y*10,4,0,Math.PI*2);ctx.fill();
-    }));
+    const digits=[
+      '01110/11011/11011/11011/11011/11011/01110','00100/01100/00100/00100/00100/00100/01110',
+      '01110/11011/00011/00110/01100/11000/11111','11110/00011/00011/01110/00011/00011/11110',
+      '00010/00110/01110/11010/11111/00010/00010','11111/11000/11000/11110/00011/00011/11110',
+      '01110/11000/11000/11110/11011/11011/01110','11111/00011/00110/00110/01100/01100/01100',
+      '01110/11011/11011/01110/11011/11011/01110','01110/11011/11011/01111/00011/00011/01110'];
+    const value=String(Math.floor(progress*100)).padStart(2,'0');
+    const check=['00000000001','00000000010','00000000100','00000001000','10000010000','01000100000','00101000000','00010000000'];
+    const display=completed?check:digits[Number(value[0])].split('/').map((row,i)=>row+'0'+digits[Number(value[1])].split('/')[i]);
+    function matrix(rows,x0,y0,gap,radius){
+      rows.forEach((row,y)=>[...row].forEach((pixel,x)=>{
+        const lit=pixel==='1';ctx.fillStyle=lit?'#fff1d4':'#f4cd8c40';
+        ctx.beginPath();ctx.arc(x0+x*gap,y0+y*gap,lit?radius:radius*.6,0,Math.PI*2);ctx.fill();
+      }));
+    }
+    matrix(display,95,120,11.1,4);
+    if(!completed)matrix(['101','001','010','100','101'],232,112,6.8,2.1);
+  }
+  function remainingTime(seconds){
+    const time=Math.ceil(seconds);
+    return Math.floor(time/60)+':'+String(time%60).padStart(2,'0');
   }
   function status(completed=false,cancelled=false){
     dial.toggleAttribute('data-complete',completed);
     output.textContent=completed?'✓':String(Math.floor(progress*100)).padStart(2,'0');
     bytes.textContent=(capacity*progress).toFixed(1)+' GB';
-    rate.textContent=completed||cancelled||!progress?(cancelled?'Cancelled':'Idle'):(95+Math.round(18*Math.sin(progress*14)))+' MB/s';
-    remain.textContent=completed?'0:00':cancelled||!progress?'—':'0:'+String(Math.ceil((1-progress)*duration/1000)).padStart(2,'0');
+    rate.textContent=completed||cancelled||!progress?(cancelled?'Cancelled':'Idle'):(42+Math.round(5*Math.sin(progress*14)))+' MB/s';
+    remain.textContent=completed?'0:00':cancelled||!progress?'—':remainingTime((1-progress)*capacity*1024/42);
     count.textContent=Math.floor(2481*progress).toLocaleString('en-US')+' of 2,481 photos';
     caption.textContent=completed?'Restore complete':'Restoring';
     paint(completed);
@@ -275,7 +294,7 @@ export function circularDownload(root, { signal, options = {} }) {
   listen(cancel,'click',()=>end(false),signal);
   listen(minimize,'click',()=>{
     const smaller=pane.toggleAttribute('data-minimized');
-    minimize.textContent=smaller?'↗':'↙';
+    minimize.textContent=smaller?'↙':'↗';
     minimize.setAttribute('aria-label',smaller?'Expand restoring progress':'Minimize restoring progress');
     minimize.setAttribute('aria-expanded',String(!smaller));
   },signal);
