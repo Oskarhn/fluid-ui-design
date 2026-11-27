@@ -6,12 +6,13 @@ const clamp = (v,min,max) => Math.min(max,Math.max(min,v));
 export function caffeineCurve(root,{signal}) {
   root.innerHTML=`
     <div class="curve-stage"><header><b>CAFFEINE</b><small>Estimated active dose · sample</small></header>
-      <div class="curve-area"><canvas aria-hidden="true"></canvas><output aria-live="polite"></output></div>
+      <div class="curve-area"><canvas aria-hidden="true"></canvas><output aria-live="polite"></output><input type="range" min="0" max="100" value="15" aria-label="Scrub caffeine curve"></div>
       <div class="dose-row"><button type="button" aria-pressed="true">08:00</button><button type="button" aria-pressed="false">10:30</button><button type="button" aria-pressed="false">13:10</button></div>
       <div class="curve-footer">TOTAL DOSE <span>252 mg</span></div>
     </div>`;
   const c=control(root,'canvas'),ctx=c.getContext('2d');
   const note=control(root,'output');
+  const scrub=control(root,'input');
   const buttons=controls(root,'button');
   const times=[.15,.35,.58], amounts=[65,82,105];
   let selected=0,sweep=times[0],target=sweep,frame=0;
@@ -36,9 +37,12 @@ export function caffeineCurve(root,{signal}) {
     // Parallel traces give the sampled curve the short, layered depth seen in the recording.
     for(let depth=25;depth>=0;depth--){
       const section=depth/25;
-      ctx.beginPath();
-      positions.forEach(({x,y},k)=>ctx[k?'lineTo':'moveTo'](x-depth*.71,y+depth*.48));
-      ctx.strokeStyle='rgba(164,173,182,'+(.24*(1-section)) + ')';ctx.stroke();
+      ctx.fillStyle='rgba(171,179,188,'+(.72*(1-section)) + ')';
+      const pixel=Math.max(1,w/290);
+      positions.forEach(({x,y},k)=>{
+        if ((k+depth*3)%4===0) return;
+        ctx.fillRect(Math.round((x-depth*.61)/pixel)*pixel,Math.round((y+depth*.63)/pixel)*pixel,pixel,pixel);
+      });
     }
     for(const {x,y,t} of positions) {
       const strength=Math.max(0,1-Math.abs(t-sweep-.019)*21);
@@ -46,7 +50,9 @@ export function caffeineCurve(root,{signal}) {
       const shade=ctx.createLinearGradient(x,y,x,baseline);
       shade.addColorStop(0,'rgba(103,161,255,'+strength*.88+')');
       shade.addColorStop(1,'rgba(46,100,204,0)');
-      ctx.fillStyle=shade;ctx.fillRect(x,y,Math.max(2,width/130),baseline-y);
+      ctx.fillStyle=shade;
+      const size=Math.max(1,w/245);
+      for(let offset=0;offset<baseline-y;offset+=size*2.4)ctx.fillRect(x,y+offset,size*1.2,size);
     }
     const x=inset+(sweep+.055)*width;
     ctx.strokeStyle='#9ea6ae5a';ctx.beginPath();ctx.moveTo(x,h*.16);ctx.lineTo(x,baseline);ctx.stroke();
@@ -65,10 +71,20 @@ export function caffeineCurve(root,{signal}) {
   function schedule(){if(!frame&&!signal.aborted)frame=requestAnimationFrame(tick);}
   function activate(i) {
     selected=i;target=times[i];buttons.forEach((b,j)=>b.setAttribute('aria-pressed',String(i===j)));
+    scrub.value=String(Math.round(target*100));
     note.textContent=amounts[i]+' mg · '+buttons[i].textContent;
     schedule();
   }
   buttons.forEach((b,i)=>listen(b,'click',()=>activate(i),signal));
+  listen(scrub,'input',()=>{
+    target=Number(scrub.value)/100;
+    const quantity=times.reduce((sum,_,i)=>sum+signalAt(target,i),0);
+    const totalMinutes=360+Math.round(target*840);
+    const time=String(Math.floor(totalMinutes/60)).padStart(2,'0')+':'+String(totalMinutes%60).padStart(2,'0');
+    note.textContent=Math.round(quantity)+' mg · '+time;
+    scrub.setAttribute('aria-valuetext',note.textContent);
+    schedule();
+  },signal);
   const resize=new ResizeObserver(render);resize.observe(c);
   signal.addEventListener('abort',()=>{resize.disconnect();cancelAnimationFrame(frame);},{once:true});
   activate(0);
@@ -102,10 +118,18 @@ export function creditConsole(root,{signal}) {
     const output=document.createElement('strong');
     output.textContent=base;nums.push(output);
     labels.append(title,output);
-    const chart=document.createElement('div');
+    const chart=document.createElement(name==='Workspace'?'canvas':'div');
     chart.className='credit-sparks';
     chart.style.setProperty('--accent',color);
-    for (const value of data) {
+    if(chart instanceof HTMLCanvasElement){
+      chart.width=220;chart.height=66;
+      const ctx=chart.getContext('2d');
+      if(ctx){
+        ctx.beginPath();data.forEach((value,i)=>ctx[i?'lineTo':'moveTo'](7+i*34,63-value*.66));
+        ctx.strokeStyle='#76abf4';ctx.lineWidth=2.5;ctx.stroke();ctx.lineTo(211,65);ctx.lineTo(7,65);ctx.closePath();
+        const ink=ctx.createLinearGradient(0,0,0,66);ink.addColorStop(0,'#689ee3a0');ink.addColorStop(1,'#689ee300');ctx.fillStyle=ink;ctx.fill();
+      }
+    }else for (const value of data) {
       const bar=document.createElement('i');
       bar.style.height=value+'%';chart.append(bar);
     }
@@ -140,6 +164,7 @@ export function contextTreemap(root,{signal}) {
     ['Free','1.1k', [['Available','1.1k']]]
   ];
   const grid=control(root,'.context-columns'),msg=control(root,'output');
+  const summary=document.createElement('aside');summary.className='context-detail';summary.hidden=true;grid.after(summary);
   const cols=blocks.map(([label,count,entries],index)=>{
     const section=document.createElement('section');
     section.dataset.index=index;
@@ -155,6 +180,11 @@ export function contextTreemap(root,{signal}) {
         grid.dataset.focus=index;
         controls(grid,'button').forEach(el=>el.setAttribute('aria-pressed',String(el===tile)));
         msg.textContent=label+' / '+name+' · '+value+' tokens';
+        summary.hidden=false;
+        summary.replaceChildren();
+        const title=document.createElement('strong');title.textContent=name;
+        const meta=document.createElement('span');meta.textContent=value+' tokens • '+label;
+        summary.append(title,meta);
       },signal);
       section.append(tile);
     });
@@ -165,6 +195,7 @@ export function contextTreemap(root,{signal}) {
     delete grid.dataset.focus;
     controls(grid,'button').forEach(el=>el.setAttribute('aria-pressed','false'));
     msg.textContent='Select a context block';
+    summary.hidden=true;
   },signal);
 }
 
@@ -178,6 +209,16 @@ export function agentTimeline(root,{signal}) {
       <output role="status">Ready</output><button type="button">Run sample</button>
     </section></div>`;
   const tasks=controls(root,'.agent-task'),output=control(root,'output'),button=control(root,'button');
+  for(const disclosure of controls(root,'summary')) listen(disclosure,'click',()=>{
+    const original=tasks.map(task=>task.getBoundingClientRect().top);
+    requestAnimationFrame(()=>{
+      if(signal.aborted)return;
+      tasks.forEach((task,i)=>{
+        const distance=original[i]-task.getBoundingClientRect().top;
+        if(Math.abs(distance)>1)motion(task,[{transform:'translateY('+distance+'px)'},{transform:'none'}],{duration:310,easing:'cubic-bezier(.2,.75,.3,1)'},signal);
+      });
+    });
+  },signal);
   let timers=[];
   function stop() {timers.forEach(cancel=>cancel());timers=[];}
   listen(button,'click',()=>{
@@ -203,9 +244,9 @@ export function connectionFlow(root,{signal}) {
   root.innerHTML=`
     <div class="connections-stage">
       <div class="connection-network"><canvas aria-hidden="true"></canvas>
-        <button type="button" data-node="0">Source <span>12.8</span></button>
-        <button type="button" data-node="1">Filter <span>0.6</span></button>
-        <button type="button" data-node="2">Preview <span>0.9</span></button>
+        <button type="button" data-node="0">Source <span>12.8</span><i aria-hidden="true"></i></button>
+        <button type="button" data-node="1">Filter <span>0.6</span><i aria-hidden="true"></i></button>
+        <button type="button" data-node="2">Preview <span>0.9</span><i aria-hidden="true"></i></button>
       </div>
       <button type="button" class="connection-run">Send a pulse</button><output role="status">Ready</output>
     </div>`;

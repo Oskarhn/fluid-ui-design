@@ -33,6 +33,7 @@ ffmpeg(['-ss','0.08','-i',sources['collapse-icon'],'-vf','crop=32:32:309:115','-
 frame('quick-actions','0.08','quick-actions.png');
 const archiveWidth = archiveHD ? 690 : 344;
 const archiveHeight = archiveHD ? 540 : 270;
+frame('file-drawer','1.15','archive-rest.png');
 function archiveAtlas(start, frames, name) {
   const columns=6;
   const rows=Math.ceil(frames/columns);
@@ -46,14 +47,21 @@ const clips = [
   {...archiveAtlas('6.35',26,'mono.webp'),hover:.17},
   {...archiveAtlas('10.60',32,'nord.webp'),hover:.19}
 ];
+const archiveCards = [
+  ['Kessel',[337,295,55,26]], ['Nord Festival',[385,298,74,32]], ['Field Serif',[441,310,62,31]],
+  ['Halden Studio',[489,325,63,29]], ['Low Tide',[543,323,64,31]], ['Ostra',[390,377,53,27]],
+  ['Mono Press',[439,383,70,27]], ['Platform 9',[495,397,59,29]],
+  ['Lumen',[549,397,56,31]], ['Common Ground',[581,416,69,31]]
+];
 for (const [id,filename] of Object.entries(sources)) copyFileSync(filename,join(out,id+'.mp4'));
 const manifest = {
   'collapse-icon':{backplate:prefix+'sidebar.png',voice:prefix+'voice.png'},
   'quick-actions':{backplate:prefix+'quick-actions.png'},
   'file-drawer':{
-    files:[{label:'Mono Press',title:'Mo\nno',background:'#f7f6ee',ink:'#191a18'},
-      {label:'Nord Festival',title:'Nord',background:'#393c3b',ink:'#f0f0ed'}],
-    atlas:{width:archiveWidth,height:archiveHeight,clips,hits:[[.468,.517,.096,.064],[.409,.413,.093,.055]]}
+    files:archiveCards.map(([label])=>({label,title:label,background:label==='Nord Festival'?'#393c3b':'#f1f0e8',ink:'#181918'})),
+    atlas:{width:archiveWidth,height:archiveHeight,clips,rest:prefix+'archive-rest.png',
+      hits:archiveCards.map(([,hit])=>hit.map((value,axis)=>value/(axis%2?720:920))),
+      cardClips:{1:2,6:1}}
   }
 };
 writeFileSync(join(out,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');

@@ -88,6 +88,15 @@ for(const [id,[find,time,name,crop]] of Object.entries(clips)) {
   if(!entry)continue;
   const key = id === 'abtste11a-trip-cards' ? 'cover' : id==='extra-basit-glass-lens-wall' ? 'swatchPhoto' : id==='davidhaz-logo-loader' ? 'photo' : 'backplate';
   manifest[id]={...manifest[id],[key]:convertFrame(join(bundle.root,'assets',entry.digest),String(Number(time)),name,crop)};
+  if(id==='davidhaz-logo-loader') {
+    const film=join(bundle.root,'assets',entry.digest);
+    const segments=[['intro','0.25','3.55','crop=288:288:496:216','afterglow-intro.mp4'],
+      ['reel','5.5','3.1','crop=550:470:595:130','afterglow-reel.mp4']];
+    for(const [key,start,duration,area,file] of segments) {
+      encode(['-ss',start,'-i',film,'-t',duration,'-vf',area,'-an','-c:v','libx264','-crf','20','-pix_fmt','yuv420p','-movflags','+faststart',join(assets,file)]);
+      manifest[id][key]=path(file);
+    }
+  }
 }
 const studies=[
   ['gabriell-lab-volume-slider','Volume slider','960 / 720'], ['raminnasibov-download-progress','Download progress','1'],
@@ -107,6 +116,10 @@ for(const [id,label,ratio] of studies) {
   const name=id+'-source.mp4';
   copyFileSync(join(bundle.root,'assets',film.digest),join(assets,name));
   comparison.push({id,label,ratio,source:path(name)});
+  if(id==='aliszu-colouring-loader'){
+    const input=join(bundle.root,'assets',film.digest);
+    manifest[id]={...manifest[id],icons:[242,333,422].map((x,i)=>convertFrame(input,'3.45','color-icon-'+i+'.jpg','crop=55:61:'+x+':247'))};
+  }
 }
 for(const [id,label,name,ratio] of [['dev-ya-trip-modes','Trip mode switch','trip-mode-switch.mp4','1'],['justyna-framer-copier','Desktop copier','copier.mp4','1166 / 720']]){
   const file=join(archive,'bencho-clips',name);

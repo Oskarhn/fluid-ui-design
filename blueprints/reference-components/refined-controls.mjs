@@ -41,21 +41,33 @@ export function copyConfirmation(root, { signal, options = {} }) {
   }, signal);
 }
 
+function paintSpeaker(canvas) {
+  const ctx=canvas.getContext('2d');
+  if(!ctx)return;
+  ctx.scale(3,3);ctx.fillStyle='#333735';ctx.strokeStyle='#333735';ctx.lineCap='round';ctx.lineWidth=1.15;
+  ctx.beginPath();ctx.moveTo(1.4,6);ctx.lineTo(4.1,6);ctx.lineTo(7.4,3.1);ctx.lineTo(7.4,12.9);ctx.lineTo(4.1,10);ctx.lineTo(1.4,10);ctx.closePath();ctx.fill();
+  ctx.beginPath();
+  if(canvas.hasAttribute('data-muted')){ctx.moveTo(9,6.1);ctx.lineTo(13,9.9);ctx.moveTo(13,6.1);ctx.lineTo(9,9.9);}
+  else for(const radius of [3.7,6]){ctx.moveTo(7+radius*.75,8-radius*.66);ctx.arc(7,8,radius,-.72,.72);}
+  ctx.stroke();
+}
+
 export function volumeElastic(root, { signal }) {
   const id=scope(root);
   root.innerHTML=`
     <div class="elastic-demo">
-      <span class="elastic-muted" aria-hidden="true">◖×</span>
+      <canvas class="elastic-speaker" width="48" height="48" data-muted aria-hidden="true"></canvas>
       <div class="elastic-track"><canvas aria-hidden="true"></canvas>
         <input id="${id}-volume" type="range" min="0" max="100" value="47" aria-label="Volume">
         <div class="elastic-thumb" aria-hidden="true"><span>47</span></div>
-      </div><span class="elastic-max" aria-hidden="true">◖))</span>
+    </div><canvas class="elastic-speaker" width="48" height="48" aria-hidden="true"></canvas>
     </div>`;
   const track=control(root,'.elastic-track');
   const input=control(root,'input');
   const thumb=control(root,'.elastic-thumb');
   const label=control(thumb,'span');
-  const canvas=control(root,'canvas'),ctx=canvas.getContext('2d');
+  const canvas=control(track,'canvas'),ctx=canvas.getContext('2d');
+  for (const speaker of controls(root,'.elastic-speaker')) paintSpeaker(speaker);
   let frame=0,last=0,current=0,velocity=0,desired=0,gesture=null;
   const split = () => Number(input.value)/100;
   function draw() {
@@ -75,6 +87,12 @@ export function volumeElastic(root, { signal }) {
     ctx.bezierCurveTo(x*.44,mid,x-14,y,x,y);ctx.stroke();
     ctx.beginPath();ctx.strokeStyle='#d6dad8';ctx.moveTo(x,y);
     ctx.bezierCurveTo(x+14,y,x+(w-x)*.52,mid,w-inset,mid);ctx.stroke();
+    for(let i=0;i<=10;i++){
+      const mark=inset+(w-inset*2)*i/10;
+      const fall=Math.max(0,1-Math.abs(mark-x)/(w*.24));
+      ctx.fillStyle=i/10<=split()?'#d79a55':'#aeb6b0';
+      ctx.beginPath();ctx.arc(mark,mid+12+current*fall*.39,i%5===0?1.2:.85,0,Math.PI*2);ctx.fill();
+    }
   }
   function tick(now) {
     frame=0;
@@ -99,7 +117,7 @@ export function volumeElastic(root, { signal }) {
     const box=track.getBoundingClientRect();
     const x=clamp((e.clientX-box.left-8)/(box.width-16),0,1);
     input.value=Math.round(x*100);
-    desired=clamp((e.clientY-gesture.origin)*.72,-30,30);
+    desired=clamp((e.clientY-gesture.origin)*.93,-42,42);
     if(!reduce()){current=desired;velocity=0;}
     draw();
   },signal);
@@ -123,7 +141,7 @@ export function couponDissolve(root, { signal }) {
       <div class="coupon-delivery"><h3>Delivery</h3><small>Home · Studio address</small></div>
       <label class="coupon-row"><input type="radio" name="service" checked> Standard <span>Free</span></label>
       <label class="coupon-row"><input type="radio" name="service" value="express"> Express <span>£12.00</span></label>
-      <div class="coupon-total"><div><small>Total</small><output aria-live="polite">£134.00</output></div><button type="button" class="coupon-reset">Reset</button></div>
+      <div class="coupon-total"><div><small>Total</small><output aria-live="polite">£134.00</output><span class="coupon-saving" hidden></span></div><button type="button" class="coupon-reset">Reset</button></div>
       <canvas aria-hidden="true"></canvas></div>
     </div>`;
   const coupons=controls(root,'[data-rate]');
@@ -133,7 +151,12 @@ export function couponDissolve(root, { signal }) {
   const radio=controls(root,'input');
   let rate=0,frame=0;
   const currency = new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'});
-  function update() {total.textContent=currency.format(134*(1-rate) + (radio[1].checked?12:0));}
+  function update() {
+    total.textContent=currency.format(134*(1-rate) + (radio[1].checked?12:0));
+    const note=control(phone,'.coupon-saving');
+    note.hidden=!rate;
+    note.textContent=rate?'MOCHEO · '+currency.format(134*rate)+' saved':'';
+  }
   function dissolve(button) {
     cancelAnimationFrame(frame);
     if (reduce()||!ctx){update();return;}
@@ -157,7 +180,8 @@ export function couponDissolve(root, { signal }) {
         const t=clamp((time-p.phase)/(1-p.phase),0,1);
         const shift=Math.sin(t*Math.PI);
         ctx.globalAlpha=(1-t)*.75;
-        ctx.fillRect(p.x+(ends[0]-p.x)*t+shift*p.dx,p.y+(ends[1]-p.y)*t+shift*p.dy,1.3,1.3);
+        const turn=Math.sin(t*7+p.phase*37)*16*shift;
+        ctx.fillRect(p.x+(ends[0]-p.x)*t+shift*p.dx+turn,p.y+(ends[1]-p.y)*t+shift*p.dy,1.1,1.1);
       }
       if (!applied&&time>.79){applied=true;update();}
       if (time<1&&!signal.aborted)frame=requestAnimationFrame(paint);
@@ -186,44 +210,75 @@ export function circularDownload(root, { signal, options = {} }) {
   root.innerHTML=`
     <div class="download-ring-stage">
       <div class="download-pane">
-        <header><span>Download</span><button type="button" data-cancel disabled aria-label="Cancel download">×</button></header>
-        <div class="download-dial"><div class="download-rim"></div><output role="status">00</output></div>
-        <div class="download-details"><span>STUDIO FILE</span><span data-rate>Ready</span><span>18.7 MB</span></div>
-        <button type="button" data-start>Start</button>
+        <header><div><span data-caption>Restoring</span><small data-count>0 of 2,481 photos</small></div><button type="button" data-minimize aria-label="Minimize restoring progress" aria-expanded="true">↙</button></header>
+        <div class="download-dial"><canvas width="320" height="320" aria-hidden="true"></canvas><output role="status">00</output><span class="download-percent" aria-hidden="true">%</span></div>
+        <div class="download-details"><div><strong data-bytes>0.0 GB</strong><span>Downloaded</span></div><div><strong data-rate>Idle</strong><span>Speed</span></div><div><strong data-remain>—</strong><span>Remaining</span></div></div>
+        <div class="download-actions"><button type="button" data-start>Start</button><button type="button" data-cancel disabled aria-label="Cancel download">Cancel</button></div>
       </div>
     </div>`;
   const stage=control(root,'.download-ring-stage');
   if (options.backplate) stage.style.backgroundImage='url('+JSON.stringify(options.backplate)+')';
-  const dial=control(root,'.download-dial'), output=control(root,'output');
-  const rate=control(root,'[data-rate]');
-  const go=control(root,'[data-start]'), cancel=control(root,'[data-cancel]');
-  let frame=0, start;
-  const duration=4400;
-  function end(completed) {
-    cancelAnimationFrame(frame);
-    go.disabled=false;cancel.disabled=true;
-    output.textContent=completed?'✓':'00';
-    rate.textContent=completed?'Complete':'Cancelled';
-    go.textContent='Restart';
-    if(!completed)dial.style.setProperty('--travel','0%');
+  const pane=control(root,'.download-pane'), dial=control(root,'.download-dial');
+  const output=control(root,'output'), ctx=control(dial,'canvas').getContext('2d');
+  const rate=control(root,'[data-rate]'), bytes=control(root,'[data-bytes]'), remain=control(root,'[data-remain]');
+  const caption=control(root,'[data-caption]'), count=control(root,'[data-count]');
+  const go=control(root,'[data-start]'), cancel=control(root,'[data-cancel]'), minimize=control(root,'[data-minimize]');
+  const duration=5400, capacity=8.7;
+  let frame=0,start,progress=0;
+  function paint(completed=false){
+    if(!ctx)return;
+    ctx.clearRect(0,0,320,320);
+    for(let i=0;i<120;i++){
+      const angle=i/120*Math.PI*2-Math.PI/2;
+      const lit=i/120<=progress;
+      ctx.fillStyle=lit?'#fff0ce':'#e9cc8561';ctx.beginPath();
+      ctx.arc(160+Math.cos(angle)*142,160+Math.sin(angle)*142,lit?2.9:2.55,0,Math.PI*2);
+      ctx.fill();
+    }
+    if(!completed)return;
+    const grid=['00000000001','00000000010','00000000100','00000001000','10000010000','01000100000','00101000000','00010000000'];
+    ctx.fillStyle='#fff4dc';
+    grid.forEach((line,y)=>[...line].forEach((dot,x)=>{
+      if(dot!=='1')return;
+      ctx.beginPath();ctx.arc(104+x*10,123+y*10,4,0,Math.PI*2);ctx.fill();
+    }));
   }
-  function tick(time) {
+  function status(completed=false,cancelled=false){
+    dial.toggleAttribute('data-complete',completed);
+    output.textContent=completed?'✓':String(Math.floor(progress*100)).padStart(2,'0');
+    bytes.textContent=(capacity*progress).toFixed(1)+' GB';
+    rate.textContent=completed||cancelled||!progress?(cancelled?'Cancelled':'Idle'):(95+Math.round(18*Math.sin(progress*14)))+' MB/s';
+    remain.textContent=completed?'0:00':cancelled||!progress?'—':'0:'+String(Math.ceil((1-progress)*duration/1000)).padStart(2,'0');
+    count.textContent=Math.floor(2481*progress).toLocaleString('en-US')+' of 2,481 photos';
+    caption.textContent=completed?'Restore complete':'Restoring';
+    paint(completed);
+  }
+  function end(completed){
+    clearTimeout(frame);cancelAnimationFrame(frame);
+    progress=completed?1:0;
+    go.disabled=false;cancel.disabled=true;go.textContent='Restart';
+    status(completed,!completed);
+  }
+  function tick(time){
     const raw=clamp((time-start)/duration,0,1);
-    const progress=raw<.85?raw:.85+(1-Math.pow(1-(raw-.85)/.15,2))*.15;
-    dial.style.setProperty('--travel',100*progress+'%');
-    const value=String(Math.floor(progress*100)).padStart(2,'0');
-    if(output.textContent!==value)output.textContent=value;
+    progress=raw<.86?raw:.86+(1-Math.pow(1-(raw-.86)/.14,2))*.14;
+    status();
     if(raw===1)end(true);
     else frame=requestAnimationFrame(tick);
   }
   listen(go,'click',()=>{
-    cancelAnimationFrame(frame);start=performance.now();
-    go.disabled=true;cancel.disabled=false;
-    output.textContent='00';rate.textContent='Downloading';
-    dial.style.setProperty('--travel','0%');
-    if (reduce()) frame=setTimeout(()=>{dial.style.setProperty('--travel','100%');end(true);},340);
+    clearTimeout(frame);cancelAnimationFrame(frame);start=performance.now();progress=0;
+    go.disabled=true;cancel.disabled=false;status();
+    if(reduce())frame=setTimeout(()=>end(true),340);
     else frame=requestAnimationFrame(tick);
   },signal);
-  listen(cancel,'click',()=>{clearTimeout(frame);end(false);},signal);
+  listen(cancel,'click',()=>end(false),signal);
+  listen(minimize,'click',()=>{
+    const smaller=pane.toggleAttribute('data-minimized');
+    minimize.textContent=smaller?'↗':'↙';
+    minimize.setAttribute('aria-label',smaller?'Expand restoring progress':'Minimize restoring progress');
+    minimize.setAttribute('aria-expanded',String(!smaller));
+  },signal);
   signal.addEventListener('abort',()=>{clearTimeout(frame);cancelAnimationFrame(frame);},{once:true});
+  status();
 }

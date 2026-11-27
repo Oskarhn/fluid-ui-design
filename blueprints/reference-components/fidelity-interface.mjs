@@ -9,7 +9,7 @@ const glyphPoses = [
   [0, [7,12,12,12,17,12,22,12], [7,19,9,19,11,19,13,19,15,19,16,19,17,19]],
   [.24,[6,19,8,14,13,11,17,10],[10,20,12,17,14,17,14,17,17,17,19,17,22,17]],
   [.55,[7,23,7,16,12,10,16,7],[22,13,20,15,18,16,16,17,18,19,20,21,22,23]],
-  [1, [8,25,8,19,8,12,8,6], [21,10,20,11,17,14,15,16,17,18,20,21,22,23]]
+  [1, [9,23,9,19,9,13,9,9], [21,11,20,12,17,14,15,16,17,18,19,20,21,21]]
 ];
 
 function paintGlyph(canvas, progress) {
@@ -23,7 +23,7 @@ function paintGlyph(canvas, progress) {
   ctx.setTransform(canvas.width / 32, 0, 0, canvas.height / 32, 0, 0);
   ctx.clearRect(0,0,32,32);
   ctx.strokeStyle = '#1b211f';
-  ctx.lineWidth = 2.2;
+  ctx.lineWidth = 2.2 - progress * .35;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.beginPath();
@@ -38,7 +38,7 @@ function paintGlyph(canvas, progress) {
   const x = b[6], y = b[7];
   ctx.beginPath();
   ctx.moveTo(x,y);
-  ctx.lineTo(x + 11 * extension,y);
+  ctx.lineTo(x + 9 * extension,y);
   ctx.stroke();
 }
 

@@ -247,8 +247,9 @@ export function burnMeter(root, { signal }) {
   const energy = control(root, '[data-energy]');
   const heart = control(root, '[data-heart]');
   const choices = controls(root, '.energy-modes button');
-  let seconds = 0, t = 0, paused = false, mode = 1;
-  const levels = [.52,.86,.69];
+  let seconds = 0, t = 0, paused = false, mode = 1, calories = 95, heat = .62;
+  const levels = [.31,.83,.61];
+  const rate = () => levels[mode] * (.69 + .22 * Math.sin(t * .86) + .09 * Math.sin(t * 1.77));
   function setMode(index) {
     mode = index;
     choices.forEach((item, i) => item.setAttribute('aria-pressed', String(i === index)));
@@ -258,13 +259,14 @@ export function burnMeter(root, { signal }) {
   function draw() {
     const duration = 275 + Math.floor(seconds);
     clock.textContent = String(Math.floor(duration / 60)).padStart(2,'0') + ':' + String(duration % 60).padStart(2,'0');
-    energy.textContent = String(95 + Math.floor(seconds * (.37 + mode * .08)));
+    energy.textContent = String(Math.floor(calories));
+    canvas.dataset.heat = heat.toFixed(3);
     heart.textContent = String(Math.round([122,177,149][mode] + Math.sin(t * .66) * 4));
     if (!ctx) return;
     const { width, height } = canvas;
     for (let j = 0; j < width; j++) {
       const x = j / width;
-      const shape = .17 + levels[mode] * (.30
+      const shape = .13 + heat * (.47
         + .22 * turbulence(x * 3.1, t * .58 + 8)
         + .13 * turbulence(x * 9 + 12, t * .97));
       for (let y = 0; y < height; y++) {
@@ -284,6 +286,9 @@ export function burnMeter(root, { signal }) {
     if (paused) return;
     t += delta;
     seconds += delta * 5;
+    const intensity = rate();
+    calories += intensity * delta * 7.4;
+    heat += (intensity - heat) * (1 - Math.exp(-delta * 2.4));
     draw();
   }, signal);
   listen(stop, 'click', () => {
@@ -293,6 +298,6 @@ export function burnMeter(root, { signal }) {
     canvas.toggleAttribute('data-paused', paused);
     if (!paused) update();
   }, signal);
-  listen(control(root, '[aria-label="Reset workout"]'), 'click', () => { seconds = 0; t = 0; draw(); }, signal);
+  listen(control(root, '[aria-label="Reset workout"]'), 'click', () => { seconds = 0; t = 0; calories = 95; heat = .62; draw(); }, signal);
   draw();
 }

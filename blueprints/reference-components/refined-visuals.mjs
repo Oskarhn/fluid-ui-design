@@ -5,8 +5,9 @@ const clamp = (v,min,max) => Math.min(max,Math.max(min,v));
 
 function lensPoster(image) {
   const board=document.createElement('canvas');
-  board.width=768;board.height=736;
+  board.width=1536;board.height=1472;
   const ctx=board.getContext('2d');
+  ctx.scale(2,2);
   ctx.fillStyle='#f4f3f2';ctx.fillRect(0,0,768,736);
   const palette=[['#06121d','#215c9c','#d99868'],['#141828','#6b4bd8','#da95c8'],
     ['#09162d','#2f90da','#e5c29d'],['#111a1c','#ca4631','#f1b298'],['#050d2c','#153e9f','#dee4db']];
@@ -80,7 +81,7 @@ export function glassLens(root,{signal,options={}}) {
     let uploaded;
     render=()=>{
       if(signal.aborted)return;
-      const dpr=Math.min(2,devicePixelRatio),w=Math.round(stage.clientWidth*dpr),h=Math.round(stage.clientHeight*dpr);
+      const dpr=Math.min(2.5,Math.max(1.5,devicePixelRatio)),w=Math.round(stage.clientWidth*dpr),h=Math.round(stage.clientHeight*dpr);
       if(!w||!h)return;
       if(view.width!==w||view.height!==h){view.width=w;view.height=h;}
       gl.viewport(0,0,w,h);
@@ -133,7 +134,7 @@ export function movingIconCopy(root,{signal}) {
     </div><output role="status" class="a11y-only"></output></div>`;
   const shell=control(root,'.icon-palette'),keys=controls(root,'[aria-pressed]');
   const copy=control(root,'.icon-copy-button'),status=control(root,'output');
-  let selected=0, reset;
+  let selected=0, reset, revision=0;
   keys.forEach((button,i)=>{
     function focus(){shell.style.setProperty('--icon-position',i);}
     listen(button,'pointerenter',focus,signal);listen(button,'focus',focus,signal);
@@ -141,16 +142,19 @@ export function movingIconCopy(root,{signal}) {
     listen(button,'click',()=>{
       selected=i; focus();
       keys.forEach((entry,j)=>entry.setAttribute('aria-pressed',String(i===j)));
+      writeIcon();
     },signal);
   });
-  listen(copy,'click',async()=>{
+  async function writeIcon(){
+    const operation=++revision;
     try{await navigator.clipboard.writeText(keys[selected].textContent);}
     catch{if(!signal.aborted)status.textContent='Clipboard unavailable';return;}
-    if(signal.aborted)return;
+    if(signal.aborted||operation!==revision)return;
     shell.dataset.confirmed='';copy.textContent='Copied';status.textContent='Symbol copied';
     reset?.();
     reset=timer(()=>{delete shell.dataset.confirmed;copy.textContent='Copy';status.textContent='';},1200,signal);
-  },signal);
+  }
+  listen(copy,'click',writeIcon,signal);
 }
 
 export function standingSkyline(root,{signal}) {

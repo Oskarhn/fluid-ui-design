@@ -30,6 +30,12 @@ export function tripCards(root,{signal,options={}}){
     sheet.replaceChildren(...parts[picked].map((value,index)=>{
       const node=document.createElement(index===1?'strong':index===0?'small':'p');node.textContent=value;return node;
     }));
+    if(picked===0){
+      const route=document.createElement('div');route.className='trip-flightpath';route.setAttribute('aria-hidden','true');
+      const plane=document.createElement('span');plane.textContent='✈';route.append(plane);sheet.insertBefore(route,sheet.lastElementChild);
+      motion(plane,[{transform:'translate(0,13px) rotate(-19deg)'},{transform:'translate(43%,0)'},{transform:'translate(86%,10px) rotate(10deg)'}],
+        {duration:900,easing:'cubic-bezier(.16,.71,.26,1)',fill:'both'},signal);
+    }
     motion(sheet,[{transform:'translateY(-10px) scale(.95)',opacity:.3},{transform:'none',opacity:1}],{duration:420,easing:ease},signal);
   }
   rows.forEach((button,i)=>listen(button,'click',()=>choose(i),signal));
@@ -50,8 +56,15 @@ export function routeCommute(root,{signal}){
   function select(i){
     const [mode,time,eta,hint]=data[i];
     buttons.forEach((item,p)=>item.setAttribute('aria-pressed',String(p===i)));
-    value.textContent=time;arrive.textContent=eta;stripe.dataset.route=mode;route.textContent=hint;
-    for(const element of [stripe,value]){
+    const previous=value.textContent;
+    value.replaceChildren();
+    const runner=document.createElement('span'),ghost=document.createElement('span');
+    runner.className='commute-digit';runner.textContent=time;
+    ghost.className='commute-ghost';ghost.setAttribute('aria-hidden','true');ghost.dataset.value=previous;
+    value.append(runner,ghost);arrive.textContent=eta;stripe.dataset.route=mode;route.textContent=hint;
+    motion(ghost,[{transform:'translateY(0)',opacity:1},{transform:'translateY(-105%)',opacity:0}],{duration:350,fill:'forwards',easing:ease},signal);
+    motion(runner,[{transform:'translateY(105%)',opacity:.55},{transform:'none',opacity:1}],{duration:420,easing:ease},signal);
+    for(const element of [stripe]){
       for(const animation of element.getAnimations()) animation.cancel();
       motion(element,element===stripe?[{transform:'scaleX(.34)'},{transform:'none'}]:[{transform:'translateY(9px)',opacity:.26},{transform:'none',opacity:1}],
         {duration:390,easing:ease},signal);
@@ -105,21 +118,39 @@ export function studioCopier(root,{signal}){
 export function logoBuild(root,{signal,options={}}){
   root.innerHTML=`
     <div class="brand-intro"><div class="brand-tiles"><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="brand-arrival" hidden><div><h3>Afterglow</h3><p>Light and movement after dark.</p></div><div class="brand-photo"></div></div>
+      <div class="brand-arrival" hidden><div><h3>Afterglow</h3><p>Light and movement after dark.</p><button type="button" data-preview>Explore gallery</button><button type="button" data-film>Play film</button></div><div class="brand-photo"></div></div>
       <div class="brand-actions"><button type="button" data-start>Play intro</button><button type="button" data-reset disabled>Replay</button></div>
       <output role="status" class="a11y-only">Ready</output>
     </div>`;
   const box=control(root,'.brand-intro'), logo=control(root,'.brand-tiles'),arrival=control(root,'.brand-arrival');
   const play=control(root,'[data-start]'),reset=control(root,'[data-reset]'),msg=control(root,'output');
   if(options.photo)control(root,'.brand-photo').style.backgroundImage='url('+JSON.stringify(options.photo)+')';
+  let intro,reel;
+  function film(url,container) {
+    const video=document.createElement('video');video.src=url;video.loop=true;video.muted=true;video.playsInline=true;
+    container.append(video);signal.addEventListener('abort',()=>video.pause(),{once:true});return video;
+  }
+  if(options.intro){intro=film(options.intro,logo);logo.dataset.film='';}
+  if(options.reel)reel=film(options.reel,control(root,'.brand-photo'));
+  const filmButton=control(root,'[data-film]');
+  listen(filmButton,'click',async()=>{
+    if(!reel){msg.textContent='Opening the studio gallery';arrival.toggleAttribute('data-expanded');return;}
+    if(reel.paused){await reel.play().catch(()=>{});filmButton.textContent='Pause film';}
+    else{reel.pause();filmButton.textContent='Play film';}
+  },signal);
+  listen(control(root,'[data-preview]'),'click',()=>{arrival.toggleAttribute('data-expanded');msg.textContent='Gallery preview';},signal);
   let cancel;
   function run(){
     cancel?.();play.disabled=true;reset.disabled=true;arrival.hidden=true;logo.hidden=false;
     box.dataset.running='';msg.textContent='Loading studio';
+    reel?.pause();
+    if(intro){intro.currentTime=0;intro.play().catch(()=>{});}
     cancel=timer(()=>{
       delete box.dataset.running;logo.hidden=true;arrival.hidden=false;reset.disabled=false;play.disabled=false;
       msg.textContent='Studio ready';
-    },reduce()?180:1920,signal);
+      intro?.pause();
+      if(reel&&!reduce()){reel.play().catch(()=>{});filmButton.textContent='Pause film';}
+    },reduce()?180:intro?3550:1920,signal);
   }
   listen(play,'click',run,signal);listen(reset,'click',run,signal);
 }
@@ -127,10 +158,14 @@ export function logoBuild(root,{signal,options={}}){
 export function colorPass(root,{signal,options={}}){
   root.innerHTML=`
     <div class="color-pass"><div class="color-phone">
-      <div class="color-island"></div><div class="color-items"><i>◎</i><i>⌁</i><i>◒</i></div>
-      <div class="color-runner" aria-hidden="true"><i></i><b></b></div><output role="status">Ready to restore color</output>
+      <div class="color-island"></div><div class="color-items"><i><b class="pass-bag"></b></i><i><b class="pass-headset"></b></i><i><b class="pass-bottle"></b></i></div>
+      <div class="color-runner" aria-hidden="true"><i class="runner-head"></i><b class="runner-body"></b><span class="runner-arm"></span><span class="runner-leg"></span><span class="runner-leg next"></span></div><output role="status">Ready to restore color</output>
     </div><div class="action-row"><button type="button" data-start>Start color pass</button><button type="button" data-cancel disabled>Cancel</button></div></div>`;
   const phone=control(root,'.color-phone'),tiles=controls(root,'.color-items i'), msg=control(root,'output');
+  tiles.forEach((tile,i)=>{
+    if(!options.icons?.[i])return;
+    const art=new Image();art.src=options.icons[i];art.alt='';tile.dataset.source='';tile.replaceChildren(art);
+  });
   const start=control(root,'[data-start]'), stop=control(root,'[data-cancel]');
   let timers=[];
   function clear(){timers.forEach(cancel=>cancel());timers=[];}
