@@ -57,22 +57,29 @@ const checks = {
     assert.equal(await root.locator('[data-rate]').textContent(),'Cancelled');
     await button(root,'Restart').click();
     await page.waitForFunction(()=>document.querySelector('#preview output')?.textContent==='✓',null,{timeout:9000});
-    assert.equal(await root.locator('[data-bytes]').textContent(),'8.7 GB');
+    assert.equal(await root.locator('[data-bytes]').textContent(),'3.8 GB');
     assert.equal(await root.locator('[data-remain]').textContent(),'0:00');
   },
   async caffeineCurve(page, root) {
     await button(root,'13:10').click();
     assert.equal(await output(root),'105 mg · 13:10');
+    const scrub=root.getByRole('slider',{name:'Scrub caffeine curve'});
+    await scrub.press('End');
+    assert.match(await output(root), /06:00$/);
+    await scrub.press('Home');
+    assert.equal(await output(root),'0 mg · 06:00');
   },
   async creditConsole(page, root) {
-    await root.getByRole('radio',{name:'500 credits',exact:true}).check();
-    await button(root,'Preview credits').click();
+    await root.getByRole('radio',{name:/^500 credits/}).check();
+    await button(root,'Add 500 · $10').click();
     assert.equal(await output(root),'Preview balance 770 credits');
     await pause(page,'#preview .credit-row strong','770');
   },
   async contextTreemap(page, root) {
-    await root.getByRole('button',{name:'Tool instructions'}).click();
-    assert.ok((await output(root)).includes('System / Tool instructions'));
+    await root.getByRole('button',{name:/^Tool definitions/}).click();
+    assert.ok((await output(root)).includes('Tool definitions'));
+    await root.getByRole('slider',{name:'Token usage'}).press('End');
+    assert.match(await root.locator('.context-count').textContent(), /200k \/ 200k/);
     await button(root,'Reset view').click();
     assert.equal(await output(root),'Select a context block');
   },
@@ -83,9 +90,14 @@ const checks = {
     await pause(page,'#preview output','Sample complete');
   },
   async connectionFlow(page, root) {
-    await button(root,'Send a pulse').click();
-    await pause(page,'#preview output','Pulse arrived at Preview');
-    assert.equal(await root.getByRole('button',{name:/^Preview/}).getAttribute('aria-pressed'),'true');
+    const send=root.getByRole('button',{name:/Send power/});
+    await send.click();
+    await pause(page,'#preview output','Power arrived at car charger');
+    assert.equal(await root.locator('[data-power-read]').textContent(),'7.4');
+    await button(root,'Store').click();
+    await send.click();
+    await pause(page,'#preview output','Power stored in battery');
+    assert.equal(await root.locator('[data-power-read]').textContent(),'0.0');
   },
   async glassLens(page, root) {
     await root.locator('canvas').press('ArrowLeft');
@@ -96,12 +108,16 @@ const checks = {
   },
   async movingIconCopy(page, root) {
     await button(root,'Symbol C').click();
+    if(await page.evaluate(()=>!matchMedia('(prefers-reduced-motion: reduce)').matches)){
+      assert.equal(await root.locator('.icon-copy-wave').count(),3);
+    }
     await pause(page,'#preview output','Symbol copied');
     assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),'◎');
   },
   async standingSkyline(page, root) {
     await button(root,'Skyline').click();
     assert.equal(await output(root),'Activity skyline');
+    assert.deepEqual(await root.locator('.calendar-totals strong').allTextContents(),['297','184','6','134']);
     await button(root,'The book').click();
     assert.equal(await output(root),'Calendar grid');
   },
@@ -221,6 +237,9 @@ const checks = {
     assert.equal(await output(root), 'Projects');
     assert.equal(await attr(toggle, 'aria-expanded'), 'false');
     assert.equal(await selected(root, 'Light'), 'true');
+    await button(root, 'Light').click();
+    await page.waitForFunction(()=>getComputedStyle(document.querySelector('.floating-field')).backgroundColor==='rgb(255, 255, 255)');
+    assert.equal(await selected(root, 'Dark'), 'false');
   },
   async toolFolders(page, root) {
     await button(root, 'Media').click();
@@ -322,7 +341,7 @@ const checks = {
   async ingredientCard(page, root) {
     await button(root, 'Ingredients').click();
     assert.equal(await attr(button(root, 'Ingredients'), 'aria-expanded'), 'true');
-    assert.match(await root.locator('.ingredient-grid').textContent(), /Grilled patty/);
+    assert.match(await root.locator('.ingredient-grid').textContent(), /4 oz patty/);
     await button(root, 'Ingredients').click();
     assert.equal(await attr(button(root, 'Ingredients'), 'aria-expanded'), 'false');
   },
