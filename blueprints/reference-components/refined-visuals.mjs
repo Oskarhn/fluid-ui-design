@@ -142,9 +142,23 @@ export function movingIconCopy(root,{signal}) {
     listen(button,'click',()=>{
       selected=i; focus();
       keys.forEach((entry,j)=>entry.setAttribute('aria-pressed',String(i===j)));
+      wave(button);
       writeIcon();
     },signal);
   });
+  function wave(key){
+    if(reduce())return;
+    const box=shell.getBoundingClientRect(),origin=key.getBoundingClientRect();
+    for(let ring=0;ring<3;ring++){
+      const pulse=document.createElement('i');pulse.className='icon-copy-wave';pulse.setAttribute('aria-hidden','true');
+      pulse.style.left=(origin.left-box.left+origin.width/2)+'px';
+      pulse.style.top=(origin.top-box.top+origin.height/2)+'px';
+      shell.append(pulse);
+      const travel=pulse.animate([{transform:'scale(.65)',opacity:.8},{transform:'scale(2.5)',opacity:0}],
+        {delay:ring*64,duration:480,easing:'cubic-bezier(.18,.75,.31,1)',fill:'both'});
+      travel.finished.then(()=>pulse.remove(),()=>pulse.remove());
+    }
+  }
   async function writeIcon(){
     const operation=++revision;
     try{await navigator.clipboard.writeText(keys[selected].textContent);}
@@ -159,7 +173,7 @@ export function movingIconCopy(root,{signal}) {
 
 export function standingSkyline(root,{signal}) {
   root.innerHTML=`<div class="calendar-stage"><div class="calendar-board">
-    <header><div><b data-total></b><span>guests seated · sample year</span></div>
+    <header><div><b data-total></b><span>guests seated, Oct 2025 – Oct 2026</span></div>
     <div class="calendar-modes"><button type="button" aria-pressed="true">The book</button><button type="button" aria-pressed="false">Skyline</button></div></header>
     <div class="calendar-totals"></div>
     <canvas aria-label="Sample restaurant activity across a year" role="img"></canvas>
@@ -169,13 +183,24 @@ export function standingSkyline(root,{signal}) {
   const canvas=control(root,'canvas'),ctx=canvas.getContext('2d');
   const modes=controls(root,'button'),status=control(root,'output');
   const months=['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'];
-  const dates=Array.from({length:364},(_,n)=>{
-    if(n%7===0||n%19===0) return 0;
-    return Math.round(32+((Math.sin(n*1.27)+1)*25)+(((n*17+31)%81)*.69)+(n%53===10?57:0));
+  const dates=Array.from({length:364},(_,day)=>{
+    const weekday=day%7,week=Math.floor(day/7);
+    if(weekday===0||(weekday===1&&week<15))return 0;
+    if(weekday===6)return 134+(week%2?18:-18);
+    if(weekday===5&&week%9===0)return week===0?184:171+week%11;
+    return Math.round(55+(Math.sin(day*1.27)+1)*19+(day*17%61)*.47);
   });
+  const total=dates.reduce((a,b)=>a+b,0);
+  let adjust=28875-total;
+  for(let i=0;adjust!==0;i=(i+1)%dates.length){
+    if(i%7===6||dates[i]<35||dates[i]>=164)continue;
+    const step=Math.sign(adjust);dates[i]+=step;adjust-=step;
+  }
   const number=v=>v.toLocaleString('en-US');
   control(root,'[data-total]').textContent=number(dates.reduce((a,b)=>a+b,0));
-  const stats=[['Nights open',dates.filter(Boolean).length],['Biggest night',Math.max(...dates)],['Full-house nights',dates.filter(n=>n>=170).length]];
+  const saturday=dates.filter((_,day)=>day%7===6);
+  const stats=[['Nights open',dates.filter(Boolean).length],['Biggest night',Math.max(...dates)],['Full-house nights',dates.filter(n=>n>=170).length],
+    ['Average Saturday',Math.round(saturday.reduce((a,b)=>a+b,0)/saturday.length)]];
   stats.forEach(([label,value])=>{
     const div=document.createElement('div'), caption=document.createElement('span'),heading=document.createElement('strong');
     caption.textContent=label;heading.textContent=number(value);div.append(caption,heading);control(root,'.calendar-totals').append(div);
@@ -196,10 +221,10 @@ export function standingSkyline(root,{signal}) {
         const i=week*7+row,v=dates[i];
         const group=v>=170?4:v>=120?3:v>=80?2:v?1:0;
         const p=colors[group];
-        const x=mix(w*.055+week*dx,w*.062+week*w/61+row*w/166),y=mix(h*.28+row*dx,h*.24+week*h*.009-row*h*.024);
+        const x=mix(w*.055+week*dx,w*.062+week*w/61+row*w/166),y=mix(h*.28+row*dx,h*.51+week*h*.0068-row*h*.021);
         const offsetX=mix(0,w/163),offsetY=mix(dx-1,-h*.024);
         const x2=x+mix(dx-1,w/63),y2=y+mix(0,h*.0086);
-        const up=blend*(v?Math.max(2,v/192*h*.39):0);
+        const up=blend*(v?Math.max(2,v/192*h*.35):0);
         const top=[[x,y-up],[x2,y2-up],[x2+offsetX,y2+offsetY-up],[x+offsetX,y+offsetY-up]];
         if(up>.2){
           polygon([top[0],top[1],[x2,y2],[x,y]],p[1]);
@@ -209,7 +234,7 @@ export function standingSkyline(root,{signal}) {
       }
     }
     ctx.fillStyle='#68756e';ctx.font='10px system-ui';
-    months.forEach((m,i)=>{if(i%2===0||w>565)ctx.fillText(m,w*.055+i*w*.071,mix(h*.28+dx*7+15,h*.32+i*h*.039));});
+    months.forEach((m,i)=>{if(i%2===0||w>565)ctx.fillText(m,w*.055+i*w*.071,mix(h*.28+dx*7+15,h*.61+i*h*.023));});
   }
   function tick(now) {
     const time=reduce()?1:clamp((now-start)/1160,0,1);
