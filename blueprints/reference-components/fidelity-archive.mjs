@@ -9,11 +9,18 @@ const DEFAULT_FILES = [
   { label:'Archive', title:'Archive', background:'#e8e9e3', ink:'#2e302c' }
 ];
 
+function positionTab(button, [left, top, width, height]) {
+  button.style.left = 100 * left + '%';
+  button.style.top = 100 * top + '%';
+  button.style.width = 100 * width + '%';
+  button.style.height = 100 * height + '%';
+}
+
 export function fileDrawer(root, { signal, options = {} }) {
   const id = scope(root);
   const files = options.files ?? DEFAULT_FILES;
   root.innerHTML = `
-    <div class="archive-stage" data-renderer="html" data-position="closed">
+    <div class="archive-stage" data-renderer="html" data-position="closed" data-active="-1">
       <div class="archive-fallback" aria-hidden="true"><div class="archive-lid"></div><div class="archive-tray"><div class="archive-fallback-paper"></div><div class="archive-face"></div></div></div>
       <button class="archive-pull" type="button" aria-expanded="false" aria-label="Open archive" aria-controls="${id}-files"></button>
       <div class="archive-tabs" id="${id}-files" hidden></div>
@@ -34,7 +41,7 @@ export function fileDrawer(root, { signal, options = {} }) {
   files.forEach((file,index) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = file.label;
+    button.setAttribute('aria-label', file.label);
     button.setAttribute('aria-pressed', 'false');
     listen(button, 'pointerenter', event => {
       if (event.pointerType === 'mouse' && active === -1) engine?.hover(index);
@@ -48,6 +55,10 @@ export function fileDrawer(root, { signal, options = {} }) {
     tabs.append(button);
   });
   const buttons = controls(tabs, 'button');
+  if (options.atlas?.hits?.length === buttons.length) {
+    tabs.dataset.project = '';
+    options.atlas.hits.forEach((hit, index) => positionTab(buttons[index], hit));
+  }
   function setOpen(open) {
     expanded = open;
     stage.dataset.position = open ? 'open' : 'closed';
@@ -81,7 +92,10 @@ export function fileDrawer(root, { signal, options = {} }) {
       if (sampled || signal.aborted) return sampled;
     }
     const [THREE,{RoomEnvironment}] = await Promise.all([import('./three/three.module.js'), import('./three/RoomEnvironment.js')]);
-    if (!signal.aborted) return buildArchive(THREE,RoomEnvironment,stage,files,preference,signal);
+    if (!signal.aborted) {
+      tabs.dataset.project = '';
+      return buildArchive(THREE,RoomEnvironment,stage,files,buttons,preference,signal);
+    }
   }
   loadArtwork().then(artwork => {
     if (!artwork || signal.aborted) { artwork?.dispose(); return; }
@@ -119,7 +133,7 @@ function cardTexture(THREE, file, index) {
   return texture;
 }
 
-function buildArchive(THREE,RoomEnvironment,stage,files,preference,signal) {
+function buildArchive(THREE,RoomEnvironment,stage,files,buttons,preference,signal) {
   const renderer = new THREE.WebGLRenderer({antialias:true, alpha:false});
   renderer.setPixelRatio(Math.min(devicePixelRatio,1.55));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -185,10 +199,13 @@ function buildArchive(THREE,RoomEnvironment,stage,files,preference,signal) {
     }));
     paper.castShadow=true;paper.receiveShadow=true;
     slide.add(paper);
-    box(slide,flange,-40+index*11,115,2+index*19,33,9,1.5);
-    return {paper,art,lift:0,velocity:0};
+    const tabX = -56+index*19;
+    const tabZ = 6+index*19;
+    const tab=box(slide,flange,tabX,124,tabZ,29,10,2);
+    return {paper,art,tab,tabX,tabZ,lift:0,velocity:0};
   });
   let target=0, travel=0, chosen=-1, pointed=-1, frame=0, last=0, visible=true;
+  const projected = new THREE.Vector3();
   const lerp=(a,b,t)=>a+(b-a)*t;
   function schedule() {
     if (!frame&&visible&&!signal.aborted&&!document.hidden) frame=requestAnimationFrame(paint);
@@ -225,8 +242,20 @@ function buildArchive(THREE,RoomEnvironment,stage,files,preference,signal) {
       paper.rotation.y=-.39*model.lift;
       paper.rotation.z=-.14*model.lift;
       paper.scale.setScalar(1+.57*model.lift);
+      model.tab.position.set(model.tabX-11*model.lift,124+123*model.lift,model.tabZ+40*model.lift);
     });
     renderer.render(scene,camera);
+    if (target) {
+      cards.forEach(({tabX,tabZ},i) => {
+        // Hit the resting tab so its small lift does not move out from under the pointer.
+        projected.set(tabX,124,tabZ).applyMatrix4(slide.matrixWorld).project(camera);
+        const x = (projected.x + 1) / 2;
+        const y = (1 - projected.y) / 2;
+        const w = 32 / (camera.right - camera.left);
+        const h = .026;
+        positionTab(buttons[i],[x - w / 2, y - h / 2, w, h]);
+      });
+    }
     if (restless) schedule();
     else last=0;
   }

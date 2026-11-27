@@ -1,4 +1,5 @@
 /* Source-matched viewports. Place these scenes on a neutral host surface. */
+@font-face {font-family:Reference Doto;src:url('./doto/Doto-latin.woff2') format('woff2');font-weight:100 900;font-display:swap;}
 .swipe-scene, .action-scene, .funnel-stage, .energy-stage, .archive-stage, .facet-stage {
   width: min(100%, 660px);
   position: relative;
@@ -22,21 +23,18 @@
 .swipe-status span { display:flex; align-items:center; gap:.8cqw; }
 .swipe-status em:first-child { width:2.5cqw; height:1.85cqw; border-radius:90% 90% 0 0; border-top:.47cqw solid #050605; }
 .swipe-status em:last-child { width:3.9cqw; height:1.8cqw; border-radius:.85cqw; background:#040604; }
-.swipe-track { position:absolute; inset:8.55cqw .35cqw 0; overflow:hidden; cursor:grab; touch-action:pan-y; user-select:none; -webkit-user-select:none; }
+.swipe-track { position:absolute; inset:8.55cqw .35cqw 0; overflow:hidden; cursor:grab; touch-action:pan-y; user-select:none; -webkit-user-select:none; perspective:150cqw; perspective-origin:48% 34%; }
 .swipe-track[data-dragging] { cursor:grabbing; }
 .swipe-track[data-pointer]:focus { outline:0; }
 .swipe-rail, .swipe-page { position:absolute; inset:0; }
 .swipe-rail { background:linear-gradient(90deg,#eff0f5,#eceef4 74%,#e9ebf1); }
-.swipe-page { transform:translate3d(calc(var(--swipe, 0) * 73%),0,0); background:#fdfdfc; box-shadow: -1.6cqw 0 2.5cqw #bac2cc33; }
-.swipe-icon,.swipe-wave { position:absolute; top:1.05cqw; width:7.1cqw; height:7.1cqw; border-radius:50%; background:#f7f8f7; display:grid; place-items:center; color:#101817; }
+.swipe-page { transform-origin:left 31%; transform:translate3d(calc(var(--swipe, 0) * 73%),0,calc(var(--swipe-depth,0)*5cqw)) rotateY(calc(var(--swipe-depth,0)*-7.2deg)); background:#fdfdfc; border-start-start-radius:calc(var(--swipe-depth,0)*1.5cqw); box-shadow:calc(-.65cqw - var(--swipe-depth,0)*1cqw) 0 calc(1.4cqw + var(--swipe-depth,0)*1.8cqw) #7a859836; }
+.swipe-icon,.swipe-wave { position:absolute; top:1.05cqw; width:7.1cqw; height:7.1cqw; border-radius:50%; background:#f7f8f7; box-shadow:inset 0 .1cqw .18cqw #fff,0 .15cqw .46cqw #283c3515; display:grid; place-items:center; color:#101817; }
 .swipe-icon { left:2.1cqw; }
-.swipe-icon i { position:absolute; left:33%; top:42%; width:2.55cqw; height:.32cqw; border-radius:1cqw; background:currentColor; transform-origin:left; transform:rotate(calc(var(--swipe,0) * -26deg)) translateX(calc(var(--swipe,0) * .5cqw)); }
-.swipe-icon i:nth-child(2) { top:54%; width:1.72cqw; transform:rotate(calc(var(--swipe,0) * 28deg)) translateX(calc(var(--swipe,0) * .5cqw)); }
-.swipe-icon i:nth-child(3) { top:32%; width:.28cqw; height:2.2cqw; opacity:calc(var(--swipe,0) * 2 - .6); transform:translateX(-.5cqw); }
-.swipe-wave { right:1.8cqw; display:flex; justify-content:center; gap:.27cqw; }
-.swipe-wave i { width:.24cqw; height:1.1cqw; background:currentColor; border-radius:1cqw; }
-.swipe-wave i:nth-child(2n) { height:1.65cqw; }
-.swipe-wave i:nth-child(3) { height:2.5cqw; }
+.swipe-icon canvas { width:4.75cqw; height:4.75cqw; }
+.swipe-wave { right:1.8cqw; background-position:center; background-size:100% 100%; }
+.swipe-wave canvas { width:4.3cqw; height:4.3cqw; }
+.swipe-wave[data-source] canvas { display:none; }
 .swipe-scene[data-backplate] .swipe-phone { border-color:transparent; box-shadow:none; background:transparent; }
 .swipe-scene[data-backplate] .swipe-status { visibility:hidden; }
 .swipe-phone::after { content:''; position:absolute; top:0; left:.35cqw; height:8.55cqw; width:calc(var(--swipe,0) * 73%); background:#eef0f5; mix-blend-mode:multiply; pointer-events:none; }
@@ -109,14 +107,14 @@
 .energy-screen { position:relative; height:75%; border-radius:3.2cqw; background:#040404; overflow:hidden; isolation:isolate; }
 .energy-history { position:absolute; z-index:2; left:1.18cqw; right:1.2cqw; top:.72cqw; display:flex; align-items:start; justify-content:space-between; gap:.45cqw; }
 .energy-history small,.energy-reading small { display:block; font-size:1.02cqw; line-height:1.1; color:#8c8b89; }
-.energy-history time,.energy-history output { font:400 3.45cqw/1 ui-monospace,'Cascadia Mono',monospace; letter-spacing:-.08em; }
+.energy-history time,.energy-history output { font:620 3.75cqw/1 Reference Doto,ui-monospace,monospace; letter-spacing:-.045em; }
 .energy-history output { display:inline; }
 .energy-history strong { color:#a73c3c; font-size:1.68cqw; }
 .energy-history >div:last-child { text-align:right; }
-.energy-scale { position:absolute; right:1.14cqw; top:18%; bottom:26%; display:flex; flex-direction:column; justify-content:space-between; color:#585958; opacity:.82; font:400 2.23cqw/1 ui-monospace,monospace; }
+.energy-scale { position:absolute; right:1.14cqw; top:18%; bottom:26%; display:flex; flex-direction:column; justify-content:space-between; color:#585958; opacity:.82; font:550 2.35cqw/1 Reference Doto,ui-monospace,monospace; }
 .energy-screen canvas { position:absolute; z-index:-1; inset:auto 0 0; width:100%; height:35%; }
 .energy-reading { position:absolute; bottom:10.8%; right:1.2cqw; text-align:right; }
-.energy-reading output { font:400 4.3cqw/1 ui-monospace,'Cascadia Mono',monospace; letter-spacing:-.1em; color:#e1e0d7; }
+.energy-reading output { font:660 4.8cqw/1 Reference Doto,ui-monospace,monospace; letter-spacing:-.05em; color:#f2f0e8; }
 .energy-modes, .energy-controls { display:flex; justify-content:center; align-items:center; gap:.68cqw; }
 .energy-modes { padding-block:.6cqw; }
 .library-preview .energy-modes button { font-size:1.5cqw; color:#898989; background:transparent; border:0; border-radius:.65cqw; padding:.43cqw .38cqw; min-height:0; }
@@ -158,6 +156,9 @@
 .archive-tabs button:nth-child(3) { --card:2; }
 .archive-tabs button:nth-child(4) { --card:3; }
 .archive-tabs button:nth-child(5) { --card:4; }
+.archive-tabs[data-project] { inset:0; width:auto; height:auto; pointer-events:none; }
+.library-preview .archive-tabs[data-project] button { position:absolute; pointer-events:auto; user-select:none; -webkit-user-select:none; }
+.library-preview .archive-stage :is(.archive-pull,.archive-return) { user-select:none; -webkit-user-select:none; }
 .library-preview .archive-return { width:44%; height:29%; left:32%; top:36%; cursor:zoom-out; }
 .library-preview .archive-tabs button[aria-pressed=true] { background:transparent; color:transparent; }
 .library-preview :is(.archive-pull,.archive-tabs button,.archive-return):focus-visible { outline:2px solid #4e764b; outline-offset:2px; }

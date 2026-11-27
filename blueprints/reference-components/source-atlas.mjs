@@ -16,7 +16,7 @@ export async function openArchiveAtlas(stage, spec, preference, signal) {
   stage.prepend(canvas);
   stage.dataset.renderer = 'texture';
 
-  let openTarget = 0, opening = 0, active = -1, showing = -1, lift = 0, frame = 0, last = 0;
+  let openTarget = 0, opening = 0, active = -1, pointed = -1, showing = -1, lift = 0, frame = 0, last = 0;
   function stamp(clipIndex, progress) {
     const clip = clips[clipIndex];
     const index = Math.min(clip.frames - 1, Math.max(0, Math.round(progress * (clip.frames - 1))));
@@ -32,14 +32,17 @@ export async function openArchiveAtlas(stage, spec, preference, signal) {
     if (signal.aborted) return;
     const dt = preference.matches ? 1 : last ? Math.min(.055,(now-last)/1000) : .016;
     last = now;
-    if (lift && showing !== active) lift = step(lift,0,dt*2.6);
-    if (!lift && showing !== active) showing = active;
+    const goal = openTarget ? (active >= 0 ? active : pointed) : -1;
+    const height = active >= 0 ? 1 : goal >= 0 ? (clips[goal+1].hover ?? .14) : 0;
+    if (lift && showing !== goal) lift = step(lift,0,dt*2.6);
+    if (!lift && showing !== goal) showing = goal;
     if (!lift && (opening < 1 || !openTarget)) opening = step(opening,openTarget,dt*1.65);
-    if (opening === 1 && showing >= 0 && showing === active) lift = step(lift,1,dt*1.36);
+    if (opening === 1 && showing >= 0 && showing === goal) lift = step(lift,height,dt*1.36);
     if (showing >= 0 && lift > 0) stamp(showing+1,lift);
     else stamp(0,opening);
     stage.style.setProperty('--archive-travel',opening);
-    if (opening !== openTarget || showing !== active || (showing >= 0 && lift !== 1)) start();
+    stage.style.setProperty('--archive-lift',lift);
+    if (opening !== openTarget || showing !== goal || (showing >= 0 && lift !== height)) start();
     else last = 0;
   }
   function start() {
@@ -48,8 +51,8 @@ export async function openArchiveAtlas(stage, spec, preference, signal) {
   stamp(0,0);
   return {
     open(value){openTarget=value ? 1 : 0;start();},
-    select(index){active=index;start();},
-    hover(){},
+    select(index){active=index;pointed=-1;start();},
+    hover(index){pointed=preference.matches ? -1 : index;start();},
     dispose(){cancelAnimationFrame(frame);}
   };
 }

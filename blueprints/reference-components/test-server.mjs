@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const base = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const mime = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.md': 'text/plain; charset=utf-8', '.jpg': 'image/jpeg', '.png': 'image/png',
-  '.webp':'image/webp', '.json':'application/json; charset=utf-8', '.mp4': 'video/mp4' };
+  '.webp':'image/webp', '.json':'application/json; charset=utf-8', '.mp4': 'video/mp4', '.woff2':'font/woff2' };
 
 export async function serveLibrary({ port = 0, root = base } = {}) {
   const server = createServer(async (request, response) => {
