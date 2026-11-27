@@ -10,7 +10,7 @@ description: >-
   web app, native mobile interface, or interactive 3D experience.
 license: MIT
 metadata:
-  version: "2.15.2"
+  version: "2.16.0"
 ---
 
 # Fluid UI Design
@@ -45,6 +45,7 @@ For new sites and web changes that affect performance, use the [Lighthouse workf
    For gestures, moving controls, transitions or 3D details, pick a state model from [motion composition](references/motion-composition.md) and reuse a [licensed Bencho block](blueprints/bencho/README.md) where it matches the task. Adapt the trigger, feedback and fallback to the project.
    For GSAP, Lenis or React Bits, use the [pinned source checkouts](vendor/motion-sources/README.md) to identify the relevant source, integration and license.
    If the user supplies a clip, use [recording motion studies](references/recording-motion-studies.md) to identify the visible phases and stable elements before setting implementation timing.
+   For a known reference URL or a reusable interaction, find its runnable example in the [reference component library](blueprints/reference-components/README.md). Load the selected module and its styles, then verify the transition in the receiving layout.
    If the user supplies a website URL as a reference, use [URL reference studies](references/url-reference-study.md). The runner produces TypeUI DESIGN.md and SKILL.md along with available DesignLang layout, token, and motion evidence. Confirm design rights when exact recreation is requested.
    Capture the states that matter with the URL study's interaction plan. For an authorized static transfer, use the static export and verify the copied route in isolation. See [website and control studies](references/website-and-control-studies.md) for examples and [licensed interaction packs](vendor/interaction-packs/README.md) for code suited to the project's platform.
    For a faithful copy the user is authorized to make, start from the original component code and media. Use [authorized browser replay](references/authorized-replay.md) for later-loaded assets and to compare the same inputs side by side before adapting the style.

@@ -30,6 +30,8 @@ Choose it when generated pages or application screens need specific engineering 
 
 [Field Signal](blueprints/field-signal/index.html) is an oscilloscope with drag and keyboard controls, waveform morphing, and a sweep you can pause and resume. Open the HTML file from a local checkout. [Motion implementation notes](references/motion-composition.md)
 
+The [reference component library](blueprints/reference-components/README.md) links runnable demos to the clips and websites they came from. Open a drawer, replay an animation, change a selected state, or inspect the component code. It includes Chrome checks at desktop and mobile widths.
+
 ## CSS examples
 
 **Before (typical model default)**

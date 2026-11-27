@@ -2,6 +2,8 @@
 
 Pick the part that matters to the brief. Record the media, layout anchors, reading order, and the action that changes the state. For animation, capture what happens before input, while the change is visible, on release, and after a reversal or cancellation. A CSS transition's declared duration is evidence about the browser state, and a still image is evidence about composition.
 
+Open the [runnable reference library](../blueprints/reference-components/README.md) to try the controls from these studies. Its catalog maps source links to component modules, sample data, and browser checks.
+
 ## Landing pages and whole destinations
 
 These are observations from the supplied URLs on 26 November 2026. Browser captures used public routes in isolated Chrome sessions. HTML-only observations support the content roles and visible structure listed below. They provide no interaction timing.
