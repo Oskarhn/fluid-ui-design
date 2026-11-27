@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anime.js workbench · Fluid UI Design</title>
+  <link rel="stylesheet" href="./workbench.css">
+  <script type="module" src="./workbench.mjs"></script>
+</head>
+<body>
+<main id="workbench">
+  <header class="masthead">
+    <a href="../reference-components/index.html">Reference library</a>
+    <h1>Anime.js workbench</h1>
+    <nav aria-label="Examples">
+      <a href="#sequence">Timeline</a>
+      <a href="#rail">Drag</a>
+      <a href="#arrange">Layout</a>
+      <a href="#scroll">Scroll</a>
+      <a href="#type">Text</a>
+      <a href="#follow">Pointer</a>
+    </nav>
+  </header>
+
+  <section class="study" id="sequence" aria-labelledby="sequence-title">
+    <div class="intro">
+      <h2 id="sequence-title">Trace a route</h2>
+      <p>Pause or scrub the sequence. One clock draws the path and brings each waypoint into view.</p>
+      <div class="controls">
+        <button type="button" data-play>Play</button>
+        <button type="button" data-reverse>Reverse</button>
+      </div>
+      <label class="range">Timeline <input data-scrub type="range" min="0" max="100" value="0" aria-label="Timeline position"><output data-time>0%</output></label>
+      <output data-timeline-status role="status">Ready</output>
+    </div>
+    <div class="route stage">
+      <svg aria-hidden="true" viewBox="0 0 580 240" preserveAspectRatio="xMidYMid meet">
+        <path class="route-bed" d="M40 167 C91 167 122 72 178 72 S258 182 321 182 S415 68 468 68 S516 108 540 108"></path>
+        <path class="route-ink" data-ink d="M40 167 C91 167 122 72 178 72 S258 182 321 182 S415 68 468 68 S516 108 540 108"></path>
+        <circle data-waypoint cx="178" cy="72" r="7"></circle>
+        <circle data-waypoint cx="321" cy="182" r="7"></circle>
+        <circle data-waypoint cx="468" cy="68" r="7"></circle>
+      </svg>
+      <p class="stage-label">Harbor / Ridge / Summit</p>
+    </div>
+  </section>
+
+  <section class="study" id="rail" aria-labelledby="rail-title">
+    <div class="intro">
+      <h2 id="rail-title">Find a notch</h2>
+      <p>Drag the weight to a notch, or set the same value with the slider.</p>
+      <label class="range">Weight <input type="range" data-weight min="0" max="4" value="0" step="1"><output data-weight-label>0 / 4</output></label>
+    </div>
+    <div class="rail-stage stage">
+      <div class="rail" data-rail aria-hidden="true"><div class="rail-marks"></div><div data-weight-knob class="knob"></div></div>
+    </div>
+  </section>
+
+  <section class="study" id="arrange" aria-labelledby="arrange-title">
+    <div class="intro">
+      <h2 id="arrange-title">Make room</h2>
+      <p>Move the lead piece to the end and watch the others take its place.</p>
+      <button type="button" data-reorder>Move lead to end</button>
+      <output data-layout-status role="status">Lead piece: Harbor</output>
+    </div>
+    <ol class="tiles stage" data-tiles>
+      <li data-tile="harbor">Harbor</li>
+      <li data-tile="ridge">Ridge</li>
+      <li data-tile="summit">Summit</li>
+    </ol>
+  </section>
+
+  <section class="study" id="scroll" aria-labelledby="scroll-title">
+    <div class="intro">
+      <h2 id="scroll-title">Move through a chapter</h2>
+      <p>Scroll inside the panel to advance the marker. Tab to the panel to use the keyboard.</p>
+      <output data-scroll-progress>0%</output>
+    </div>
+    <div class="scroll-stage stage">
+      <div class="chapter-scroll" data-scroller tabindex="0" role="region" aria-label="Scrollable chapters">
+        <div class="chapter-content" data-chapters>
+          <p>Harbor</p>
+          <p>Ridge</p>
+          <p>Summit</p>
+        </div>
+      </div>
+      <div class="chapter-track" aria-hidden="true"><i data-scroll-indicator></i></div>
+    </div>
+  </section>
+
+  <section class="study" id="type" aria-labelledby="type-title">
+    <div class="intro">
+      <h2 id="type-title">Set the type in motion</h2>
+      <p>Reveal the words in sequence. The heading stays readable throughout.</p>
+      <button type="button" data-type>Animate words</button>
+      <output data-type-status role="status">Ready</output>
+    </div>
+    <div class="type-stage stage"><p data-phrase>Type in motion</p></div>
+  </section>
+
+  <section class="study" id="follow" aria-labelledby="follow-title">
+    <div class="intro">
+      <h2 id="follow-title">Follow the pointer</h2>
+      <p>Move across the field or nudge the marker. The pulse uses the browser's animation engine.</p>
+      <div class="controls">
+        <button type="button" data-nudge="-1">Nudge left</button>
+        <button type="button" data-nudge="1">Nudge right</button>
+        <button type="button" data-pulse>Pulse ring</button>
+      </div>
+      <output data-pulse-status role="status">Ready</output>
+    </div>
+    <div class="pointer-stage stage" data-field aria-hidden="true">
+      <div class="pointer-dot" data-follower><span data-ring></span></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
