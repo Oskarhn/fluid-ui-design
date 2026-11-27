@@ -54,6 +54,27 @@ For an editable static page served from a new host, use the [static export](url-
 - Review missing graphics, dynamic branding, playback, and blocked pages separately. Preserve the actual differences in the report. A template page, API dependency, or private route can require a source handoff to reproduce outside the recorded actions.
 - Test responsiveness and reduced motion where they matter to the new page.
 
+### Check nested scroll, translated specimens and filters
+
+A capture plan can set `openingWaitMs` for a slow-loading public demo. Add an `observe` list with a name, a CSS selector and a reading such as `scrollTop`, `left`, `count` or `checked`. Add an `expect` object to the relevant step. A recorded click only qualifies when its expected result appears in both the original and local replay.
+
+For example, this plan checks the scroll position of a nested container.
+
+```json
+{
+  "observe": [{"name":"offset","selector":"main .scroll-root","read":"scrollTop"}],
+  "steps": [{
+    "action":"scroll",
+    "delta":600,
+    "waitMs":1400,
+    "label":"Scroll to the next chapter",
+    "expect":{"offset":600}
+  }]
+}
+```
+
+For a horizontal specimen moved by a wheel gesture, observe the specimen track's `left` coordinate. For a portfolio filter, observe the number of laid-out matching result cards and whether the intended radio is checked. Compare a filtered state and a return to the full list.
+
 ## What the recovered clips show
 
 These observations are from the original playable videos. Use the notes to choose what to measure in a new implementation.
