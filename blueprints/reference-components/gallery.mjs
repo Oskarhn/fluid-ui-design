@@ -40,7 +40,9 @@ function render(entry) {
   reference.href = entry.url;
   reference.textContent = entry.referenceLabel ?? 'Original reference';
   const archive=websiteReplays.get(entry.id);
-  replay.hidden=!archive;
+  const sourceClip=privateAssets.comparisons?.some(clip=>clip.id===entry.id);
+  replay.hidden=!archive&&!sourceClip;
+  replay.textContent=archive?'Compare original code':'Compare with original footage';
   if(!replay.hidden)replay.href='./compare-fidelity.html#'+entry.id;
   source.href = './' + file;
   const compare = archive && !showComponent && !mode.has('demo') && archive.poster;

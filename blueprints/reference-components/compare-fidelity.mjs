@@ -20,12 +20,18 @@ const status=document.querySelector('#web-status');
 const before=document.querySelector('#original-frame'),after=document.querySelector('#copy-frame');
 const videos=document.querySelector('#show-videos');
 const libraryLink=document.querySelector('.actions a');
-function showVideos(){
-  before.hidden=true;after.hidden=true;movie.hidden=false;localMovie.hidden=false;
+let activeWebsite=false;
+function showLive(){
+  before.hidden=true;after.hidden=true;movie.hidden=false;
+  localMovie.hidden=!activeWebsite;frame.hidden=activeWebsite;
+  copyLabel.textContent=activeWebsite?'Opptak fra kopien med originalkode':'Kjørbar komponent';
   videos.hidden=true;
   markers.querySelectorAll('[aria-pressed]').forEach(button=>button.setAttribute('aria-pressed','false'));
 }
-videos.addEventListener('click',()=>{showVideos();movie.play().catch(()=>{});});
+videos.addEventListener('click',()=>{
+  showLive();
+  if(activeWebsite)movie.play().catch(()=>{});
+});
 try {
   const response=await fetch('./private-reference/websites.json');
   if(response.ok){
@@ -38,17 +44,23 @@ try {
   }
 } catch {}
 try {
-  const response=await fetch('./private-reference/manifest.json');
+  const [response,review]=await Promise.all([
+    fetch('./private-reference/manifest.json'),
+    fetch('./private-reference/component-pairs.json')
+  ]);
   if(response.ok){
     const assets=await response.json();
+    const pairs=review.ok?await review.json():{};
     for(const entry of assets.comparisons??[]) cases.push([entry.id,entry.label,entry.ratio,
-      'Bruk kontrollene i komponenten til høyre. Originalklippet kan stoppes og spoles separat.',[['Start',0]],entry.source]);
+      pairs[entry.id]?.hint??'Bruk kontrollene i komponenten til høyre. Originalklippet kan stoppes og spoles separat.',
+      [['Start',0]],entry.source,null,pairs[entry.id]]);
   }
 } catch {}
 for (const [id,label] of cases) picker.add(new Option(label,id));
 
 function show() {
-  const [id,label,ratio,hint,points,source,website] = cases.find(([key]) => key === picker.value);
+  const [id,label,ratio,hint,points,source,website,study] = cases.find(([key]) => key === picker.value);
+  activeWebsite=Boolean(website);
   instruction.textContent = hint;
   panel.style.setProperty('--ratio',ratio);
   libraryLink.href='./index.html?reference-assets=1#'+id;
@@ -74,18 +86,21 @@ function show() {
   }
   missing.hidden = true;
   markers.replaceChildren();
-  if(website?.frames?.length){
-    website.frames.forEach((step,i)=>{
+  const pairs=website?.frames??study?.frames;
+  if(pairs?.length){
+    pairs.forEach((step,i)=>{
       const action=document.createElement('button');
       action.type='button';
       action.textContent=(i?i+' · ':'')+step.label;
       action.setAttribute('aria-pressed','false');
       action.addEventListener('click',()=>{
         movie.pause();localMovie.pause();
-        movie.hidden=true;localMovie.hidden=true;
-        const base='./private-reference/website-replays/'+id+'/';
+        movie.hidden=true;localMovie.hidden=true;frame.hidden=true;
+        const base=website?'./private-reference/website-replays/'+id+'/':'./private-reference/component-frames/'+id+'/';
         before.src=base+step.original;after.src=base+step.copy;
         before.hidden=false;after.hidden=false;videos.hidden=false;
+        videos.textContent=website?'Spill opptak':'Tilbake til kjørbar komponent';
+        copyLabel.textContent=website?'Kopien med originalkode':'Opptak fra komponenten';
         markers.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button===action)));
       });
       markers.append(action);
