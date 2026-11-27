@@ -53,12 +53,17 @@ const archiveCards = [
   ['Mono Press',[439,383,70,27]], ['Platform 9',[495,397,59,29]],
   ['Lumen',[549,397,56,31]], ['Common Ground',[581,416,69,31]]
 ];
+const cardColors=['#f4f1eb','#d73726','#3f3e3e','#f0ece0','#3b393d','#4d4c4e','#faf7f0','#3b3b3e','#38383b','#e5e0d7'];
+function archiveFile([label],index) {
+  return {label,title:label==='Mono Press'?'Mo\nno':label==='Nord Festival'?'Nord':label,
+    background:cardColors[index],ink:[1,2,4,5,7,8].includes(index)?'#f7f4ec':'#272724'};
+}
 for (const [id,filename] of Object.entries(sources)) copyFileSync(filename,join(out,id+'.mp4'));
 const manifest = {
   'collapse-icon':{backplate:prefix+'sidebar.png',voice:prefix+'voice.png'},
   'quick-actions':{backplate:prefix+'quick-actions.png'},
   'file-drawer':{
-    files:archiveCards.map(([label])=>({label,title:label,background:label==='Nord Festival'?'#393c3b':'#f1f0e8',ink:'#181918'})),
+    files:archiveCards.map(archiveFile),
     atlas:{width:archiveWidth,height:archiveHeight,clips,rest:prefix+'archive-rest.png',
       hits:archiveCards.map(([,hit])=>hit.map((value,axis)=>value/(axis%2?720:920))),
       cardClips:{1:2,6:1}}

@@ -55,7 +55,8 @@ export function fileDrawer(root, { signal, options = {} }) {
     tabs.append(button);
   });
   const buttons = controls(tabs, 'button');
-  if (options.atlas?.hits?.length === buttons.length) {
+  const recordedPresentation = options.archivePresentation === 'recorded';
+  if (recordedPresentation && options.atlas?.hits?.length === buttons.length) {
     tabs.dataset.project = '';
     options.atlas.hits.forEach((hit, index) => positionTab(buttons[index], hit));
   }
@@ -87,7 +88,7 @@ export function fileDrawer(root, { signal, options = {} }) {
   }, signal);
   signal.addEventListener('abort', () => engine?.dispose(), {once:true});
   async function loadArtwork() {
-    if (options.atlas) {
+    if (recordedPresentation && options.atlas) {
       const sampled = await openArchiveAtlas(stage,options.atlas,preference,signal).catch(() => null);
       if (sampled || signal.aborted) return sampled;
     }
@@ -133,12 +134,43 @@ function cardTexture(THREE, file, index) {
   return texture;
 }
 
+function tabTexture(THREE,file,index) {
+  const surface=document.createElement('canvas');
+  surface.width=336;surface.height=104;
+  const ctx=surface.getContext('2d');
+  ctx.fillStyle='#f6f5ef';ctx.beginPath();ctx.roundRect(0,0,336,104,[17,17,0,0]);ctx.fill();
+  ctx.font='500 38px Arial';ctx.fillStyle='#656665';
+  ctx.fillText(String(index+1).padStart(2,'0'),21,62);
+  ctx.fillStyle='#2c2e2d';
+  ctx.fillText(file.label,76,62,240);
+  const texture=new THREE.CanvasTexture(surface);
+  texture.colorSpace=THREE.SRGBColorSpace;
+  return texture;
+}
+
+function brushedMetal(THREE) {
+  const surface=document.createElement('canvas');
+  surface.width=512;surface.height=256;
+  const ctx=surface.getContext('2d');
+  ctx.fillStyle='#9b9ca1';ctx.fillRect(0,0,512,256);
+  for(let row=0;row<256;row++){
+    const n=Math.sin(row*429.8712)*.5+.5;
+    ctx.fillStyle=n>.55?'#e8ebf035':'#22253134';
+    const offset=(row*137)%98;
+    ctx.fillRect(offset,row,512-offset,1);
+  }
+  const texture=new THREE.CanvasTexture(surface);
+  texture.colorSpace=THREE.SRGBColorSpace;
+  texture.anisotropy=8;
+  return texture;
+}
+
 function buildArchive(THREE,RoomEnvironment,stage,files,buttons,preference,signal) {
   const renderer = new THREE.WebGLRenderer({antialias:true, alpha:false});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.55));
+  renderer.setPixelRatio(Math.min(2.25,Math.max(1.5,devicePixelRatio)));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.2;
+  renderer.toneMappingExposure=1.02;
   renderer.shadowMap.enabled=true;
   renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.domElement.className='archive-canvas';
@@ -148,7 +180,7 @@ function buildArchive(THREE,RoomEnvironment,stage,files,buttons,preference,signa
   const scene=new THREE.Scene();
   scene.background=new THREE.Color(0xe9e7e0);
   const camera=new THREE.OrthographicCamera(-295,295,231,-231,.5,3500);
-  camera.position.set(-365,393,638);
+  camera.position.set(-320,500,690);
   camera.lookAt(0,45,24);
   const room=new RoomEnvironment();
   const generator=new THREE.PMREMGenerator(renderer);
@@ -170,7 +202,9 @@ function buildArchive(THREE,RoomEnvironment,stage,files,buttons,preference,signa
   scene.add(cabinet);
   const shell=new THREE.MeshStandardMaterial({color:0x373939,roughness:.81,metalness:.18,envMapIntensity:.34});
   const dark=new THREE.MeshStandardMaterial({color:0x1a1c1c,roughness:.92,metalness:.1,envMapIntensity:.16});
-  const steel=new THREE.MeshStandardMaterial({color:0x82837e,roughness:.46,metalness:.63,envMapIntensity:.58});
+  const metalTexture=brushedMetal(THREE);
+  const steel=new THREE.MeshStandardMaterial({color:0x81828a,roughness:.47,metalness:.58,envMapIntensity:.52});
+  const brushed=new THREE.MeshStandardMaterial({map:metalTexture,color:0xd7d9e1,roughness:.48,metalness:.47,envMapIntensity:.44});
   const flange=new THREE.MeshStandardMaterial({color:0xadb0a7,roughness:.5,metalness:.42});
   function box(container,material,x,y,z,w,h,d) {
     const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
@@ -188,24 +222,36 @@ function buildArchive(THREE,RoomEnvironment,stage,files,buttons,preference,signa
   box(slide,dark,0,16,7,181,9,204);
   box(slide,dark,-87,57,12,7,82,211);
   box(slide,dark,87,57,12,7,82,211);
-  box(slide,steel,0,66,115,187,110,10);
+  box(slide,brushed,0,66,115,187,110,10);
   box(slide,flange,0,119,119,182,2.3,3);
-  box(slide,dark,0,82,121,69,14,2.7);
+  box(slide,dark,0,82,121,69,17,2.7);
+  box(slide,steel,0,82,122,63,13,1.8);
+  box(slide,dark,0,82,123.2,60,10,1.2);
+  const lamp=new THREE.Mesh(new THREE.CircleGeometry(2.25,24),new THREE.MeshBasicMaterial({color:0xf46647}));
+  lamp.position.set(70,58,121);slide.add(lamp);
   box(slide,flange,0,47,122,58,4.9,5.5);
   const cards = files.map((file,index)=>{
     const art=cardTexture(THREE,file,index);
-    const paper=new THREE.Mesh(new THREE.PlaneGeometry(164,106),new THREE.MeshStandardMaterial({
-      map:art,side:THREE.DoubleSide,roughness:.72,metalness:0,emissiveMap:art,emissive:0x151515
-    }));
+    const paper=new THREE.Mesh(new THREE.PlaneGeometry(164,106),new THREE.MeshBasicMaterial({map:art,side:THREE.DoubleSide,toneMapped:false}));
+    const folder=new THREE.Group();
     paper.castShadow=true;paper.receiveShadow=true;
-    slide.add(paper);
-    const tabX = -56+index*19;
-    const tabZ = 6+index*19;
-    const tab=box(slide,flange,tabX,124,tabZ,29,10,2);
-    return {paper,art,tab,tabX,tabZ,lift:0,velocity:0};
+    paper.position.z=1.05;
+    box(folder,steel,0,0,0,164,106,1.4);
+    folder.add(paper);
+    const tabX = files.length>6 ? -56+(index%5)*24 : -56+index*19;
+    const baseZ = 18+index*72/Math.max(1,files.length-1);
+    const tabTop=new THREE.Vector3(tabX,57,.2);
+    const tabArt=tabTexture(THREE,file,index);
+    const tab=new THREE.Mesh(new THREE.PlaneGeometry(29,10),new THREE.MeshBasicMaterial({map:tabArt,transparent:true,side:THREE.DoubleSide,toneMapped:false}));
+    tab.position.set(tabX,57,1.12);folder.add(tab);
+    slide.add(folder);
+    const restingTab=tabTop.clone().applyAxisAngle(new THREE.Vector3(1,0,0),-.19).add(new THREE.Vector3(0,66,baseZ));
+    return {paper,art,tab,tabArt,folder,restingTab,baseZ,lift:0,velocity:0};
   });
   let target=0, travel=0, chosen=-1, pointed=-1, frame=0, last=0, visible=true;
   const projected = new THREE.Vector3();
+  const displayPosition=new THREE.Vector3(), orientation=new THREE.Quaternion(), rest=new THREE.Euler();
+  const tabAxis=new THREE.Quaternion();
   const lerp=(a,b,t)=>a+(b-a)*t;
   function schedule() {
     if (!frame&&visible&&!signal.aborted&&!document.hidden) frame=requestAnimationFrame(paint);
@@ -226,8 +272,14 @@ function buildArchive(THREE,RoomEnvironment,stage,files,buttons,preference,signa
     cabinet.rotation.y=.057*travel;
     cabinet.position.x=-14*travel;
     stage.style.setProperty('--archive-travel',travel);
+    scene.updateMatrixWorld(true);
+    displayPosition.set(0,154,173).applyMatrix4(slide.matrixWorld).project(camera);
+    displayPosition.x=.08;displayPosition.y=.14;
+    displayPosition.unproject(camera);
+    slide.worldToLocal(displayPosition);
+    slide.getWorldQuaternion(orientation).invert().multiply(camera.quaternion);
     let restless=travel!==target;
-    cards.forEach(({paper},i)=>{
+    cards.forEach(({folder,baseZ},i)=>{
       const model=cards[i];
       const goal = chosen === i ? 1 : pointed === i ? .13 : 0;
       if (calm) model.lift=goal;
@@ -237,22 +289,22 @@ function buildArchive(THREE,RoomEnvironment,stage,files,buttons,preference,signa
         if (Math.abs(goal-model.lift)<.001&&Math.abs(model.velocity)<.015){model.lift=goal;model.velocity=0;}
       }
       restless ||= model.lift!==goal;
-      paper.position.set(-11*model.lift,66+123*model.lift,18+i*18+40*model.lift);
-      paper.rotation.x=-.19-.29*model.lift;
-      paper.rotation.y=-.39*model.lift;
-      paper.rotation.z=-.14*model.lift;
-      paper.scale.setScalar(1+.57*model.lift);
-      model.tab.position.set(model.tabX-11*model.lift,124+123*model.lift,model.tabZ+40*model.lift);
+      const lift=model.lift, pull=Math.min(1,Math.max(0,(lift-.17)/.83));
+      folder.position.set(0,66+115*lift,baseZ+25*lift).lerp(displayPosition,pull);
+      tabAxis.setFromEuler(rest.set(-.19,0,0));
+      folder.quaternion.copy(tabAxis).slerp(orientation,pull);
+      folder.scale.setScalar(1+.65*lift);
     });
+    stage.style.setProperty('--archive-lift',Math.max(0,...cards.map(card=>card.lift)));
     renderer.render(scene,camera);
     if (target) {
-      cards.forEach(({tabX,tabZ},i) => {
+      cards.forEach(({restingTab},i) => {
         // Hit the resting tab so its small lift does not move out from under the pointer.
-        projected.set(tabX,124,tabZ).applyMatrix4(slide.matrixWorld).project(camera);
+        projected.copy(restingTab).applyMatrix4(slide.matrixWorld).project(camera);
         const x = (projected.x + 1) / 2;
         const y = (1 - projected.y) / 2;
         const w = 32 / (camera.right - camera.left);
-        const h = .026;
+        const h = files.length>6?.018:.026;
         positionTab(buttons[i],[x - w / 2, y - h / 2, w, h]);
       });
     }
@@ -279,8 +331,9 @@ function buildArchive(THREE,RoomEnvironment,stage,files,buttons,preference,signa
     dispose(){
       cancelAnimationFrame(frame);resize.disconnect();io.disconnect();
       scene.traverse(item=>{item.geometry?.dispose();});
-      [shell,dark,steel,flange,base.material].forEach(mat=>mat.dispose());
-      cards.forEach(({art,paper})=>{art.dispose();paper.material.dispose();});
+      [shell,dark,steel,brushed,flange,lamp.material,base.material].forEach(mat=>mat.dispose());
+      metalTexture.dispose();
+      cards.forEach(({art,paper,tab,tabArt})=>{art.dispose();paper.material.dispose();tabArt.dispose();tab.material.dispose();});
       env.dispose();renderer.dispose();renderer.forceContextLoss();
     }
   };
