@@ -10,7 +10,7 @@ description: >-
   web app, native mobile interface, or interactive 3D experience.
 license: MIT
 metadata:
-  version: "2.16.3"
+  version: "2.17.0"
 ---
 
 # Fluid UI Design
@@ -29,7 +29,7 @@ Use the mobile composition table to choose a route by task: a marketing page, an
 
 ## First-pass builds
 
-For a request to build a page, deliver the working page in the same run. Read the project's brief, brand, and existing DESIGN.md. A supplied document or gallery is reference material. Apply the user's current instructions to decide what to borrow.
+For a request to build a page, deliver the working page in the same run. Read the project's brief, brand, and existing DESIGN.md. A supplied document or gallery is reference material. Apply the user's current instructions to decide what to borrow. When adapting an example for a new project, replace every sample brand, product name, label and footer with the receiving project's content. Keep original names and branding in the comparison evidence.
 
 For HTML, CSS, and browser-side JavaScript, [search the bundled Modern Web Guidance](references/web-platform.md) before choosing APIs or adding dependencies. Retrieve the guides that match the implementation and check the project's browser support target and the documented fallbacks.
 
@@ -46,7 +46,7 @@ For new sites and web changes that affect performance, use the [Lighthouse workf
    For GSAP, Lenis or React Bits, use the [pinned source checkouts](vendor/motion-sources/README.md) to identify the relevant source, integration and license.
    If the user supplies a clip, use [recording motion studies](references/recording-motion-studies.md) to identify the visible phases and stable elements before setting implementation timing.
    For a known reference URL or a reusable interaction, find its runnable example in the [reference component library](blueprints/reference-components/README.md). Load the selected module and its styles, then verify the transition in the receiving layout.
-   For an authorized website replay, work through each URL independently. Promote a source archive only after the same input produces the expected state in both the original and replay. Keep the side-by-side evidence with the selected archive.
+   For an authorized website replay, work through each URL independently. Promote a source archive only after the same input produces the expected state in both the original and replay. Keep the side-by-side evidence with the selected archive. Reuse its media and interaction code when available. Check the real input, intermediate frame and settled state before offering it as a usable example. Record which controls, scroll regions and viewport sizes were tested.
    When matching a reference, reproduce the observed input first. Compare opening, mid-gesture, and settled frames at matching viewport bounds. For an object or material study, inspect the camera, silhouette, lighting, and depth along with timing and the final state.
    If the user supplies a website URL as a reference, use [URL reference studies](references/url-reference-study.md). The runner produces TypeUI DESIGN.md and SKILL.md along with available DesignLang layout, token, and motion evidence. Confirm design rights when exact recreation is requested.
    Capture the states that matter with the URL study's interaction plan. For an authorized static transfer, use the static export and verify the copied route in isolation. See [website and control studies](references/website-and-control-studies.md) for examples and [licensed interaction packs](vendor/interaction-packs/README.md) for code suited to the project's platform.
