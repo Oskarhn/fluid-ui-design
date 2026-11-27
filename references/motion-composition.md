@@ -25,6 +25,10 @@ Start with the action and the information that changes. Record the states the us
 - Measure an actual recording or inspect CSS before claiming a source timing. Keep whether the evidence came from a live control, a recorded clip, or an inferred mechanism. For a new example, tune timing against the content and number of moving objects.
 - Start a simple state change around 160–240ms and a deliberate spatial transition around 350–550ms. These are starting values for new work. Reduced motion keeps the information and lets the same controls reach the same states.
 
+## Choose an animation API
+
+For a sequence you can reverse or scrub, a physical control, or a layout transition with retained elements, check the [Anime.js guide](animejs.md). It maps the measured states and inputs to the right module and includes an offline workbench. Keep one owner for each animated property when adapting an existing component.
+
 ## Work from examples
 
 [Field Signal](../blueprints/field-signal/index.html) combines a tactile dial, a continuous signal with a rounded numeric readout, a waveform morph, and a sweep with a held pause. Open the example in a browser or read [its source](../blueprints/field-signal/scope.js) for the input and drawing loop.
