@@ -134,22 +134,51 @@ const checks = {
     assert.equal(await output(root),'49');
     assert.equal(await root.locator('[data-arrival]').textContent(),'9:29 AM');
   },
-  async studioCopier(page, root) {
-    await button(root,'Place workshop ticket').click();
+  async studioCopier(page, root, entry, width) {
+    const feed=button(root,'Place workshop ticket'),bed=root.locator('.printer-bed');
+    const make=button(root,'Make copy'),take=button(root,'Take copy');
+    if(width>390) {
+      const paper=await feed.boundingBox(),tray=await bed.boundingBox();
+      const start=[paper.x+paper.width/2,paper.y+paper.height/2];
+      await page.mouse.move(...start);await page.mouse.down();
+      await page.mouse.move(start[0]+paper.width*.3,start[1],{steps:6});
+      await page.mouse.up();
+      assert.equal(await output(root),'PLACE ORIGINAL');
+      assert.ok(await make.isDisabled());
+      await page.mouse.move(...start);await page.mouse.down();
+      await page.mouse.move(tray.x+tray.width*.3,tray.y+tray.height*.55,{steps:18});
+      await page.mouse.up();
+    }else await feed.focus().then(()=>feed.press('Enter'));
     assert.equal(await output(root),'READY');
-    await button(root,'Make copy').click();
-    await pause(page,'#preview output','COPY READY');
-    assert.ok(await root.locator('.printer-page').isVisible());
+    await make.click();
+    if(width>390){
+      assert.equal(await output(root),'COPYING');
+      await pause(page,'#preview output','PRINTING');
+      assert.ok(await take.isVisible());
+    }
+    await pause(page,'#preview output','TAKE COPY');
+    await take.click();
+    assert.equal(await output(root),'COPY TAKEN');
     await button(root,'Reset').click();
-    assert.ok(await button(root,'Make copy').isDisabled());
+    assert.ok(await make.isDisabled());
+    assert.ok(await take.isHidden());
   },
   async logoBuild(page, root) {
     await button(root,'Play intro').click();
     await pause(page,'#preview output','Studio ready');
     assert.ok(await root.locator('.brand-arrival').isVisible());
   },
-  async colorPass(page, root) {
-    await button(root,'Start color pass').click();
+  async colorPass(page, root, entry, width) {
+    const play=button(root,'Start color pass'),cancel=button(root,'Cancel');
+    await play.click();
+    if(width>390){
+      await page.waitForFunction(()=>document.querySelectorAll('#preview [data-color]').length===1);
+      await cancel.click();
+      assert.equal(await output(root),'Color pass cancelled');
+      assert.ok(await cancel.isDisabled());
+      await play.click();
+      await page.waitForFunction(()=>document.querySelectorAll('#preview [data-color]').length===2);
+    }
     await pause(page,'#preview output','Color restored');
     assert.equal(await root.locator('[data-color]').count(),3);
   },
