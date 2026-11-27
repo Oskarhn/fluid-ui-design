@@ -63,6 +63,15 @@ for(const entry of catalog) {
   const next=manifest[n]??{};
   const frames=Array.from({length:3},(_,i)=>snapshot(bundle,Math.round(i*(originalCount-1)/2),n+'-'+i+'.jpg'));
   next.sourceFrames=frames;
+  if(n==='munch'){
+    const photo=bundle.doc.entries.find(item=>item.status===200&&item.headers?.['content-type']==='image/webp'
+      && item.url.includes('menu-smash-single.webp'));
+    if(photo?.digest){
+      const source=join(bundle.root,'assets',photo.digest), name='munch-smash-single.webp';
+      if(existsSync(source)){copyFileSync(source,join(assets,name));next.foodPhoto=path(name);}
+    }
+  }
+  if(n==='venice'&&originalCount>=7)next.nightFrame=snapshot(bundle,5,'venice-night.jpg');
   if(entry.component==='mediaIndex') {
     next.items=entry.options.items.map((label,index)=>{
       const src=video(bundle,n,index);

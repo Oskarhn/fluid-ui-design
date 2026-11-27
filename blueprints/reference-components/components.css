@@ -25,12 +25,13 @@ button, input, select { font: inherit; }
 .action-row, .profile-actions, .segmented, .filter-buttons, .connection-buttons { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .action-row { margin-top: 10px; }
 .tab-content { padding: 1rem 0; }
-.floating-field { color: #252827; width: min(100%, 440px); min-height: 310px; border-radius: 8px; padding: 26px 12px 12px; background: #d8dbd5; display: grid; justify-items: center; align-content: start; transition: background 230ms; }
+.floating-field { color: #252827; width: min(100%, 440px); min-height: 310px; border-radius: 8px; padding: 26px 12px 12px; background: #fff; display: grid; justify-items: center; align-content: start; transition: background 230ms; }
 .floating-field[data-dark] { color: #e7ebe7; background: #27292b; }
 .floating-menu { width: min(100%, 270px); background: #f2f3ef; border-radius: 16px; box-shadow: 0 9px 20px #27322735; }
 [data-dark] .floating-menu { background: #111516; }
-.floating-trigger { display: flex; justify-content: space-between; gap: 5px; background: #161916; padding: 4px; border-radius: 16px; }
-.library-preview .floating-trigger button { color: #fff; background: transparent; border-color: transparent; }
+.floating-trigger { display: flex; justify-content: space-between; gap: 5px; background: #f5f6f5; padding: 4px; border-radius: 16px; }
+[data-dark] .floating-trigger { background: #161916; }
+.library-preview .floating-trigger button { color: inherit; background: transparent; border-color: transparent; }
 .floating-collapse, .ingredient-grid { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 370ms cubic-bezier(.22,.75,.23,1); }
 [data-open] > .floating-collapse, [data-open] > .ingredient-grid { grid-template-rows: 1fr; }
 .floating-inner, .ingredient-grid > div { overflow: hidden; min-height: 0; }
@@ -129,19 +130,19 @@ button, input, select { font: inherit; }
 .stage-orbit i:nth-child(3) { rotate: 84deg; }
 .media-choices, .search-row { display:flex; flex-wrap:wrap; gap:6px; }
 .media-detail { margin-top:10px; background:#253b37; border-radius:9px; color:#e4f3ee; padding:9px; }
-.media-detail video { display:block; object-fit:cover; width:100%; aspect-ratio:16/9; max-height:220px; background:#151f20; border-radius:6px; }
+.media-detail video { display:block; object-fit:contain; width:100%; aspect-ratio:16/9; max-height:220px; background:#151f20; border-radius:6px; }
 .media-caption { font-weight:650; }
 .media-status:empty { display:none; }
 .billing-study fieldset { border: 1px solid #afc1ba; display: flex; flex-wrap:wrap; gap:8px; }
 .billing-study label { min-height:44px; display:inline-flex; align-items:center; gap:6px; padding:.2rem .42rem; }
 .billing-study input { accent-color:#19594c; }
 .bill-detail { min-height:125px; padding:8px 12px; background:#f5f9f7; }
-.ingredient-study { width:min(100%,310px); text-align:center; background:#f5e1db; border-radius:10px; padding:12px; color:#381f19; }
-.burger-drawing { display:grid; gap:3px; place-items:center; min-height:100px; align-content:center; }
-.burger-drawing i { width:60%; height:13px; border-radius:18px; background:#874325; }
-.burger-drawing i:first-child { height:34px; border-radius:50% 50% 10px 10px; background:#ce863d; }
-.burger-drawing i:nth-child(2) { height:9px; background:#44683f; }
-.burger-drawing i:last-child { height:20px; background:#b97331; }
+.ingredient-study { width:min(100%,310px); background:#faf7ef; border:1px solid #d6b4ae; border-radius:22px; overflow:hidden; color:#780c17; }
+.ingredient-study .ingredient-copy { padding:15px 18px; }
+.ingredient-copy h3 {font:400 1.75rem/1 Georgia,serif;}
+.ingredient-copy p {font-size:.83rem;line-height:1.4;margin:.45em 0 .9em;}
+.library-preview .ingredient-copy button {background:transparent;border-color:#d6b4ae;color:inherit;}
+.ingredient-copy ul {font-size:.82rem;padding-left:1.1em;}
 .ingredient-grid ul { text-align:left; }
 .specimen { display:grid; align-items:center; gap:7px; }
 .specimen-preview { background:#f2f6f3; padding:15px; border-radius:8px; min-height:110px; transition:background 240ms,color 240ms; }

@@ -9,15 +9,16 @@ export function lightSwitch(root, { signal, options = {} }) {
     <div class="lights-stage">
       <div class="lights-rail"><button type="button" aria-label="Toggle lights" aria-pressed="false"><span aria-hidden="true" class="light-orb">☼</span></button></div>
       <div class="lights-city" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-      <div class="lights-plane" aria-hidden="true">✈</div><output aria-live="polite">Daylight</output>
+      <div class="lights-plane" aria-hidden="true"><span style="display:block;scale:-1 1">✈</span></div><output aria-live="polite">Daylight</output>
     </div>
   `;
   const stage = control(root, '.lights-stage');
   const button = control(root, 'button');
   const mark = control(root, '.light-orb');
   const plane = control(root, '.lights-plane');
+  let photo;
   if (options.sourceFrames?.[0]) {
-    const photo = new Image();
+    photo = new Image();
     photo.alt = '';
     photo.className = 'lights-real';
     photo.src = options.sourceFrames[0];
@@ -43,6 +44,7 @@ export function lightSwitch(root, { signal, options = {} }) {
   listen(button, 'click', () => {
     const night = stage.toggleAttribute('data-night');
     button.setAttribute('aria-pressed', String(night));
+    if(photo)photo.src=night?(options.nightFrame??options.sourceFrames[0]):options.sourceFrames[0];
     control(root, 'output').textContent = night ? 'Lights dimmed' : 'Daylight restored';
     flight?.cancel();
     if (night) {
@@ -258,10 +260,9 @@ export function ingredientCard(root, { signal, options = {} }) {
   const id = scope(root);
   root.innerHTML = `
     <div class="ingredient-study">
-      <div class="burger-drawing" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-      <h3>House burger</h3>
+      <div class="ingredient-copy"><h3>Smash single</h3><p>Griddled patty, American cheese, pickles, and house sauce.</p>
       <button class="ingredient-toggle" type="button" aria-expanded="false" aria-controls="${id}-ingredients">Ingredients</button>
-      <div class="ingredient-grid"><div id="${id}-ingredients" inert><ul><li>Toasted bun</li><li>Pickles and onion</li><li>Grilled patty</li><li>House sauce</li></ul></div></div>
+      <div class="ingredient-grid"><div id="${id}-ingredients" inert><ul><li>Potato bun</li><li>Pickles</li><li>4 oz patty</li><li>American cheese</li><li>House sauce</li></ul></div></div></div>
     </div>
   `;
   const frame = control(root, '.ingredient-study');
@@ -269,7 +270,7 @@ export function ingredientCard(root, { signal, options = {} }) {
   const content = control(root, '.ingredient-grid > div');
   if (options.foodPhoto) {
     const image = new Image();image.alt='';image.src=options.foodPhoto;image.className='ingredient-photo';
-    control(root,'.burger-drawing').replaceWith(image);
+    frame.prepend(image);
   }
   listen(trigger, 'click', () => {
     const open = frame.toggleAttribute('data-open');

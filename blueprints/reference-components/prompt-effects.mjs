@@ -21,14 +21,17 @@ export function videoHero(root, { signal, options = {} }) {
   }
   listen(video, 'play', () => { button.textContent = 'Pause background'; }, signal);
   listen(video, 'pause', () => { button.textContent = 'Play background'; }, signal);
+  let playWhenVisible=Boolean(options.video)&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
   listen(button, 'click', async () => {
-    if (!video.paused) { video.pause(); return; }
+    if (!video.paused) { playWhenVisible=false;video.pause(); return; }
+    playWhenVisible=true;
     try { await video.play(); }
     catch { if (!signal.aborted) status.textContent = 'The video is unavailable.'; }
   }, signal);
-  const observer = new IntersectionObserver(entries => {
-    if (entries.some(entry => !entry.isIntersecting)) video.pause();
-  });
+  const observer = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting || entry.intersectionRatio < .25) video.pause();
+    else if (playWhenVisible) video.play().catch(()=>{});
+  }, {threshold:[0,.25]});
   observer.observe(video);
   signal.addEventListener('abort', () => { video.pause(); observer.disconnect(); }, { once: true });
 }
