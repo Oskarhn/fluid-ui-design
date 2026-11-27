@@ -33,9 +33,10 @@
   </div>
   <p id="input"></p>
   <p id="error" role="status" hidden>De lokale referanseklippene mangler. Se <a href="./README.md">hvordan de klargjøres</a>.</p>
+  <div class="actions" id="website-actions" hidden><button type="button" id="open-site">Åpne kopien i Chrome</button><span id="web-status" role="status"></span></div>
   <div class="pair" id="pair">
     <figure><figcaption>Originalopptak</figcaption><video id="original" muted playsinline controls preload="metadata"></video></figure>
-    <figure><figcaption>Kjørbar komponent</figcaption><iframe id="copy" title="Kjørbar lokal komponent"></iframe></figure>
+    <figure><figcaption id="copy-label">Kjørbar komponent</figcaption><iframe id="copy" title="Kjørbar lokal komponent"></iframe><video id="site-copy" muted playsinline controls preload="metadata" hidden></video></figure>
   </div>
   <div class="actions" id="marks" aria-label="Hopp i originalopptaket"></div>
 </main>

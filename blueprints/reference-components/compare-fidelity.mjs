@@ -4,7 +4,7 @@ const cases = [
   ['quick-actions','Quick Actions','320 / 320','Trykk på plusstegnet. Hold pekeren over en handling. Lukk med krysset eller Escape.', [['Lukket',.08],['Handlinger synlige',1.5],['Peker over kort',2.7]]],
   ['patient-funnel','Patient funnel','358 / 270','Bytt fra «All patients» til «In-clinic» eller «Telehealth», og se hvordan profilen og partiklene endres.', [['Alle pasienter',.12],['In-clinic',4.6],['Telehealth',6.3]]],
   ['calorie-flame','Energy flame meter','356 / 270','Bytt mellom Walk, Run og Cycle. Bruk den hvite knappen for å stoppe og fortsette.', [['Tidlig i klippet',.09],['Aktiv flamme',4.1],['Sent i klippet',7.7]]],
-  ['file-drawer','Archive Drawer','344 / 270','Trykk på metallfronten. Trykk på en av de to synlige arkivfanene og deretter på det løftede kortet for å legge det tilbake.', [['Lukket',.05],['Åpen skuff',1.1],['Mono løftet',7.65],['Nord løftet',12.0]]]
+  ['file-drawer','Archive Drawer','344 / 270','Trykk på metallfronten. Hold pekeren over en fane for å løfte den litt, eller trykk for å løfte kortet ut.', [['Lukket',.05],['Åpen skuff',1.1],['Mono løftet',7.65],['Nord løftet',12.0]]]
 ];
 const picker = document.querySelector('#cases');
 const movie = document.querySelector('#original');
@@ -13,6 +13,18 @@ const panel = document.querySelector('#pair');
 const instruction = document.querySelector('#input');
 const markers = document.querySelector('#marks');
 const missing = document.querySelector('#error');
+const localMovie=document.querySelector('#site-copy');
+const websiteActions=document.querySelector('#website-actions');
+const copyLabel=document.querySelector('#copy-label');
+const status=document.querySelector('#web-status');
+try {
+  const response=await fetch('./private-reference/websites.json');
+  if(response.ok){
+    const sites=await response.json();
+    for(const site of sites)cases.push([site.id,site.title,site.ratio,site.hint,[['Start',0]],
+      './private-reference/website-replays/'+site.id+'/original.webm',site]);
+  }
+} catch {}
 try {
   const response=await fetch('./private-reference/manifest.json');
   if(response.ok){
@@ -24,13 +36,22 @@ try {
 for (const [id,label] of cases) picker.add(new Option(label,id));
 
 function show() {
-  const [id,label,ratio,hint,points,source] = cases.find(([key]) => key === picker.value);
+  const [id,label,ratio,hint,points,source,website] = cases.find(([key]) => key === picker.value);
   instruction.textContent = hint;
   panel.style.setProperty('--ratio',ratio);
   movie.pause();
   movie.src = source ?? './private-reference/' + id + '.mp4';
-  frame.title = label + ' med fungerende kontroller';
-  frame.src = './index.html?demo=1&reference-assets=1#' + id;
+  localMovie.pause();localMovie.hidden=!website;frame.hidden=Boolean(website);
+  websiteActions.hidden=!website;status.textContent='';
+  copyLabel.textContent=website?'Opptak fra kopien med originalkode':'Kjørbar komponent';
+  if(website){
+    frame.removeAttribute('src');
+    localMovie.src='./private-reference/website-replays/'+id+'/copy.webm';
+  }else{
+    localMovie.removeAttribute('src');
+    frame.title = label + ' med fungerende kontroller';
+    frame.src = './index.html?demo=1&reference-assets=1#' + id;
+  }
   missing.hidden = true;
   markers.replaceChildren();
   for (const [text,position] of points) {
@@ -46,6 +67,15 @@ function show() {
   }
 }
 movie.addEventListener('error', () => { missing.hidden = false; });
+movie.addEventListener('play',()=>{if(!localMovie.hidden)localMovie.play().catch(()=>{});});
+movie.addEventListener('pause',()=>{if(!localMovie.hidden)localMovie.pause();});
+movie.addEventListener('seeked',()=>{if(!localMovie.hidden&&localMovie.readyState>=1)localMovie.currentTime=Math.min(movie.currentTime,localMovie.duration);});
+document.querySelector('#open-site').addEventListener('click',async()=>{
+  try{
+    const response=await fetch('/open-archived-site/'+encodeURIComponent(picker.value),{method:'POST',headers:{'X-Reference-Replay':'1'}});
+    status.textContent=response.ok?'Åpner den lokale kopien i et eget Chrome-vindu.':'Kopien kunne ikke åpnes fra denne serveren.';
+  }catch{status.textContent='Kopien kunne ikke åpnes.';}
+});
 picker.addEventListener('change', () => { history.replaceState(null,'','#'+picker.value); show(); });
 const requested = location.hash.slice(1);
 if (cases.some(([id]) => id === requested)) picker.value = requested;

@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { dirname, extname, resolve, sep } from 'node:path';
@@ -7,10 +8,31 @@ import { fileURLToPath } from 'node:url';
 const base = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const mime = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.md': 'text/plain; charset=utf-8', '.jpg': 'image/jpeg', '.png': 'image/png',
-  '.webp':'image/webp', '.json':'application/json; charset=utf-8', '.mp4': 'video/mp4', '.woff2':'font/woff2' };
+  '.webp':'image/webp', '.json':'application/json; charset=utf-8', '.mp4': 'video/mp4', '.webm':'video/webm', '.woff2':'font/woff2' };
 
-export async function serveLibrary({ port = 0, root = base } = {}) {
+export async function serveLibrary({ port = 0, root = base, allowReplay = false } = {}) {
+  const windows = new Map();
   const server = createServer(async (request, response) => {
+    const open = request.url.match(/^\/open-archived-site\/([a-z][a-z0-9-]{0,69})$/);
+    if (open && request.method==='POST') {
+      const expected='127.0.0.1:'+server.address().port;
+      if(!allowReplay||request.headers.host!==expected||request.headers.origin!=='http://'+expected||request.headers['x-reference-replay']!=='1'){
+        response.writeHead(403).end();return;
+      }
+      const id=open[1];
+      const archive=resolve(root,'blueprints/reference-components/private-reference/website-replays',id);
+      try{if(!(await stat(resolve(archive,'archive.json'))).isFile()) throw Error();}
+      catch{response.writeHead(404).end();return;}
+      if(windows.has(id)){response.writeHead(202).end();return;}
+      const child=spawn(process.execPath,[resolve(root,'scripts/replay-ui.mjs'),'open',archive],{
+        cwd:root,stdio:'ignore',windowsHide:true
+      });
+      windows.set(id,child);
+      child.once('exit',()=>windows.delete(id));
+      child.once('error',()=>{windows.delete(id);if(!response.headersSent)response.writeHead(503).end();});
+      child.once('spawn',()=>response.writeHead(202).end());
+      return;
+    }
     if (!['GET','HEAD'].includes(request.method)) { response.writeHead(405).end(); return; }
     try {
       const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
@@ -49,6 +71,6 @@ export async function serveLibrary({ port = 0, root = base } = {}) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const port = process.argv[2] ? Number(process.argv[2]) : 63845;
-  const server = await serveLibrary({ port });
+  const server = await serveLibrary({ port,allowReplay:true });
   console.log(server.url);
 }

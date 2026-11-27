@@ -56,7 +56,9 @@ const checks = {
     await button(root,'Cancel download').click();
     assert.equal(await root.locator('[data-rate]').textContent(),'Cancelled');
     await button(root,'Restart').click();
-    await pause(page,'#preview output','✓');
+    await page.waitForFunction(()=>document.querySelector('#preview output')?.textContent==='✓',null,{timeout:9000});
+    assert.equal(await root.locator('[data-bytes]').textContent(),'8.7 GB');
+    assert.equal(await root.locator('[data-remain]').textContent(),'0:00');
   },
   async caffeineCurve(page, root) {
     await button(root,'13:10').click();
@@ -94,7 +96,6 @@ const checks = {
   },
   async movingIconCopy(page, root) {
     await button(root,'Symbol C').click();
-    await button(root,'Copy').click();
     await pause(page,'#preview output','Symbol copied');
     assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),'◎');
   },
@@ -462,12 +463,39 @@ const checks = {
       await root.locator('.facet-stage').hover();
       await page.waitForFunction(() => Number(document.querySelector('.facet-stage')?.dataset.focus) >= 0);
     }
-    await button(root, 'Read paper').click();
+    async function clickOnLabel(name) {
+      const label = button(root,name);
+      await label.waitFor();
+      if(width===390){await label.click(); return;}
+      let bounds=await label.boundingBox();
+      await page.mouse.move(bounds.x+bounds.width/2,bounds.y+bounds.height/2);
+      await page.waitForTimeout(195);
+      bounds=await label.boundingBox();
+      const target=await label.evaluate(element=>{
+        const rect=element.getBoundingClientRect();
+        return element.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2));
+      });
+      assert.ok(target,'Hit region did not cover '+name);
+      await page.mouse.click(bounds.x+bounds.width/2,bounds.y+bounds.height/2);
+    }
+    async function returnToHero(){
+      await button(root,'Back').click();
+      await page.waitForFunction(()=>document.querySelector('.facet-stage')?.dataset.phase==='hero');
+    }
+    await clickOnLabel('Read paper');
     await root.getByRole('heading', { name: 'Real-time glass, in five terms.' }).waitFor();
     assert.equal(await frame.evaluate(el => el.inert), true);
-    await button(root, 'Back').click();
+    await returnToHero();
     assert.ok(await frame.isVisible());
     assert.match(await page.evaluate(() => document.activeElement.textContent), /Read paper/);
+    await clickOnLabel('Open studio');
+    await root.getByRole('heading',{name:'Material studio',exact:true}).waitFor();
+    await returnToHero();
+    await clickOnLabel('Sign in');
+    await root.getByRole('textbox',{name:'Display name'}).fill('Test viewer');
+    await button(root,'Enter studio').click();
+    await root.getByRole('heading',{name:'Studio workspace'}).waitFor();
+    await returnToHero();
   }
 };
 

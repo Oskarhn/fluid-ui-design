@@ -26,7 +26,17 @@ node blueprints/reference-components/prepare-context-assets.mjs <authorized-brow
 node blueprints/reference-components/prepare-prompt-assets.mjs <authorized-prompt-media-directory> [authorized-x-clips-directory]
 ```
 
-The first tool builds the sidebar bezel and voice mark from the source, keeps the Quick Actions dashboard, and supplies the recorded archive lift through native controls. Its optional archive input accepts the larger source clip. The other tools add original site frames, embedded media when present, and the prompt's own backdrop footage and mask layers. The gallery uses this local material when opened with `?reference-assets=1`. The comparison page lists the additional source clips it finds in the pack. These files stay in `private-reference/`.
+The first tool builds the sidebar bezel and voice mark from the source, keeps the Quick Actions dashboard, and supplies the recorded archive lift through native controls. Its optional archive input accepts the larger source clip. The other tools add original site frames, embedded media when present, and the prompt's own backdrop footage and mask layers. The gallery uses this local material when opened with `?reference-assets=1`. The local archive presents ten named hit areas. Mono and Nord use the recorded lifts. The other cards lift from the photographed tabs and show locally drawn card faces. These files stay in `private-reference/`.
+
+### Add a verified website replay
+
+Record the authorized site with [replay-ui.mjs](../../scripts/replay-ui.mjs) using a plan that selects a real control and verifies its visible result. For a supported catalog item, import the archive after both sides pass the same state checks.
+
+```sh
+node blueprints/reference-components/prepare-website-replay.mjs <catalog-id> <recorded-archive-directory>
+```
+
+The comparison page offers both recordings. Its local Chrome button opens the archived HTML, styles, script and media in an isolated browser using only captured routes. Start the gallery server with `PLAYWRIGHT_MODULE` set if Playwright is installed elsewhere. Use the reusable component entry when you only need the interaction in a new design.
 
 ## Open and verify
 

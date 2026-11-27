@@ -7,16 +7,19 @@ const preview = document.getElementById('preview');
 const heading = document.getElementById('component-name');
 const reference = document.getElementById('reference-source');
 const source = document.getElementById('component-source');
+const replay = document.getElementById('reference-replay');
 const reset = document.getElementById('reset');
 const entryInfo = document.getElementById('component-info');
 const byId = new Map(catalog.map(entry => [entry.id, entry]));
 const mode = new URLSearchParams(location.search);
 document.body.toggleAttribute('data-demo-mode', mode.has('demo'));
 let privateAssets = {};
+let websiteIds = new Set();
 if (mode.has('reference-assets')) {
   try {
-    const result = await fetch('./private-reference/manifest.json');
+    const [result,websiteData] = await Promise.all([fetch('./private-reference/manifest.json'),fetch('./private-reference/websites.json')]);
     if (result.ok) privateAssets = await result.json();
+    if (websiteData.ok) websiteIds=new Set((await websiteData.json()).map(record=>record.id));
   } catch {}
 }
 let current;
@@ -34,6 +37,8 @@ function render(entry) {
   entryInfo.textContent = entry.description;
   reference.href = entry.url;
   reference.textContent = entry.referenceLabel ?? 'Original reference';
+  replay.hidden=!websiteIds.has(entry.id);
+  if(!replay.hidden)replay.href='./compare-fidelity.html#'+entry.id;
   source.href = './' + file;
   mount(preview, { signal: session.signal, options: { ...entry.options, ...privateAssets[entry.id] } });
   renderList();
