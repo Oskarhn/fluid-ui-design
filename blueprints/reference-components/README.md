@@ -1,6 +1,6 @@
 # Runnable reference components
 
-Use the [catalog](catalog.mjs) to look up a reference by its URL, author, or behavior. The [interactive gallery](index.html) includes 88 entries built from 48 component implementations. It also links to the [11 Craft controls](../interaction-controls/index.html) and the [12 original Bencho blocks](../bencho/README.md).
+Use the [catalog](catalog.mjs) to look up a reference by its URL, author, or behavior. The [interactive gallery](index.html) includes 88 entries built from 48 component implementations. The [Anime.js workbench](../animejs/index.html) adds custom motion examples for use alongside the catalog. The gallery also links to the [11 Craft controls](../interaction-controls/index.html) and the [12 original Bencho blocks](../bencho/README.md).
 
 | Collection | What runs |
 | --- | --- |
