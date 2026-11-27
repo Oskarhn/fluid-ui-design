@@ -127,7 +127,9 @@ for(const [id,label,ratio] of studies) {
   comparison.push({id,label,ratio,source:path(name)});
   if(id==='aliszu-colouring-loader'){
     const input=join(bundle.root,'assets',film.digest);
-    manifest[id]={...manifest[id],icons:[242,333,422].map((x,i)=>convertFrame(input,'3.45','color-icon-'+i+'.jpg','crop=55:61:'+x+':247'))};
+    const iconSets=['3.45','7.6','11.81'].map((time,batch)=>
+      [242,333,422].map((x,i)=>convertFrame(input,time,'color-'+batch+'-icon-'+i+'.jpg','crop=55:59:'+x+':242')));
+    manifest[id]={...manifest[id],iconSets};
   }
 }
 for(const [id,label,name,ratio] of [['dev-ya-trip-modes','Trip mode switch','trip-mode-switch.mp4','1'],['justyna-framer-copier','Desktop copier','copier.mp4','1166 / 720']]){
