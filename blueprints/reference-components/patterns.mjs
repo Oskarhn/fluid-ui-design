@@ -223,7 +223,7 @@ export function flipCalendar(root, { signal }) {
   render();
 }
 
-export function deviceShowcase(root, { signal }) {
+export function deviceShowcase(root, { signal, options = {} }) {
   root.innerHTML = `
     <div class="device-study"><div class="device-model" aria-hidden="true"><div class="device-keyboard"></div><div class="device-lid"><span>◆</span></div></div>
       <output aria-live="polite"></output><div class="profile-actions"></div>
@@ -232,6 +232,11 @@ export function deviceShowcase(root, { signal }) {
   const labels = ['Lid', 'Inside', 'Unboxing', 'Final look'];
   const actions = control(root, '.profile-actions');
   const model = control(root, '.device-model');
+  let material;
+  if (options.sourceFrames?.[0]) {
+    material = new Image();material.alt='';material.className='device-source';
+    model.dataset.source='';model.prepend(material);
+  }
   const output = control(root, 'output');
   let animation;
   const buttons = labels.map((label, index) => {
@@ -243,6 +248,7 @@ export function deviceShowcase(root, { signal }) {
   function show(index) {
     choose(buttons, index);
     model.dataset.view = index;
+    if(material)material.src=options.sourceFrames[index]||options.sourceFrames[0];
     animation?.cancel();
     if (index === 2) animation = motion(model, [{ transform: 'translateY(40px) rotateX(-18deg) scale(.76)' },
       { transform: 'none' }], { duration: 580, easing: 'cubic-bezier(.22,.7,.18,1)' }, signal);
@@ -253,7 +259,7 @@ export function deviceShowcase(root, { signal }) {
   show(0);
 }
 
-export function canvasLogin(root, { signal }) {
+export function canvasLogin(root, { signal, options = {} }) {
   const id = scope(root);
   root.innerHTML = `
     <div class="local-access">
@@ -264,6 +270,9 @@ export function canvasLogin(root, { signal }) {
   `;
   const input = control(root, 'input');
   const art = control(root, '.access-art');
+  if (options.sourceFrames?.[0]) {
+    const image=new Image();image.alt='';image.src=options.sourceFrames[0];image.className='access-source';art.prepend(image);
+  }
   const status = control(root, 'output');
   listen(control(root, 'button'), 'click', () => {
     const name = input.value.trim();

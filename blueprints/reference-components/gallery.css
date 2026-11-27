@@ -64,7 +64,7 @@ a { color: #22534f; text-underline-offset: .22em; }
 [data-demo-mode] { background:#141414; }
 [data-demo-mode] .library { display:block; margin:0; max-width:none; padding:0; }
 [data-demo-mode] :is(.library-header,.library-list,.library-detail > header) { display:none; }
-[data-demo-mode] .library-preview { padding:0; min-height:0; border:0; border-radius:0; }
+[data-demo-mode] .library-preview { padding:0; min-height:100svh; border:0; border-radius:0; }
 [data-demo-mode] .library-preview > * { width:100%; max-width:none; }
 @media (max-width: 760px) {
   .library { grid-template-columns: minmax(0, 1fr); gap: 24px; }
