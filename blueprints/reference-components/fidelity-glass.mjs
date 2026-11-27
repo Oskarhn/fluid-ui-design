@@ -24,12 +24,13 @@ const destinations = {
   signin: ['Sign in to the demo studio', 'Set a display name for this session.']
 };
 
-export function glassTransfer(root, { signal }) {
+export function glassTransfer(root, { signal, options = {} }) {
+  const brandName=String(options.brandName ?? 'Material Studio').trim().slice(0,44) || 'Material Studio';
   root.innerHTML = `
-    <div class="facet-stage" data-renderer="html" aria-label="Facet material studio">
+    <div class="facet-stage" data-renderer="html">
       <div class="facet-view">
         <div class="facet-fallback-shards" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-        <nav class="facet-nav" aria-label="Facet"><span>◆ Facet</span><button type="button" data-facet-control="studio">Studio</button><button type="button" data-facet-control="materials">Materials</button><button type="button" data-facet-control="pricing">Pricing</button><button type="button" data-facet-control="signin">Sign in</button></nav>
+        <nav class="facet-nav"><span class="facet-brand"></span><button type="button" data-facet-control="studio">Studio</button><button type="button" data-facet-control="materials">Materials</button><button type="button" data-facet-control="pricing">Pricing</button><button type="button" data-facet-control="signin">Sign in</button></nav>
         <div class="facet-copy">
           <p>Real-time material studio</p><h3>Designed<br>in glass.</h3>
           <p>Author dispersion, transmission, and refraction in the browser.<br>Live previews, real materials.</p>
@@ -45,6 +46,9 @@ export function glassTransfer(root, { signal }) {
     </div>
   `;
   const stage = control(root, '.facet-stage');
+  stage.setAttribute('aria-label',brandName);
+  control(root,'.facet-nav').setAttribute('aria-label',brandName+' navigation');
+  control(root,'.facet-brand').textContent='◆ '+brandName;
   const view = control(root, '.facet-view');
   const paper = control(root, '.facet-paper');
   const paintedControls = [...root.querySelectorAll('[data-facet-control]')];
@@ -143,7 +147,7 @@ export function glassTransfer(root, { signal }) {
   Promise.all([import('./three/three.module.js'), import('./three/RoomEnvironment.js')])
     .then(([THREE, {RoomEnvironment}]) => {
       if (signal.aborted) return;
-      engine = renderGlass(THREE, RoomEnvironment, stage, view, preference, signal);
+      engine = renderGlass(THREE, RoomEnvironment, stage, view, preference, signal,brandName);
       if (open) engine.travel(true);
     }).catch(() => { if (!signal.aborted) stage.dataset.renderer = 'html'; });
 }
@@ -161,10 +165,11 @@ function printFace(THREE, width, height, paint) {
   return texture;
 }
 
-function drawNav(ctx) {
+function drawNav(ctx, brandName) {
   ctx.fillStyle = '#cbd0ce';
   ctx.font = '600 18px Arial';
-  ctx.fillText('◆ Facet', 39, 48);
+  ctx.fillText('◆ '+brandName, 39, 48,180);
+  return Math.min(180,ctx.measureText('◆ '+brandName).width);
 }
 
 function drawPanel(ctx) {
@@ -186,10 +191,6 @@ function drawPanel(ctx) {
   ctx.font = '400 17px Arial';
   ctx.fillText('Author dispersion, transmission, and refraction in the browser.', 46, 382);
   ctx.fillText('Live previews, real materials.', 46, 400);
-  ctx.fillStyle = '#b2b7b4';
-  ctx.font = '400 12px Arial';
-  ctx.fillText('© Facet Lab',48,688);
-  ctx.fillText('KHR_materials_dispersion',1150,688);
 }
 
 function cellRings(time, pointer) {
@@ -205,7 +206,7 @@ function cellRings(time, pointer) {
   return [[[0,0],a,p,d,[0,1]],[a,b,q,p],[b,c,r,q],[p,q,r,e,d],[c,[1,0],[1,1],e,r]];
 }
 
-function renderGlass(THREE, RoomEnvironment, stage, view, preference, signal) {
+function renderGlass(THREE, RoomEnvironment, stage, view, preference, signal, brandName) {
   const renderer = new THREE.WebGLRenderer({antialias:true, alpha:false, powerPreference:'default'});
   renderer.setClearColor(0x08080a);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -235,7 +236,8 @@ function renderGlass(THREE, RoomEnvironment, stage, view, preference, signal) {
   scene.add(fill);
   const glowCenter = { value:new THREE.Vector2() };
   const glowAmount = { value:0 };
-  const navTexture = printFace(THREE, NAV.w, NAV.h, drawNav);
+  let brandWidth=0;
+  const navTexture = printFace(THREE, NAV.w, NAV.h, ctx=>{brandWidth=drawNav(ctx,brandName);});
   const panelTexture = printFace(THREE, PANEL.w, PANEL.h, drawPanel);
   const rim = new THREE.MeshPhysicalMaterial({
     color: 0x262a2e, roughness: .32, metalness: .34, clearcoat: .72, envMapIntensity: .61,
@@ -244,7 +246,8 @@ function renderGlass(THREE, RoomEnvironment, stage, view, preference, signal) {
   const bits = [];
   const bodies = [];
   const hits = [...view.querySelectorAll('[data-facet-control]')].map(element => {
-    const rect = placements[element.dataset.facetControl];
+    const rect = [...placements[element.dataset.facetControl]];
+    if(rect[0]===0&&element.dataset.facetControl!=='signin')rect[1]+=Math.max(0,brandWidth-49);
     element.style.width = rect[3]+'px';
     element.style.height = rect[4]+'px';
     return {element, rect};
