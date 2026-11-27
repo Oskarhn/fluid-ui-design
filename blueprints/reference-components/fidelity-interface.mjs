@@ -23,7 +23,7 @@ function paintGlyph(canvas, progress) {
   ctx.setTransform(canvas.width / 32, 0, 0, canvas.height / 32, 0, 0);
   ctx.clearRect(0,0,32,32);
   ctx.strokeStyle = '#1b211f';
-  ctx.lineWidth = 2.2 - progress * .35;
+  ctx.lineWidth = 2.2 + progress * .14;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.beginPath();

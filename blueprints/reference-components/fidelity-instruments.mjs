@@ -240,6 +240,7 @@ export function burnMeter(root, { signal }) {
     </div>
   `;
   const canvas = control(root, 'canvas');
+  const screen = control(root,'.energy-screen');
   const ctx = canvas.getContext('2d');
   const grid = ctx?.createImageData(canvas.width, canvas.height);
   const stop = control(root, '.energy-stop');
@@ -260,6 +261,9 @@ export function burnMeter(root, { signal }) {
     const duration = 275 + Math.floor(seconds);
     clock.textContent = String(Math.floor(duration / 60)).padStart(2,'0') + ':' + String(duration % 60).padStart(2,'0');
     energy.textContent = String(Math.floor(calories));
+    // Use the continuous sample, not the rounded display, to position the plot.
+    screen.style.setProperty('--energy-height', (15+clamp(calories,0,600)*.146)+'%');
+    screen.style.setProperty('--energy-level', (3+clamp(calories,0,600)*.146)+'%');
     canvas.dataset.heat = heat.toFixed(3);
     heart.textContent = String(Math.round([122,177,149][mode] + Math.sin(t * .66) * 4));
     if (!ctx) return;
@@ -287,7 +291,7 @@ export function burnMeter(root, { signal }) {
     t += delta;
     seconds += delta * 5;
     const intensity = rate();
-    calories += intensity * delta * 7.4;
+    calories += intensity * delta * 13.8;
     heat += (intensity - heat) * (1 - Math.exp(-delta * 2.4));
     draw();
   }, signal);
