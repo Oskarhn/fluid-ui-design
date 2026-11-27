@@ -95,12 +95,18 @@ const target=join(privateRoot,'website-replays',suppliedId);
 mkdirSync(target,{recursive:true});
 cpSync(join(capture,'assets'),join(target,'assets'),{recursive:true});
 for(const name of ['archive.json','original.webm','copy.webm'])copyFileSync(join(capture,name),join(target,name));
-const poster=original[0].file;
-if(!/^original-00\.(jpg|png)$/.test(poster))throw Error('Expected a recorded opening frame.');
-copyFileSync(join(capture,poster),join(target,poster));
+const frames=original.map((shot,index)=>{
+  const pair={label:index ? shot.label:'Før første handling',original:shot.file,copy:copy[index].file};
+  if(!/^original-\d{2}\.(jpg|png)$/.test(pair.original)||!/^copy-\d{2}\.(jpg|png)$/.test(pair.copy)){
+    throw Error('Expected paired original and replay screenshots.');
+  }
+  for(const name of [pair.original,pair.copy])copyFileSync(join(capture,name),join(target,name));
+  return pair;
+});
+const poster=frames[0].original;
 const manifestPath=join(privateRoot,'websites.json');
 const manifest=existsSync(manifestPath)?JSON.parse(readFileSync(manifestPath,'utf8')):[];
 const size=report.plan.viewport;
-const classification={id:suppliedId,title:item.title,ratio:size.width+' / '+size.height,hint:item.hint,url:item.target,poster,states:original.length,missingRoutes:report.replayMisses?.length??0};
+const classification={id:suppliedId,title:item.title,ratio:size.width+' / '+size.height,hint:item.hint,url:item.target,poster,frames,states:original.length,missingRoutes:report.replayMisses?.length??0};
 writeFileSync(manifestPath,JSON.stringify([...manifest.filter(entry=>entry.id!==suppliedId),classification],null,2)+'\n');
 console.log(JSON.stringify({id:suppliedId,resources:report.entries.length,matchedStates:copy.length,missingRoutes:report.replayMisses?.length??0}));

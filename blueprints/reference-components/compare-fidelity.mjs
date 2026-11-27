@@ -17,6 +17,15 @@ const localMovie=document.querySelector('#site-copy');
 const websiteActions=document.querySelector('#website-actions');
 const copyLabel=document.querySelector('#copy-label');
 const status=document.querySelector('#web-status');
+const before=document.querySelector('#original-frame'),after=document.querySelector('#copy-frame');
+const videos=document.querySelector('#show-videos');
+const libraryLink=document.querySelector('.actions a');
+function showVideos(){
+  before.hidden=true;after.hidden=true;movie.hidden=false;localMovie.hidden=false;
+  videos.hidden=true;
+  markers.querySelectorAll('[aria-pressed]').forEach(button=>button.setAttribute('aria-pressed','false'));
+}
+videos.addEventListener('click',()=>{showVideos();movie.play().catch(()=>{});});
 try {
   const response=await fetch('./private-reference/websites.json');
   if(response.ok){
@@ -42,14 +51,22 @@ function show() {
   const [id,label,ratio,hint,points,source,website] = cases.find(([key]) => key === picker.value);
   instruction.textContent = hint;
   panel.style.setProperty('--ratio',ratio);
+  libraryLink.href='./index.html?reference-assets=1#'+id;
   movie.pause();
+  movie.hidden=false;before.hidden=true;after.hidden=true;videos.hidden=true;
+  movie.removeAttribute('poster');localMovie.removeAttribute('poster');
   movie.src = source ?? './private-reference/' + id + '.mp4';
   localMovie.pause();localMovie.hidden=!website;frame.hidden=Boolean(website);
   websiteActions.hidden=!website;status.textContent='';
   copyLabel.textContent=website?'Opptak fra kopien med originalkode':'Kjørbar komponent';
   if(website){
     frame.removeAttribute('src');
-    localMovie.src='./private-reference/website-replays/'+id+'/copy.webm';
+    const base='./private-reference/website-replays/'+id+'/';
+    localMovie.src=base+'copy.webm';
+    if(website.frames?.length){
+      movie.poster=base+website.frames[0].original;
+      localMovie.poster=base+website.frames[0].copy;
+    }
   }else{
     localMovie.removeAttribute('src');
     frame.title = label + ' med fungerende kontroller';
@@ -57,6 +74,24 @@ function show() {
   }
   missing.hidden = true;
   markers.replaceChildren();
+  if(website?.frames?.length){
+    website.frames.forEach((step,i)=>{
+      const action=document.createElement('button');
+      action.type='button';
+      action.textContent=(i?i+' · ':'')+step.label;
+      action.setAttribute('aria-pressed','false');
+      action.addEventListener('click',()=>{
+        movie.pause();localMovie.pause();
+        movie.hidden=true;localMovie.hidden=true;
+        const base='./private-reference/website-replays/'+id+'/';
+        before.src=base+step.original;after.src=base+step.copy;
+        before.hidden=false;after.hidden=false;videos.hidden=false;
+        markers.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button===action)));
+      });
+      markers.append(action);
+    });
+    return;
+  }
   for (const [text,position] of points) {
     const button = document.createElement('button');
     button.type = 'button';
