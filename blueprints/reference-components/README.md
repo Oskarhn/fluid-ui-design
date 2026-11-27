@@ -26,7 +26,7 @@ node blueprints/reference-components/prepare-context-assets.mjs <authorized-brow
 node blueprints/reference-components/prepare-prompt-assets.mjs <authorized-prompt-media-directory> [authorized-x-clips-directory]
 ```
 
-The first tool builds the sidebar bezel and voice mark from the source, keeps the Quick Actions dashboard, and supplies the recorded archive lift through native controls. Its optional archive input accepts the larger source clip. The other tools add original site frames, embedded media when present, and the prompt's own backdrop footage and mask layers. The gallery uses this local material when opened with `?reference-assets=1`. The local archive presents ten named hit areas. Mono and Nord use the recorded lifts. The other cards lift from the photographed tabs and show locally drawn card faces. These files stay in `private-reference/`.
+The first tool builds the sidebar bezel and voice mark and supplies the Quick Actions source. It reads up to ten named tabs from the archive reference. The reusable archive lifts a whole card with its tab, paper and material under a 3D camera. The optional large clip adds comparison footage. The other tools extract original site frames, embedded media, and the backdrop and mask layers. These files stay in the local `private-reference/` directory.
 
 ### Add a verified website replay
 
@@ -36,7 +36,7 @@ Record the authorized site with [replay-ui.mjs](../../scripts/replay-ui.mjs) usi
 node blueprints/reference-components/prepare-website-replay.mjs <catalog-id> <recorded-archive-directory>
 ```
 
-The comparison page offers both recordings. Its local Chrome button opens the archived HTML, styles, script and media in an isolated browser using only captured routes. Start the gallery server with `PLAYWRIGHT_MODULE` set if Playwright is installed elsewhere. Use the reusable component entry when you only need the interaction in a new design.
+Open the gallery with `?reference-assets=1` to see the recorded site as the primary preview when both sides qualified. Choose the standalone component to see the reusable implementation. The comparison page plays both recordings together and shows the tested actions and uncaptured requests. Its local Chrome button opens the archived HTML, styles, script and media in an isolated browser using only captured routes. Start the gallery server with `PLAYWRIGHT_MODULE` set if Playwright is installed elsewhere. Use the reusable component entry when you only need the interaction in a new design.
 
 ## Open and verify
 
@@ -69,4 +69,4 @@ floatingNav(document.querySelector('.library-preview'), { signal: lifetime.signa
 // Call lifetime.abort() before removing the component.
 ```
 
-Replace sample labels, data, colors, and media for the receiving project. Keep the input, selected state, cancellation, and reduced-motion behavior. For upstream implementations of PanelUI, Loading.dev, Unfold, or Liquid Taffy, start with the [licensed source packages](../../vendor/interaction-packs/README.md).
+Replace the demo name, sample labels, data, colors, and media with the receiving project’s content. A brand such as Facet stays visible in the original footage only. Set the `brandName` option for `glassTransfer` when mounting it and put the project’s own links and actions in the projected hit areas. Keep the input, selected state, cancellation, and reduced-motion behavior. For upstream implementations of PanelUI, Loading.dev, Unfold, or Liquid Taffy, start with the [licensed source packages](../../vendor/interaction-packs/README.md).
