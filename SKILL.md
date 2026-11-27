@@ -10,7 +10,7 @@ description: >-
   web app, native mobile interface, or interactive 3D experience.
 license: MIT
 metadata:
-  version: "2.16.1"
+  version: "2.16.2"
 ---
 
 # Fluid UI Design

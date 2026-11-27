@@ -13,14 +13,22 @@ const panel = document.querySelector('#pair');
 const instruction = document.querySelector('#input');
 const markers = document.querySelector('#marks');
 const missing = document.querySelector('#error');
+try {
+  const response=await fetch('./private-reference/manifest.json');
+  if(response.ok){
+    const assets=await response.json();
+    for(const entry of assets.comparisons??[]) cases.push([entry.id,entry.label,entry.ratio,
+      'Bruk kontrollene i komponenten til høyre. Originalklippet kan stoppes og spoles separat.',[['Start',0]],entry.source]);
+  }
+} catch {}
 for (const [id,label] of cases) picker.add(new Option(label,id));
 
 function show() {
-  const [id,label,ratio,hint,points] = cases.find(([key]) => key === picker.value);
+  const [id,label,ratio,hint,points,source] = cases.find(([key]) => key === picker.value);
   instruction.textContent = hint;
   panel.style.setProperty('--ratio',ratio);
   movie.pause();
-  movie.src = './private-reference/' + id + '.mp4';
+  movie.src = source ?? './private-reference/' + id + '.mp4';
   frame.title = label + ' med fungerende kontroller';
   frame.src = './index.html?demo=1&reference-assets=1#' + id;
   missing.hidden = true;

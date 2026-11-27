@@ -1,6 +1,6 @@
 # Runnable reference components
 
-Use the [catalog](catalog.mjs) to look up a reference by its URL, author, or behavior. The [interactive gallery](index.html) includes 88 entries built from 35 component implementations. It also links to the [11 Craft controls](../interaction-controls/index.html) and the [12 original Bencho blocks](../bencho/README.md).
+Use the [catalog](catalog.mjs) to look up a reference by its URL, author, or behavior. The [interactive gallery](index.html) includes 88 entries built from 48 component implementations. It also links to the [11 Craft controls](../interaction-controls/index.html) and the [12 original Bencho blocks](../bencho/README.md).
 
 | Collection | What runs |
 | --- | --- |
@@ -14,17 +14,19 @@ Each entry links to its reference or supplied-brief notes and to the component m
 
 Heron, Land-book, and the linked OpenAI launch page have no component entry because the reference requests returned HTTP 403 during capture. The Framer marketplace entry is a working adaptation of its preview. Install a copy of the marketplace component from its publisher if the project needs that implementation. The local media demos use [bundled sample loops](../../media/preview-loops/README.md).
 
-## Compare six revised components with their sources
+## Compare revised components with their sources
 
-Use [the comparison page](compare-fidelity.html) to step through the source footage and interact with the component at matching bounds. Drag the sidebar horizontally and hold midway to compare position. On the archive, open the tray, lift a file, and put it back. The funnel and the flame are live Canvas 2D renderers. The glass is a WebGL scene using the pinned [Three.js 0.169.0 build](three/LICENSE), with a readable HTML fallback.
+Use [the comparison page](compare-fidelity.html) to step through the source footage and interact with the component at matching bounds. Hold the sidebar midway through a drag to see its depth and the two strokes folding into the final icon. In the archive, hover a visible tab for a small lift, then click to pull the file out. The funnel and flame use Canvas 2D. The glass uses the bundled [Three.js 0.169.0 build](three/LICENSE), with a readable HTML fallback.
 
-Prepare the six authorized input videos locally with FFmpeg. The directory must contain the five X exports listed in the catalog. Pass the Facet preview separately.
+Prepare the six base comparison videos locally with FFmpeg. The directory must contain the five X exports listed in the catalog. Pass the Facet preview separately. The archive directory supplies the additional Bencho clips. The prompt media directory supplies `intelligence-bg.mp4`, `mons-masked.png`, and `mons-clear.png`.
 
 ```sh
-node blueprints/reference-components/prepare-fidelity.mjs <authorized-x-clips-directory> <authorized-facet-preview.mp4>
+node blueprints/reference-components/prepare-fidelity.mjs <authorized-x-clips-directory> <authorized-facet-preview.mp4> [higher-resolution-archive.mp4]
+node blueprints/reference-components/prepare-context-assets.mjs <authorized-browser-archive-directory>
+node blueprints/reference-components/prepare-prompt-assets.mjs <authorized-prompt-media-directory> [authorized-x-clips-directory]
 ```
 
-The script gives the sidebar its original phone bezel, Quick Actions its actual dashboard image, and the archive three strips of frames for the tray and the two recorded file lifts. Native controls drive the archive strip in both directions. These media files are stored in `private-reference/`, alongside the input clips for comparison. On other installations the scene draws its own artwork from the supplied geometry and data.
+The first tool builds the sidebar bezel and voice mark from the source, keeps the Quick Actions dashboard, and supplies the recorded archive lift through native controls. Its optional archive input accepts the larger source clip. The other tools add original site frames, embedded media when present, and the prompt's own backdrop footage and mask layers. The gallery uses this local material when opened with `?reference-assets=1`. The comparison page lists the additional source clips it finds in the pack. These files stay in `private-reference/`.
 
 ## Open and verify
 
@@ -47,7 +49,7 @@ The full suite exercises each catalog entry and the Craft controls at 1280 px an
 
 ## Reuse a component
 
-Find the chosen entry in `catalog.mjs` and open its module from the gallery. Copy the component function, its imports from `shared.mjs`, and the applicable rules from `components.css` or `fidelity.css`. Mount it in a container with class `library-preview` or scope the copied styles to the receiving project's container. Pass the entry's `options` and an `AbortSignal`. Abort when the component unmounts, then remove its DOM.
+Find an entry in `catalog.mjs` and open its module from the gallery. Copy the function, its imports and relevant rules from `components.css`, `fidelity.css` or `refined.css`. Mount it inside `.library-preview` or scope its styles to the receiving container. Pass the entry's `options` and an `AbortSignal`. Abort when the component unmounts, then remove its DOM.
 
 ```js
 import { floatingNav } from './navigation.mjs';

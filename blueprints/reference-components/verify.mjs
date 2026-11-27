@@ -15,6 +15,127 @@ const pause = async (page, selector, expected) => {
 };
 
 const checks = {
+  async photoQuestions(page, root) {
+    const answers=root.locator('details');
+    await answers.nth(0).locator('summary').click();
+    assert.equal(await answers.nth(0).getAttribute('open'),'');
+    await answers.nth(1).locator('summary').click();
+    await page.waitForFunction(()=>[...document.querySelectorAll('#preview details')].filter(el=>el.open).length===1);
+    assert.equal(await answers.nth(1).getAttribute('open'),'');
+  },
+  async mailWorkspace(page, root) {
+    await button(root,'Loops').click();
+    assert.equal(await output(root),'Loops selected');
+    await button(root,'Collapse sidebar').click();
+    assert.equal(await button(root,'Expand sidebar').getAttribute('aria-expanded'),'false');
+    await button(root,'Expand sidebar').click();
+    await button(root,'Emails').click();
+    assert.equal(await output(root),'Emails selected');
+  },
+  async volumeElastic(page, root, entry, width) {
+    const slider=root.getByRole('slider',{name:'Volume'});
+    await slider.press('End');
+    assert.equal(await slider.inputValue(),'100');
+    if(width>390){
+      const b=await slider.boundingBox();
+      await page.mouse.move(b.x+b.width*.6,b.y+b.height*.5);
+      await page.mouse.down();
+      await page.mouse.move(b.x+b.width*.35,b.y+b.height*.67,{steps:6});
+      assert.ok(Number(await slider.inputValue())>20&&Number(await slider.inputValue())<50);
+      await page.mouse.up();
+    }
+  },
+  async couponDissolve(page, root) {
+    await root.getByRole('button',{name:'MOCHEO 70%',exact:true}).click();
+    await pause(page,'#preview output','£40.20');
+    await button(root,'Reset').click();
+    assert.equal(await output(root),'£134.00');
+  },
+  async circularDownload(page, root) {
+    await button(root,'Start').click();
+    await button(root,'Cancel download').click();
+    assert.equal(await root.locator('[data-rate]').textContent(),'Cancelled');
+    await button(root,'Restart').click();
+    await pause(page,'#preview output','✓');
+  },
+  async caffeineCurve(page, root) {
+    await button(root,'13:10').click();
+    assert.equal(await output(root),'105 mg · 13:10');
+  },
+  async creditConsole(page, root) {
+    await root.getByRole('radio',{name:'500 credits',exact:true}).check();
+    await button(root,'Preview credits').click();
+    assert.equal(await output(root),'Preview balance 770 credits');
+    await pause(page,'#preview .credit-row strong','770');
+  },
+  async contextTreemap(page, root) {
+    await root.getByRole('button',{name:'Tool instructions'}).click();
+    assert.ok((await output(root)).includes('System / Tool instructions'));
+    await button(root,'Reset view').click();
+    assert.equal(await output(root),'Select a context block');
+  },
+  async agentTimeline(page, root) {
+    await root.getByText('Compare validators',{exact:true}).click();
+    assert.equal(await root.locator('details').first().getAttribute('open'),'');
+    await button(root,'Run sample').click();
+    await pause(page,'#preview output','Sample complete');
+  },
+  async connectionFlow(page, root) {
+    await button(root,'Send a pulse').click();
+    await pause(page,'#preview output','Pulse arrived at Preview');
+    assert.equal(await root.getByRole('button',{name:/^Preview/}).getAttribute('aria-pressed'),'true');
+  },
+  async glassLens(page, root) {
+    await root.locator('canvas').press('ArrowLeft');
+    await button(root,'Refraction').click();
+    assert.equal(await output(root),'Flat board');
+    await button(root,'Refraction').click();
+    assert.equal(await output(root),'Refraction active');
+  },
+  async movingIconCopy(page, root) {
+    await button(root,'Symbol C').click();
+    await button(root,'Copy').click();
+    await pause(page,'#preview output','Symbol copied');
+    assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),'◎');
+  },
+  async standingSkyline(page, root) {
+    await button(root,'Skyline').click();
+    assert.equal(await output(root),'Activity skyline');
+    await button(root,'The book').click();
+    assert.equal(await output(root),'Calendar grid');
+  },
+  async tripCards(page, root) {
+    const flight=root.getByRole('button',{name:/Flight/});
+    await flight.click();
+    assert.equal(await flight.getAttribute('aria-expanded'),'true');
+    assert.match(await root.locator('.trip-sheet').textContent(),/Direct/);
+    await page.keyboard.press('Escape');
+    assert.equal(await flight.getAttribute('aria-expanded'),'false');
+  },
+  async routeCommute(page, root) {
+    await root.getByRole('button',{name:/Walk/}).click();
+    assert.equal(await output(root),'49');
+    assert.equal(await root.locator('[data-arrival]').textContent(),'9:29 AM');
+  },
+  async studioCopier(page, root) {
+    await button(root,'Place workshop ticket').click();
+    assert.equal(await output(root),'READY');
+    await button(root,'Make copy').click();
+    await pause(page,'#preview output','COPY READY');
+    assert.ok(await root.locator('.printer-page').isVisible());
+    await button(root,'Reset').click();
+    assert.ok(await button(root,'Make copy').isDisabled());
+  },
+  async logoBuild(page, root) {
+    await button(root,'Play intro').click();
+    await pause(page,'#preview output','Studio ready');
+    assert.ok(await root.locator('.brand-arrival').isVisible());
+  },
+  async colorPass(page, root) {
+    await button(root,'Start color pass').click();
+    await pause(page,'#preview output','Color restored');
+    assert.equal(await root.locator('[data-color]').count(),3);
+  },
   async collapseIcon(page, root, entry, width) {
     const track = root.getByRole('slider', { name: 'Drag sidebar horizontally' });
     await track.click();
@@ -72,6 +193,11 @@ const checks = {
   },
   async fileDrawer(page, root) {
     await button(root, 'Open archive').click();
+    await page.waitForFunction(() => Number(document.querySelector('.archive-stage').style.getPropertyValue('--archive-travel')) > .96);
+    for (const name of ['Index','Nord Festival','Mono Press','Field Notes','Archive']) {
+      const tab = button(root, name);
+      assert.ok(await tab.evaluate(el=>{const b=el.getBoundingClientRect();return document.elementFromPoint(b.x+b.width/2,b.y+b.height/2)===el;}), 'Unreachable '+name);
+    }
     await button(root, 'Mono Press').click();
     assert.equal(await root.locator('[role=status]').textContent(), 'Mono Press lifted');
     await page.keyboard.press('Escape');
@@ -120,7 +246,7 @@ const checks = {
   async copyConfirmation(page, root) {
     await root.locator('button').click();
     await pause(page, '#preview [role=status]', 'Reference ID copied');
-    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), 'ref_7H2D8Q3C');
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), 'con_ij4wyajc4wl9r1x6');
   },
   async notificationStack(page, root) {
     await button(root, 'Dismiss Your proofs arrived').click();
@@ -159,6 +285,14 @@ const checks = {
     await tabs.first().press('ArrowRight');
     assert.equal(await attr(tabs.nth(1), 'aria-selected'), 'true');
     assert.equal(await root.getByRole('tabpanel').locator('h3').textContent(), entry.options.stages[1][0]);
+    const selectedOptions = entry.options.stageChoices?.[1];
+    if (selectedOptions?.length) {
+      const [label, enabled] = selectedOptions[0];
+      const control = root.getByRole('checkbox', { name: label });
+      assert.equal(await control.isChecked(), enabled);
+      await control.click();
+      assert.equal(await control.isChecked(), !enabled);
+    }
     if (entry.options.scroll && width > 390) {
       const scroller = root.getByRole('tabpanel').locator('.stage-scroller');
       await scroller.hover();
