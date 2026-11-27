@@ -37,6 +37,8 @@ Use either a unique CSS selector or an accessible role and name. The plan also a
 
 Give a key step a selector when the focus target matters. For example, use `{"action":"key","key":"ArrowRight","selector":"input[type=range]"}` on a page with one slider. Check the starting and ending values in both receipts.
 
+For partially covered targets, inspect a visible part of the control and give the click or hover a relative pointer position. `"pointer": true, "point": [0.18, 0.5]` aims 18% across and halfway down. The point must hit the control or one of its children. If hover temporarily replaces the control, record the hover and wait for it to return before clicking. Check the state after the click.
+
 The capture records same-origin application responses, public static CDN assets, and original video files when they are available. The replay uses the source URLs in an isolated Chrome window so relative imports and navigation keep working. Missing requests remain blocked and are listed in the receipt. The browser profile starts without the user's cookies, and the archive keeps neither cookie headers nor credentials. Range requests are served from verified full media files when available.
 
 A client-side navigation may fetch a framework payload with a session-specific URL. Save the full HTML for routes the plan actually visits so the browser can fall back to document navigation during replay. The receipt marks stills taken through Chrome's screenshot protocol after a normal screenshot times out. Check those frames for unfinished fonts or media.
