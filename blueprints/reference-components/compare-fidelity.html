@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sammenlign original og komponent</title>
+  <style>
+    :root{color:#e6e8e7;background:#181a19;font:15px/1.55 system-ui,sans-serif; color-scheme:dark}
+    body{margin:0}
+    main{max-width:1550px;margin:auto;padding:clamp(14px,3vw,40px)}
+    h1{margin:0 0 18px;font-size:clamp(1.55rem,3vw,2.6rem);font-weight:520;line-height:1.1}
+    label{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px}
+    select,button{font:inherit;padding:.45rem .66rem;min-height:42px;background:#262b29;border:1px solid #656b67;border-radius:6px}
+    button{cursor:pointer}
+    a{color:#b5dbcf;text-underline-offset:.15em}
+    .pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-block:15px}
+    figure{margin:0;min-width:0}
+    figcaption{margin-bottom:7px;font-weight:600}
+    video,iframe{display:block;width:100%;aspect-ratio:var(--ratio);background:#101112;border:1px solid #515654;box-sizing:border-box}
+    .actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+    #error{color:#f0adab}
+    [hidden]{display:none}
+    @media(max-width:700px){.pair{grid-template-columns:1fr}}
+  </style>
+  <script type="module" src="./compare-fidelity.mjs"></script>
+</head>
+<body>
+<main>
+  <h1>Original og kjørbar komponent</h1>
+  <div class="actions">
+    <label>Eksempel <select id="cases"></select></label>
+    <a href="./index.html?reference-assets=1">Åpne i komponentbiblioteket</a>
+  </div>
+  <p id="input"></p>
+  <p id="error" role="status" hidden>De lokale referanseklippene mangler. Se <a href="./README.md">hvordan de klargjøres</a>.</p>
+  <div class="pair" id="pair">
+    <figure><figcaption>Originalopptak</figcaption><video id="original" muted playsinline controls preload="metadata"></video></figure>
+    <figure><figcaption>Kjørbar komponent</figcaption><iframe id="copy" title="Kjørbar lokal komponent"></iframe></figure>
+  </div>
+  <div class="actions" id="marks" aria-label="Hopp i originalopptaket"></div>
+</main>
+</body>
+</html>

@@ -15,41 +15,67 @@ const pause = async (page, selector, expected) => {
 };
 
 const checks = {
-  async collapseIcon(page, root) {
-    await button(root, 'Open sidebar').click();
-    assert.equal(await attr(button(root, 'Close sidebar'), 'aria-expanded'), 'true');
-    await button(root, 'Archive').click();
-    assert.equal(await root.locator('h3').textContent(), 'Archive');
-    await button(root, 'Open sidebar').click();
-    await page.keyboard.press('Escape');
-    assert.equal(await attr(button(root, 'Open sidebar'), 'aria-expanded'), 'false');
+  async collapseIcon(page, root, entry, width) {
+    const track = root.getByRole('slider', { name: 'Drag sidebar horizontally' });
+    await track.click();
+    assert.equal(await attr(track, 'aria-valuenow'), '0');
+    const box = await track.boundingBox();
+    const y = box.y + Math.min(30, box.height / 2);
+    const position = fraction => box.x + box.width * fraction;
+    const intermediate = async () => {
+      const value = Number(await attr(track, 'aria-valuenow'));
+      assert.ok(value > 15 && value < 60);
+    };
+    if (width === 390) {
+      const session = await page.context().newCDPSession(page);
+      const dispatch = (type, fraction) => session.send('Input.dispatchTouchEvent', {
+        type, touchPoints: fraction === undefined ? [] : [{x:position(fraction),y}]
+      });
+      try {
+        await dispatch('touchStart',.16);
+        await dispatch('touchMove',.39);
+        await intermediate();
+        await dispatch('touchMove',.87);
+        await dispatch('touchEnd');
+      } finally { await session.detach(); }
+    } else {
+      await page.mouse.move(position(.16), y);
+      await page.mouse.down();
+      await page.mouse.move(position(.39), y, { steps: 7 });
+      await intermediate();
+      await page.mouse.move(position(.87), y, { steps: 8 });
+      await page.mouse.up();
+    }
+    await page.waitForFunction(() => document.querySelector('.swipe-track').getAttribute('aria-valuenow') === '100');
+    await track.press('Escape');
+    await page.waitForFunction(() => document.querySelector('.swipe-track').getAttribute('aria-valuenow') === '0');
   },
   async quickActions(page, root) {
     await button(root, 'Quick actions').click();
     assert.equal(await attr(button(root, 'Quick actions'), 'aria-expanded'), 'true');
     await root.getByRole('button', { name: 'New invoice' }).click();
-    assert.equal(await root.locator('[role=status]').textContent(), 'New invoice selected');
+    assert.equal(await root.locator('[role=status]').textContent(), 'New invoice');
   },
   async conversionFunnel(page, root) {
-    assert.equal(await output(root), '23.8%');
-    await root.getByRole('combobox').selectOption('First half');
-    assert.equal(await output(root), '26.7%');
-    assert.equal(await root.locator('.funnel-stats strong').last().textContent(), '203');
+    assert.equal(await output(root), '46.8%');
+    await root.getByRole('tab', { name:'Telehealth' }).click();
+    assert.equal(await output(root), '44.2%');
+    assert.equal(await root.locator('.funnel-readings strong').last().textContent(), '993');
   },
   async burnMeter(page, root) {
-    await root.getByRole('slider').press('ArrowRight');
-    assert.equal(await output(root), '41 / 100');
+    await button(root, 'Walk').click();
+    assert.equal(await selected(root, 'Walk'), 'true');
     await button(root, 'Pause').click();
-    assert.equal(await selected(root, 'Resume'), 'true');
+    assert.equal(await attr(root.locator('canvas'), 'data-paused'), '');
     await button(root, 'Resume').click();
-    assert.equal(await selected(root, 'Pause'), 'false');
+    assert.equal(await attr(root.locator('canvas'), 'data-paused'), null);
   },
   async fileDrawer(page, root) {
     await button(root, 'Open archive').click();
-    await button(root, 'Proof sheets').click();
-    assert.equal(await root.getByRole('dialog').locator('h3').textContent(), 'Proof sheets');
+    await button(root, 'Mono Press').click();
+    assert.equal(await root.locator('[role=status]').textContent(), 'Mono Press lifted');
     await page.keyboard.press('Escape');
-    assert.ok(!await root.getByRole('dialog').isVisible());
+    assert.ok(!await button(root, 'Return to drawer').isVisible());
     await button(root, 'Close archive').click();
     assert.equal(await attr(button(root, 'Open archive'), 'aria-expanded'), 'false');
   },
@@ -295,17 +321,19 @@ const checks = {
     assert.equal(await selected(root, 'Reveal sample'), 'false');
   },
   async glassTransfer(page, root, entry, width) {
-    const frame = root.locator('.glass-view');
+    const frame = root.locator('.facet-view');
     if (width > 390) {
+      await page.waitForFunction(() => document.querySelector('.facet-stage')?.dataset.renderer === 'webgl', null, { timeout:12000 });
       await frame.hover({ position: { x: 35, y: 30 } });
-      assert.ok(await frame.evaluate(el => el.style.getPropertyValue('--tilt-x')));
+      await root.locator('.facet-stage').hover();
+      await page.waitForFunction(() => Number(document.querySelector('.facet-stage')?.dataset.focus) >= 0);
     }
-    await button(root, 'Read material notes').click();
-    await root.getByRole('heading', { name: 'Material notes' }).waitFor();
-    assert.ok(!await frame.isVisible());
-    await button(root, 'Back to material').click();
+    await button(root, 'Read paper').click();
+    await root.getByRole('heading', { name: 'Real-time glass, in five terms.' }).waitFor();
+    assert.equal(await frame.evaluate(el => el.inert), true);
+    await button(root, 'Back').click();
     assert.ok(await frame.isVisible());
-    assert.equal(await page.evaluate(() => document.activeElement.textContent), 'Read material notes');
+    assert.match(await page.evaluate(() => document.activeElement.textContent), /Read paper/);
   }
 };
 
@@ -349,7 +377,7 @@ assert.equal(new Set(catalog.map(entry => entry.id)).size, catalog.length, 'Dupl
 for (const entry of catalog) assert.ok(components[entry.component] && checks[entry.component], entry.id);
 
 const host = await serveLibrary();
-const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const browser = await chromium.launch({ channel: 'chrome', headless: true, args:['--enable-unsafe-swiftshader'] });
 try {
   const failed = [];
   const completed = [];
@@ -362,6 +390,9 @@ try {
     page.setDefaultTimeout(5000);
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
+    page.on('console', message => {
+      if (message.type() === 'error' && message.text().includes('THREE.WebGLProgram')) errors.push(message.text());
+    });
     await page.goto(host.url);
     for (const entry of cases) {
       try {
