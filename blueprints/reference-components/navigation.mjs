@@ -108,13 +108,14 @@ export function toolFolders(root, { signal }) {
   root.append(wrap);
 }
 
-export function editorPalette(root, { signal }) {
+export function editorPalette(root, { signal, options = {} }) {
   root.innerHTML = `
     <div class="editor-phone">
       <div class="editor-canvas" data-crop="false" data-rotate="false"><strong>Form and field</strong><div></div></div>
       <div class="editor-tools" hidden aria-label="Edit tools">
         <button type="button" aria-pressed="false">Crop</button><button type="button" aria-pressed="false">Rotate</button>
-        <button type="button" aria-pressed="false">Tone</button><button type="button">Undo</button>
+        <button type="button" aria-pressed="false">Tone</button><button type="button" aria-pressed="false">Mirror</button>
+        <button type="button" aria-pressed="false">Contrast</button><button type="button" aria-pressed="false">Soften</button><button type="button">Undo</button>
       </div>
       <output role="status"></output><button class="palette-trigger" type="button" aria-expanded="false">Edit</button>
     </div>
@@ -122,11 +123,16 @@ export function editorPalette(root, { signal }) {
   const panel = control(root, '.editor-tools');
   const trigger = control(root, '.palette-trigger');
   const canvas = control(root, '.editor-canvas');
+  if(options.photo) {
+    const photo=new Image();photo.src=options.photo;photo.alt='';
+    control(canvas,'div').append(photo);
+    canvas.dataset.photo='';
+  }
   const active = controls(panel, 'button[aria-pressed]');
   panel.id = scope(root) + '-tools';
   trigger.setAttribute('aria-controls', panel.id);
-  const keys = ['crop', 'rotate', 'tone'];
-  const applied = [false, false, false];
+  const keys = ['crop', 'rotate', 'tone', 'mirror', 'contrast', 'soften'];
+  const applied = keys.map(()=>false);
   const history = [];
   function update(label) {
     active.forEach((button, index) => {

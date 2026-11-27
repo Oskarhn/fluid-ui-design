@@ -4,7 +4,7 @@ const ease = 'cubic-bezier(.18,.81,.25,1)';
 
 export { conversionFunnel, burnMeter } from './fidelity-instruments.mjs';
 
-export function featureCards(root, { signal }) {
+export function featureCards(root, { signal, options = {} }) {
   const board = document.createElement('div');
   board.className = 'feature-cards';
   const labels = ['Productive days', 'Spending patterns', 'Busiest hours'];
@@ -14,7 +14,9 @@ export function featureCards(root, { signal }) {
     const illustration = document.createElement('span');
     illustration.className = 'feature-figure shape-' + i;
     illustration.setAttribute('aria-hidden', 'true');
-    for (let stroke = 0; stroke < 5; stroke++) illustration.append(document.createElement('i'));
+    if(options.images?.[i]){
+      const image=new Image();image.src=options.images[i];image.alt='';illustration.append(image);
+    }else for (let stroke = 0; stroke < 5; stroke++) illustration.append(document.createElement('i'));
     card.append(illustration);
     listen(card, 'click', () => activate(i), signal);
     listen(card, 'pointerenter', event => { if (event.pointerType === 'mouse') activate(i); }, signal);

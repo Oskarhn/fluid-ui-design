@@ -68,40 +68,7 @@ export function stackingLoader(root, { signal }) {
   signal.addEventListener('abort', () => running?.abort(), { once: true });
 }
 
-export function copyConfirmation(root, { signal }) {
-  const value = 'ref_7H2D8Q3C';
-  root.innerHTML = `
-    <div class="copy-study"><span>Reference ID</span><button type="button"><code></code><span aria-hidden="true">▢</span></button><p role="status"></p></div>
-  `;
-  const button = control(root, 'button');
-  const code = control(root, 'code');
-  const icon = control(root, 'button span');
-  const status = control(root, '[role=status]');
-  code.textContent = value;
-  button.setAttribute('aria-label', 'Copy reference ID ' + value);
-  let cancel;
-  listen(button, 'click', async () => {
-    cancel?.();
-    try {
-      await navigator.clipboard.writeText(value);
-    } catch {
-      if (!signal.aborted) status.textContent = 'Clipboard unavailable. Select the reference ID to copy it.';
-      return;
-    }
-    if (signal.aborted) return;
-    button.dataset.copied = '';
-    code.textContent = 'Copied';
-    icon.textContent = '✓';
-    status.textContent = 'Reference ID copied';
-    motion(code, [{ opacity: .2, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 220 }, signal);
-    cancel = timer(() => {
-      delete button.dataset.copied;
-      code.textContent = value;
-      icon.textContent = '▢';
-      status.textContent = '';
-    }, 1600, signal);
-  }, signal);
-}
+export { copyConfirmation } from './refined-controls.mjs';
 
 const notices = [
   ['Paper', 'Your proofs arrived', 'The revised pages are ready to view.'],
@@ -109,7 +76,7 @@ const notices = [
   ['Clay', 'A new material sample', 'Open the archive to find the reference.']
 ];
 
-export function notificationStack(root, { signal }) {
+export function notificationStack(root, { signal, options = {} }) {
   const shell = document.createElement('div');
   shell.className = 'notice-study';
   const stack = document.createElement('div');
@@ -124,6 +91,11 @@ export function notificationStack(root, { signal }) {
     article.style.setProperty('--material', ['#aa9980', '#5784a1', '#b06643'][index]);
     const swatch = text('div', material, 'notice-swatch');
     swatch.setAttribute('aria-hidden', 'true');
+    if (options.photos?.[index]) {
+      swatch.style.backgroundImage='url('+JSON.stringify(options.photos[index])+')';
+      swatch.dataset.photo='';
+      swatch.textContent='';
+    }
     const info = document.createElement('div');
     info.append(text('h3', title), text('p', description));
     const dismiss = text('button', '×', 'notice-dismiss');
