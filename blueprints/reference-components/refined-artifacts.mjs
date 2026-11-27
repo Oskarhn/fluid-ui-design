@@ -91,46 +91,113 @@ export function routeCommute(root,{signal}){
   selectorKeys(board,buttons,select,signal);
 }
 
-export function studioCopier(root,{signal}){
+export function studioCopier(root,{signal,options={}}){
   root.innerHTML=`
-    <div class="copier-stage"><div class="printer">
-      <div class="printer-back"></div><div class="printer-lid"></div>
-      <div class="printer-bed"><span>Workshop ticket</span><div class="scan-beam"></div></div>
-      <div class="printer-body"><output aria-live="polite">INSERT CARD</output><button type="button" class="print-action" aria-label="Make copy" disabled></button></div>
-      <div class="printer-chute"><div class="printer-page" hidden><small>STUDIO • COPY</small><b>Workshop ticket</b><span>Verified print</span></div></div>
-    </div><div class="printer-actions"><button type="button">Place workshop ticket</button><button type="button" data-reset>Reset</button></div></div>`;
-  const machine=control(root,'.printer'),slide=control(root,'.printer-bed');
-  const insert=control(root,'.printer-actions button'),copy=control(root,'.print-action'),status=control(root,'output');
-  const ticket=control(root,'.printer-page');
-  let cancel,drag;
-  function loaded(){if(machine.dataset.mode)return;machine.dataset.mode='ready';status.textContent='READY';copy.disabled=false;}
-  listen(insert,'pointerdown',event=>{
-    if(event.button!==0||machine.dataset.mode)return;
-    drag={x:event.clientX,y:event.clientY};insert.setPointerCapture(event.pointerId);
-  },signal);
-  listen(insert,'pointermove',event=>{
-    if(drag)insert.style.translate=(event.clientX-drag.x)+'px '+(event.clientY-drag.y)+'px';
-  },signal);
-  listen(insert,'pointerup',event=>{
-    if(!drag)return;
-    insert.style.translate='';const rect=slide.getBoundingClientRect();
-    if(event.clientX>=rect.left&&event.clientX<=rect.right&&event.clientY>=rect.top&&event.clientY<=rect.bottom)loaded();
-    drag=null;
-  },signal);
-  listen(insert,'pointercancel',()=>{drag=null;insert.style.translate='';},signal);
-  listen(insert,'click',loaded,signal);
+    <div class="copier-stage"><div class="printer" data-mode="idle">
+      <div class="printer-chute"></div>
+      <div class="printer-case">
+        <div class="printer-bed"><div class="printer-paper printer-original" aria-hidden="true"></div><div class="scan-beam"></div></div>
+        <div class="printer-lid" aria-hidden="true"></div>
+        <div class="printer-body"><output aria-live="polite">PLACE ORIGINAL</output><button type="button" class="print-action" aria-label="Make copy" disabled></button></div>
+      </div>
+      <button type="button" class="printer-paper printer-feed" aria-label="Place workshop ticket"></button>
+      <button type="button" class="printer-paper printer-page" aria-label="Take copy" hidden></button>
+    </div><div class="printer-actions"><button type="button" data-reset>Reset</button></div></div>`;
+  const machine=control(root,'.printer'),bed=control(root,'.printer-bed');
+  const feed=control(root,'.printer-feed'),copy=control(root,'.print-action'),status=control(root,'output');
+  const original=control(root,'.printer-original'),ticket=control(root,'.printer-page');
+  const reset=control(root,'[data-reset]');
+  const paperTitle=options.paperTitle??'Studio archive';
+  const paperText=options.paperText??'workshop ticket';
+  for(const paper of [feed,original,ticket]){
+    const label=document.createElement('small'),line=document.createElement('strong');
+    label.textContent=paperTitle;line.textContent=paperText;
+    paper.append(label,line);
+  }
+  const phases={idle:'PLACE ORIGINAL',placing:'DROP',ready:'READY',scan:'COPYING',print:'PRINTING',complete:'TAKE COPY',taken:'COPY TAKEN'};
+  let cancel,drag,skipClick=false,feedMotion;
+  function state(value){
+    machine.dataset.mode=value;
+    status.textContent=phases[value];
+    copy.disabled=value!=='ready';
+  }
+  function accept() {
+    if(!['idle','placing'].includes(machine.dataset.mode))return;
+    state('ready');
+    feed.hidden=true;
+    if(document.activeElement===feed)copy.focus({preventScroll:true});
+  }
+  function take() {
+    if(machine.dataset.mode!=='complete')return;
+    state('taken');ticket.blur();
+  }
+  function dragPaper(paper,area,canPick,acceptDrop,onDrag){
+    listen(paper,'pointerdown',event=>{
+      if(event.button!==0||!event.isPrimary||!canPick())return;
+      skipClick=false;
+      drag={id:event.pointerId,x:event.clientX,y:event.clientY,paper,moved:false};
+      paper.setPointerCapture(event.pointerId);
+    },signal);
+    listen(paper,'pointermove',event=>{
+      if(drag?.id!==event.pointerId||drag.paper!==paper)return;
+      const x=event.clientX-drag.x,y=event.clientY-drag.y;
+      if(!drag.moved&&Math.hypot(x,y)<5)return;
+      if(!drag.moved){drag.moved=true;paper.setAttribute('data-dragging','');onDrag?.();}
+      paper.style.translate=x+'px '+y+'px';
+    },signal);
+    function finish(event,cancelled){
+      if(drag?.id!==event.pointerId||drag.paper!==paper)return;
+      const previous=drag;drag=null;
+      paper.removeAttribute('data-dragging');
+      const from=paper.style.translate;
+      paper.style.translate='';
+      if(!previous.moved)return;
+      skipClick=!cancelled;
+      const rect=area.getBoundingClientRect();
+      const inside=event.clientX>=rect.left&&event.clientX<=rect.right&&event.clientY>=rect.top&&event.clientY<=rect.bottom;
+      if(!cancelled&&acceptDrop(inside))return;
+      if(paper===feed)state('idle');
+      motion(paper,[{translate:from},{translate:'0 0'}],{duration:320,easing:ease},signal);
+    }
+    listen(paper,'pointerup',event=>finish(event,false),signal);
+    listen(paper,'pointercancel',event=>finish(event,true),signal);
+  }
+  function handleClick(action){
+    return event=>{
+      if(skipClick&&event.detail){skipClick=false;return;}
+      action();
+    };
+  }
+  dragPaper(feed,bed,()=>machine.dataset.mode==='idle',inside=>{
+    if(inside)accept();
+    return inside;
+  },()=>state('placing'));
+  dragPaper(ticket,control(root,'.printer-chute'),()=>machine.dataset.mode==='complete',inside=>{
+    if(!inside)take();
+    return !inside;
+  });
+  listen(feed,'click',handleClick(accept),signal);
+  listen(ticket,'click',handleClick(take),signal);
   listen(copy,'click',()=>{
     if(machine.dataset.mode!=='ready')return;
-    machine.dataset.mode='scan';copy.disabled=true;status.textContent='SCANNING';
+    reset.focus({preventScroll:true});
+    if(reduce()){
+      state('complete');ticket.hidden=false;return;
+    }
+    state('scan');
     cancel=timer(()=>{
-      machine.dataset.mode='print';status.textContent='PRINTING';ticket.hidden=false;
-      motion(ticket,[{transform:'translateY(-105%)'},{transform:'translateY(-29%)',offset:.72},{transform:'translateY(0)'}],
-        {duration:reduce()?0:860,easing:'linear'},signal);
-      cancel=timer(()=>{machine.dataset.mode='complete';status.textContent='COPY READY';},reduce()?0:870,signal);
-    },reduce()?140:1100,signal);
+      state('print');ticket.hidden=false;
+      feedMotion=motion(ticket,[{translate:'0 -105%'},{translate:'0 -75%',offset:.25},{translate:'0 0'}],
+        {duration:1090,easing:'linear'},signal);
+      cancel=timer(()=>state('complete'),1100,signal);
+    },1380,signal);
   },signal);
-  listen(control(root,'[data-reset]'),'click',()=>{
-    cancel?.();ticket.getAnimations().forEach(animation=>animation.cancel());delete machine.dataset.mode;status.textContent='INSERT CARD';copy.disabled=true;ticket.hidden=true;
+  listen(reset,'click',()=>{
+    cancel?.();feedMotion?.cancel();ticket.hidden=true;feed.hidden=false;
+    if(drag){
+      drag.paper.style.translate='';drag.paper.removeAttribute('data-dragging');drag=null;
+    }
+    skipClick=false;state('idle');
   },signal);
 }
 
@@ -187,65 +254,120 @@ export function logoBuild(root,{signal,options={}}){
 
 export function colorPass(root,{signal,options={}}){
   root.innerHTML=`
-    <div class="color-pass"><div class="color-phone">
-      <div class="color-island"></div><div class="color-items"><i><b class="pass-bag"></b></i><i><b class="pass-headset"></b></i><i><b class="pass-bottle"></b></i></div>
-      <canvas class="color-runner" width="520" height="108" aria-hidden="true"></canvas><output role="status">Ready to restore color</output>
-    </div><div class="action-row"><button type="button" data-start>Start color pass</button><button type="button" data-cancel disabled>Cancel</button></div></div>`;
-  const phone=control(root,'.color-phone'),tiles=controls(root,'.color-items i'), msg=control(root,'output');
-  tiles.forEach((tile,i)=>{
-    if(!options.icons?.[i])return;
-    const art=new Image();art.src=options.icons[i];art.alt='';tile.dataset.source='';tile.replaceChildren(art);
-  });
-  const start=control(root,'[data-start]'), stop=control(root,'[data-cancel]');
+    <div class="color-pass"><div class="color-scene"><div class="color-phone">
+      <header><b>09:41</b><span class="color-island"></span><span aria-hidden="true">◒ ▰</span></header>
+      <div class="color-items" aria-hidden="true"><i><b class="pass-bag"></b></i><i><b class="pass-headset"></b></i><i><b class="pass-bottle"></b></i></div>
+      <canvas class="color-runner" width="288" height="138" aria-hidden="true"></canvas>
+      <div class="color-caption">Preparing your coloring page</div><canvas class="color-wipe" width="288" height="628" aria-hidden="true"></canvas><output role="status" class="a11y-only">Ready to restore color</output>
+    </div></div><div class="action-row"><button type="button" data-start>Start color pass</button><button type="button" data-cancel disabled>Cancel</button></div></div>`;
+  const phone=control(root,'.color-phone'),tiles=controls(root,'.color-items i'),msg=control(root,'output');
+  const start=control(root,'[data-start]'),stop=control(root,'[data-cancel]');
   const canvas=control(root,'.color-runner'),ctx=canvas.getContext('2d');
-  let frame=0;
+  const wipe=control(root,'.color-wipe').getContext('2d');
+  const artwork=(options.iconSets??[options.icons??[]]).map(set=>set.map(src=>{
+    const image=new Image();image.src=src;image.alt='';return image;
+  }));
+  let frame=0,current=-1;
+  function setBatch(index){
+    if(current===index)return;
+    current=index;
+    phone.dataset.batch=String(index+1);
+    tiles.forEach((tile,i)=>{
+      tile.removeAttribute('data-color');
+      const image=artwork[index]?.[i];
+      if(image){
+        tile.dataset.source='';
+        tile.replaceChildren(image);
+      }
+    });
+  }
   function render(progress){
     if(!ctx)return;
-    ctx.clearRect(0,0,520,108);
-    const stride=progress*14*Math.PI, swing=Math.sin(stride);
+    ctx.clearRect(0,0,288,138);
+    const stride=progress*16*Math.PI, swing=Math.sin(stride);
     ctx.save();
-    ctx.translate(27+progress*466,49+Math.abs(swing)*-5);
+    ctx.translate(-24+progress*337,46+Math.abs(swing)*13);
     ctx.lineCap='round';ctx.lineJoin='round';
-    function stroke(color,width,coords){
-      ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=width;
-      coords.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();
+    function stroke(ink,weight,points){
+      ctx.beginPath();ctx.lineWidth=weight;ctx.strokeStyle=ink;
+      points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+      ctx.stroke();
     }
-    function limb(phase,color){
-      const stance=Math.cos(phase),lead=Math.sin(phase);
-      const knee=[lead*19,35-stance*4],ankle=[lead*33-5,52-Math.max(0,stance)*13];
-      stroke(color,10,[[0,13],knee,ankle]);
-      stroke('#27535b',7,[ankle,[ankle[0]+10,ankle[1]-1]]);
+    const outline='#222727';
+    function segment(ink,weight,points){
+      stroke(outline,weight+3,points);stroke(ink,weight,points);
     }
-    limb(stride+Math.PI,'#3a4c56');
-    stroke('#cadacf',7,[[0,-12],[swing*12-10,-1],[swing*17+6,-8]]);
-    stroke('#2b5660',20,[[0,11],[3,-10]]);
-    stroke('#c8e4c9',3,[[-4,5],[5,5]]);
-    limb(stride,'#253a43');
-    stroke('#b27759',7,[[4,-11],[-swing*13-7,-2],[-swing*13+8,-11]]);
-    ctx.fillStyle='#ba8262';ctx.beginPath();ctx.ellipse(10,-25,8.4,10.5,-.28,0,2*Math.PI);ctx.fill();
-    stroke('#333333',9,[[3,-30],[9,-34],[16,-31]]);
-    stroke('#57997b',3,[[5,-28],[18,-27]]);
+    function limb(phase,ink){
+      const step=Math.sin(phase),lift=Math.cos(phase);
+      const knee=[step*14,28-4*lift],ankle=[step*20-4,43-11*Math.max(0,lift)];
+      segment(ink,7,[[0,12],knee,ankle]);
+      segment('#f2ead6',6,[ankle,[ankle[0]+8,ankle[1]-1]]);
+    }
+    function disc(x,y,rx,ry,angle,ink){
+      ctx.beginPath();ctx.ellipse(x,y,rx,ry,angle,0,2*Math.PI);
+      ctx.fillStyle=ink;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=outline;ctx.stroke();
+    }
+    limb(stride+Math.PI,'#3d5458');
+    segment('#bf8157',5,[[1,-7],[swing*10-7,1],[swing*12+6,-6]]);
+    segment('#d7b36c',8,[[-10,-10],[-9,7]]);
+    segment('#538477',18,[[0,9],[3,-9]]);
+    stroke('#e3d3a2',2,[[-2,3],[8,2]]);
+    limb(stride,'#58727b');
+    segment('#d79e70',5,[[6,-9],[-swing*11-4,0],[-swing*12+9,-6]]);
+    disc(10,-22,8,10,-.22,'#dca97b');
+    disc(7,-28,10,6,-.30,'#a5c485');
+    stroke('#425849',2,[[1,-25],[10,-27],[17,-27]]);
+    stroke(outline,2,[[14,-21],[14,-20]]);
     ctx.restore();
   }
-  function clear(){cancelAnimationFrame(frame);}
-  function done(status){delete phone.dataset.running;ctx?.clearRect(0,0,520,108);msg.textContent=status;start.disabled=false;stop.disabled=true;}
+  function paintPage(progress){
+    if(!wipe)return;
+    wipe.clearRect(0,0,288,628);
+    const edge=-102+progress*845;
+    wipe.fillStyle='#0860df';
+    wipe.beginPath();
+    wipe.moveTo(0,0);wipe.lineTo(288,0);wipe.lineTo(288,edge+75);
+    wipe.bezierCurveTo(215,edge+65,126,edge+47,83,edge+1);
+    wipe.bezierCurveTo(47,edge-26,17,edge-17,0,edge-30);
+    wipe.closePath();wipe.fill();
+    if(progress===1)return;
+    const x=290-progress*237,y=edge+9;
+    wipe.save();wipe.translate(x,y);wipe.rotate(-.38);
+    wipe.lineWidth=3;wipe.strokeStyle='#222329';
+    wipe.fillStyle='#ee5439';wipe.beginPath();wipe.roundRect(-17,-12,34,44,6);wipe.fill();wipe.stroke();
+    wipe.fillStyle='#e9e3d6';wipe.beginPath();wipe.roundRect(-13,-25,26,17,[8,8,2,2]);wipe.fill();wipe.stroke();
+    wipe.fillStyle='#5a5f60';wipe.fillRect(-5,-27,10,4);
+    wipe.restore();
+  }
+  function done(message){
+    cancelAnimationFrame(frame);ctx?.clearRect(0,0,288,138);
+    delete phone.dataset.running;delete phone.dataset.wiping;msg.textContent=message;start.disabled=false;stop.disabled=true;
+  }
   listen(start,'click',()=>{
-    clear();tiles.forEach(el=>el.removeAttribute('data-color'));phone.dataset.running='';start.disabled=true;stop.disabled=false;
-    msg.textContent='Restoring color…';
+    current=-1;setBatch(0);phone.dataset.running='';wipe?.clearRect(0,0,288,628);
+    start.disabled=true;stop.disabled=false;msg.textContent='Restoring color…';
     if(reduce()){
-      tiles.forEach(tile=>tile.dataset.color='');done('Color restored');return;
+      setBatch(artwork.length-1);tiles.forEach(tile=>tile.dataset.color='');paintPage(1);done('Color restored');return;
     }
-    const began=performance.now(), duration=2280;
-    function tick(now){
-      if(signal.aborted)return;
-      const progress=Math.min(1,(now-began)/duration);
-      render(progress);
-      tiles.forEach((tile,i)=>tile.toggleAttribute('data-color',progress>=.19+i*.29));
-      if(progress>=1)done('Color restored');
-      else frame=requestAnimationFrame(tick);
+    const began=performance.now(),travel=3100,interval=4100;
+    function run(now){
+      const elapsed=now-began;
+      const index=Math.min(artwork.length-1,Math.floor(elapsed/interval));
+      const fraction=Math.min(1,(elapsed-index*interval)/travel);
+      setBatch(index);
+      if(fraction<1)render(fraction);else ctx?.clearRect(0,0,288,138);
+      tiles.forEach((tile,i)=>tile.toggleAttribute('data-color',fraction>=[.17,.45,.76][i]));
+      const paint=Math.max(0,(elapsed-index*interval-travel)/440);
+      if(index===artwork.length-1&&paint>0){
+        phone.dataset.wiping='';
+        paintPage(Math.min(1,paint));
+        if(paint>=1){done('Color restored');return;}
+      }
+      frame=requestAnimationFrame(run);
     }
-    frame=requestAnimationFrame(tick);
+    frame=requestAnimationFrame(run);
   },signal);
-  listen(stop,'click',()=>{clear();done('Color pass cancelled');},signal);
-  signal.addEventListener('abort',clear,{once:true});
+  listen(stop,'click',()=>{wipe?.clearRect(0,0,288,628);done('Color pass cancelled');},signal);
+  signal.addEventListener('abort',()=>cancelAnimationFrame(frame),{once:true});
+  setBatch(0);
 }
